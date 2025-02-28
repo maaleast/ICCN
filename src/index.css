@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.clip-path-trapezoid-reverse {
+    clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 20% 0%);
+  }
+  
+
+.dark {
+    @apply bg-gray-900 text-gray-100;
+    }
+
