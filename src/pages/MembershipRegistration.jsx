@@ -150,7 +150,7 @@ const MembershipRegistration = () => {
                 title: "Berhasil!",
                 text: "Pendaftaran member berhasil, menunggu verifikasi",
             }).then(() => {
-                navigate("/upload", { state: { membershipData: data } });
+                navigate("/home", { state: { membershipData: data } });
             });
         } catch (error) {
             Swal.fire({
