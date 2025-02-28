@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { API_BASE_URL } from "../config";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Pagination from './Pagination'; // Import komponen Pagination
 
 export default function Pemasukan() {
     const [transactions, setTransactions] = useState([]);
@@ -10,6 +11,10 @@ export default function Pemasukan() {
     const [formData, setFormData] = useState({ jumlah: '', deskripsi: '' });
     const [editingId, setEditingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
+
+    // State untuk pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     // Ambil data pemasukan
     useEffect(() => {
@@ -20,7 +25,7 @@ export default function Pemasukan() {
         try {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan`);
             const data = await response.json();
-            
+
             // Filter hanya transaksi dengan status MASUK
             const pemasukan = data.filter(t => t.status === 'MASUK');
             setTransactions(pemasukan);
@@ -29,15 +34,25 @@ export default function Pemasukan() {
         }
     };
 
+    // Hitung total halaman dan data yang ditampilkan
+    const totalPages = Math.ceil(transactions.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentTransactions = transactions.slice(startIndex, startIndex + itemsPerPage);
+
+    // Fungsi untuk navigasi pagination
+    const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
+    const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+    const goToPage = (page) => setCurrentPage(page);
+
     // Handle form submit (tambah/edit)
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const url = editingId 
+        const url = editingId
             ? `${API_BASE_URL}/admin/keuangan/edit/${editingId}`
             : `${API_BASE_URL}/admin/keuangan/tambah`;
-        
+
         const method = editingId ? 'PUT' : 'POST';
-        
+
         try {
             const response = await fetch(url, {
                 method,
@@ -50,17 +65,17 @@ export default function Pemasukan() {
             });
 
             if (!response.ok) throw new Error('Gagal menyimpan');
-            
+
             // Refresh data
             fetchData();
-            
+
             // Tampilkan notifikasi
             if (editingId) {
                 toast.success('Pemasukan berhasil diupdate!');
             } else {
                 toast.success('Pemasukan berhasil ditambahkan!');
             }
-            
+
             // Reset form
             setIsModalOpen(false);
             setFormData({ jumlah: '', deskripsi: '' });
@@ -82,17 +97,17 @@ export default function Pemasukan() {
         if (!deletingId) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/keuangan/delete/${deletingId}`, { 
-                method: 'DELETE' 
+            const response = await fetch(`${API_BASE_URL}/admin/keuangan/delete/${deletingId}`, {
+                method: 'DELETE'
             });
             if (!response.ok) throw new Error('Gagal menghapus');
-            
+
             // Refresh data
             fetchData();
-            
+
             // Tampilkan notifikasi
             toast.success('Pemasukan berhasil dihapus!');
-            
+
             // Tutup modal konfirmasi
             setIsDeleteModalOpen(false);
         } catch (error) {
@@ -255,7 +270,7 @@ export default function Pemasukan() {
             {/* Tabel Pemasukan */}
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold dark:text-gray-100">Daftar Pemasukan</h3>
-                <button 
+                <button
                     onClick={() => setIsModalOpen(true)}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
                 >
@@ -263,58 +278,71 @@ export default function Pemasukan() {
                 </button>
             </div>
 
-            <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Deskripsi</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Tanggal</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Jumlah</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {transactions.map((t) => (
-                        <tr key={t.id} className="border-t dark:border-gray-700">
-                            <td className="py-3 px-4 dark:text-gray-300">{t.deskripsi}</td>
-                            <td className="py-3 px-4 dark:text-gray-300">
-                                {new Date(t.tanggal_waktu).toLocaleDateString('id-ID')}
-                            </td>
-                            <td className="py-3 px-4 dark:text-gray-300">
-                                {new Intl.NumberFormat('id-ID', {
-                                    style: 'currency',
-                                    currency: 'IDR',
-                                    minimumFractionDigits: 0,
-                                }).format(t.jumlah)}
-                            </td>
-                            <td className="py-3 px-4">
-                                <button
-                                    onClick={() => {
-                                        setEditingId(t.id);
-                                        setFormData({
-                                            jumlah: new Intl.NumberFormat('id-ID', {
-                                                style: 'currency',
-                                                currency: 'IDR',
-                                                minimumFractionDigits: 0,
-                                            }).format(t.jumlah),
-                                            deskripsi: t.deskripsi
-                                        });
-                                        setIsModalOpen(true);
-                                    }}
-                                    className="text-blue-600 hover:underline mr-3"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteConfirmation(t.id)}
-                                    className="text-red-600 hover:underline"
-                                >
-                                    Hapus
-                                </button>
-                            </td>
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th className="text-left py-3 px-4 text-sm font-semibold">Deskripsi</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold">Tanggal</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold">Jumlah</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold">Aksi</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {currentTransactions.map((t) => (
+                            <tr key={t.id} className="border-t dark:border-gray-700">
+                                <td className="py-3 px-4 dark:text-gray-300">{t.deskripsi}</td>
+                                <td className="py-3 px-4 dark:text-gray-300">
+                                    {new Date(t.tanggal_waktu).toLocaleDateString('id-ID')}
+                                </td>
+                                <td className="py-3 px-4 dark:text-gray-300">
+                                    {new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR',
+                                        minimumFractionDigits: 0,
+                                    }).format(t.jumlah)}
+                                </td>
+                                <td className="py-3 px-4">
+                                    <button
+                                        onClick={() => {
+                                            setEditingId(t.id);
+                                            setFormData({
+                                                jumlah: new Intl.NumberFormat('id-ID', {
+                                                    style: 'currency',
+                                                    currency: 'IDR',
+                                                    minimumFractionDigits: 0,
+                                                }).format(t.jumlah),
+                                                deskripsi: t.deskripsi
+                                            });
+                                            setIsModalOpen(true);
+                                        }}
+                                        className="text-blue-600 hover:underline mr-3"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteConfirmation(t.id)}
+                                        className="text-red-600 hover:underline"
+                                    >
+                                        Hapus
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="mt-6">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    goToPage={goToPage}
+                    prevPage={prevPage}
+                    nextPage={nextPage}
+                />
+            </div>
         </div>
     );
 }

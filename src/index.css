@@ -11,3 +11,6 @@
     @apply bg-gray-900 text-gray-100;
     }
 
+.dark .pagination-button:hover {
+      background-color: #374151 !important;
+  }

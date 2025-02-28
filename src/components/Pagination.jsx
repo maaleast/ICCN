@@ -1,51 +1,92 @@
 import React from "react";
 
 const Pagination = ({ currentPage, totalPages, goToPage, prevPage, nextPage }) => {
+    const showEllipsis = totalPages > 3;
+    const renderPages = () => {
+        if (totalPages <= 3) {
+            return Array.from({ length: totalPages }, (_, i) => i + 1);
+        }
+
+        if (currentPage <= 2) {
+            return [1, 2];
+        }
+
+        if (currentPage >= totalPages - 2) {
+            return [totalPages - 2, totalPages - 1, totalPages];
+        }
+
+        return [currentPage - 1, currentPage, currentPage + 1];
+    };
+
     return (
-        <div className="flex justify-center items-center mt-6 space-x-2">
-            <button
-                onClick={() => goToPage(1)}
-                disabled={currentPage === 1}
-                className="px-3 py-2 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md disabled:opacity-50"
-            >
-                Awal
-            </button>
-            <button
-                onClick={prevPage}
-                disabled={currentPage === 1}
-                className="px-3 py-2 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md disabled:opacity-50"
-            >
-                ◀
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .slice(Math.max(currentPage - 2, 0), Math.min(currentPage + 1, totalPages))
-                .map((page) => (
+        <div className="flex justify-center mt-6"> {/* Container utama untuk pagination */}
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-md p-2 inline-block"> {/* Container pagination */}
+                <div className="flex items-center space-x-2">
+                    {/* Tombol Previous */}
                     <button
-                        key={page}
-                        onClick={() => goToPage(page)}
-                        className={`px-4 py-2 rounded-md transition ${
-                            currentPage === page
-                                ? "bg-blue-500 text-white dark:bg-blue-400"
-                                : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600"
-                        }`}
+                        onClick={prevPage}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 text-gray-600 dark:text-gray-300 disabled:opacity-50 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md"
                     >
-                        {page}
+                        &lt;
                     </button>
-                ))}
-            <button
-                onClick={nextPage}
-                disabled={currentPage === totalPages}
-                className="px-3 py-2 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md disabled:opacity-50"
-            >
-                ▶
-            </button>
-            <button
-                onClick={() => goToPage(totalPages)}
-                disabled={currentPage === totalPages}
-                className="px-3 py-2 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md disabled:opacity-50"
-            >
-                Akhir
-            </button>
+
+                    {/* Halaman Pertama dan Ellipsis */}
+                    {currentPage > 3 && showEllipsis && (
+                        <>
+                            <button
+                                onClick={() => goToPage(1)}
+                                className={`px-3 py-1 rounded-md ${1 === currentPage
+                                    ? "bg-blue-500 text-white"
+                                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                    }`}
+                            >
+                                1
+                            </button>
+                            <span className="text-gray-400">...</span>
+                        </>
+                    )}
+
+                    {/* Halaman Utama */}
+                    {renderPages().map((page) => (
+                        <button
+                            key={page}
+                            onClick={() => goToPage(page)}
+                            className={`px-3 py-1 rounded-md ${page === currentPage
+                                ? "bg-blue-500 text-white"
+                                : "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                }`}
+                        >
+                            {page}
+                        </button>
+                    ))}
+
+                    {/* Halaman Terakhir dan Ellipsis */}
+                    {currentPage < totalPages - 2 && showEllipsis && (
+                        <>
+                            <span className="text-gray-400">...</span>
+                            <button
+                                onClick={() => goToPage(totalPages)}
+                                className={`px-3 py-1 rounded-md ${totalPages === currentPage
+                                    ? "bg-blue-500 text-white"
+                                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                    }`}
+                            >
+                                {totalPages}
+                            </button>
+                        </>
+                    )}
+
+                    {/* Tombol Next */}
+                    <button
+                        onClick={nextPage}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-1 text-gray-600 dark:text-gray-300 disabled:opacity-50 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md"
+                    >
+                        &gt;
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };

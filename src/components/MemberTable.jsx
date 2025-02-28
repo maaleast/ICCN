@@ -8,6 +8,7 @@ export default function MemberTable() {
     const [error, setError] = useState(null);
     const [selectedMember, setSelectedMember] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [currentMembers, setCurrentMembers] = useState([]);
     const itemsPerPage = 10;
 
     useEffect(() => {
@@ -26,6 +27,12 @@ export default function MemberTable() {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        setCurrentMembers(members.slice(startIndex, endIndex));
+    }, [currentPage, members]);
+
     const formatDate = (dateString) => {
         const options = { day: "numeric", month: "short", year: "numeric" };
         return new Date(dateString).toLocaleDateString("id-ID", options);
@@ -33,23 +40,19 @@ export default function MemberTable() {
 
     const handleVerification = async (memberId, status) => {
         try {
-            // Tentukan endpoint berdasarkan status
             const endpoint = status === "DITERIMA" ? "diterima" : "ditolak";
-            
             const response = await fetch(
-                `${API_BASE_URL}/admin/verifikasi/${endpoint}/${memberId}`, 
+                `${API_BASE_URL}/admin/verifikasi/${endpoint}/${memberId}`,
                 {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    // Tidak perlu mengirim body karena status sudah tercermin di endpoint
                 }
             );
-    
+
             if (!response.ok) throw new Error("Gagal memperbarui status");
-    
-            // Update status di state lokal
+
             setMembers(members.map(member =>
                 member.id === memberId ? { ...member, status_verifikasi: status } : member
             ));
@@ -60,15 +63,13 @@ export default function MemberTable() {
     };
 
     const totalPages = Math.ceil(members.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentMembers = members.slice(startIndex, startIndex + itemsPerPage);
-
     const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
     const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const goToPage = (page) => setCurrentPage(page);
 
     if (loading) return <div className="p-6 text-gray-500">Memuat data...</div>;
     if (error) return <div className="p-6 text-red-500">Error: {error}</div>;
+    if (members.length === 0) return <div className="p-6 text-gray-500">Tidak ada data member</div>;
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -126,59 +127,69 @@ export default function MemberTable() {
                 </div>
             </div>
 
-            <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Nama</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Tanggal Daftar</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Status</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {currentMembers.map((member) => (
-                        <tr key={member.id} className="border-t dark:border-gray-700">
-                            <td className="py-3 px-4 dark:text-gray-300">{member.nama_pembayar}</td>
-                            <td className="py-3 px-4 dark:text-gray-300">{formatDate(member.tanggal_submit)}</td>
-                            <td className="py-3 px-4">
-                                <span
-                                    className={`px-2 py-1 rounded-full text-xs ${member.status_verifikasi === "PENDING"
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Nama</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Tanggal Daftar</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Status</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currentMembers.map((member) => (
+                            <tr key={member.id} className="border-t dark:border-gray-700">
+                                <td className="py-3 px-4 dark:text-gray-300">{member.nama_pembayar}</td>
+                                <td className="py-3 px-4 dark:text-gray-300">{formatDate(member.tanggal_submit)}</td>
+                                <td className="py-3 px-4">
+                                    <span
+                                        className={`px-2 py-1 rounded-full text-xs ${member.status_verifikasi === "PENDING"
                                             ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-800 dark:text-yellow-200"
                                             : member.status_verifikasi === "DITERIMA"
                                                 ? "bg-green-100 text-green-600 dark:bg-green-800 dark:text-green-200"
                                                 : "bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-200"
-                                        }`}
-                                >
-                                    {member.status_verifikasi}
-                                </span>
-                            </td>
-                            <td className="py-3 px-4">
-                                <button
-                                    onClick={() => setSelectedMember(member)}
-                                    className="text-blue-600 hover:underline mr-3 dark:text-blue-400"
-                                >
-                                    Detail
-                                </button>
-                                <button
-                                    onClick={() => handleVerification(member.id, "DITERIMA")}
-                                    className="text-green-600 hover:underline mr-3 dark:text-green-400"
-                                >
-                                    Diterima
-                                </button>
-                                <button
-                                    onClick={() => handleVerification(member.id, "DITOLAK")}
-                                    className="text-red-600 hover:underline dark:text-red-400"
-                                >
-                                    Tolak
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                                            }`}
+                                    >
+                                        {member.status_verifikasi}
+                                    </span>
+                                </td>
+                                <td className="py-3 px-4">
+                                    <button
+                                        onClick={() => setSelectedMember(member)}
+                                        className="text-blue-600 hover:underline mr-3 dark:text-blue-400"
+                                    >
+                                        Detail
+                                    </button>
+                                    <button
+                                        onClick={() => handleVerification(member.id, "DITERIMA")}
+                                        className="text-green-600 hover:underline mr-3 dark:text-green-400"
+                                    >
+                                        Diterima
+                                    </button>
+                                    <button
+                                        onClick={() => handleVerification(member.id, "DITOLAK")}
+                                        className="text-red-600 hover:underline dark:text-red-400"
+                                    >
+                                        Tolak
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
 
             {/* Pagination */}
-            <Pagination currentPage={currentPage} totalPages={totalPages} goToPage={goToPage} prevPage={prevPage} nextPage={nextPage} />
+            <div className="mt-6">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    goToPage={goToPage}
+                    prevPage={prevPage}
+                    nextPage={nextPage}
+                />
+            </div>
         </div>
     );
 }
