@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "../config";
 import Swal from "sweetalert2";
+import Pagination from "./Pagination";
 
 export default function Pelatihan() {
     const [pelatihan, setPelatihan] = useState([]);
@@ -16,6 +17,10 @@ export default function Pelatihan() {
     useEffect(() => {
         fetchPelatihan();
     }, []);
+
+    // State untuk pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const fetchPelatihan = () => {
         fetch(`${API_BASE_URL}/admin/pelatihan`)
@@ -144,22 +149,32 @@ export default function Pelatihan() {
 
     // Fungsi untuk menampilkan notifikasi error
     const showErrorNotification = (message) => {
-    Swal.fire({
-        position: "bottom-end",
-        icon: "error",
-        title: message,
-        showConfirmButton: false,
-        timer: 3000,
-        toast: true, // Menjadikan notifikasi sebagai toast
-        width: '400px', // Menyesuaikan lebar notifikasi
-        background: '#f0f0f0', // Warna background notifikasi
-        customClass: {
-            popup: 'custom-popup', // Class custom untuk styling tambahan
-            title: 'custom-title', // Class custom untuk judul
-        },
-        backdrop: false, // Menghilangkan backdrop gelap
-    });
-};
+        Swal.fire({
+            position: "bottom-end",
+            icon: "error",
+            title: message,
+            showConfirmButton: false,
+            timer: 3000,
+            toast: true, // Menjadikan notifikasi sebagai toast
+            width: '400px', // Menyesuaikan lebar notifikasi
+            background: '#f0f0f0', // Warna background notifikasi
+            customClass: {
+                popup: 'custom-popup', // Class custom untuk styling tambahan
+                title: 'custom-title', // Class custom untuk judul
+            },
+            backdrop: false, // Menghilangkan backdrop gelap
+        });
+    };
+
+    // Hitung total halaman dan data yang ditampilkan
+    const totalPages = Math.ceil(pelatihan.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const displayedPelatihan = pelatihan.slice(startIndex, startIndex + itemsPerPage);
+
+    // Fungsi untuk navigasi pagination
+    const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
+    const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+    const goToPage = (page) => setCurrentPage(page);
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -185,8 +200,8 @@ export default function Pelatihan() {
                         </tr>
                     </thead>
                     <tbody>
-                        {pelatihan.length > 0 ? (
-                            pelatihan.map((item) => (
+                        {displayedPelatihan.length > 0 ? (
+                            displayedPelatihan.map((item) => (
                                 <tr key={item.id} className="border-t">
                                     <td className="py-3 px-4">{item.judul_pelatihan}</td>
                                     <td className="py-3 px-4">{formatDate(item.tanggal_pelatihan)}</td>
@@ -223,9 +238,7 @@ export default function Pelatihan() {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="3" className="text-center py-4 text-gray-500">
-                                    Tidak ada data pelatihan.
-                                </td>
+                                <td colSpan="3" className="text-center py-3 text-gray-500">Tidak ada data</td>
                             </tr>
                         )}
                     </tbody>
@@ -235,24 +248,24 @@ export default function Pelatihan() {
             {/* Modal Tambah Pelatihan */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl">
-                        <h2 className="text-lg font-semibold mb-4">Tambah Pelatihan</h2>
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl dark:bg-gray-800">
+                        <h2 className="text-lg font-semibold mb-4 dark:text-white">Tambah Pelatihan</h2>
                         <input
                             type="text"
                             placeholder="Judul Pelatihan"
-                            className="w-full p-2 mb-3 border rounded-lg"
+                            className="w-full p-2 mb-3 border rounded-lg dark:text-gray-800"
                             value={newPelatihan.judul}
                             onChange={(e) => setNewPelatihan({ ...newPelatihan, judul: e.target.value })}
                         />
                         <input
                             type="datetime-local"
-                            className="w-full p-2 mb-3 border rounded-lg"
+                            className="w-full p-2 mb-3 border rounded-lg dark:text-gray-800"
                             value={newPelatihan.tanggal}
                             onChange={(e) => setNewPelatihan({ ...newPelatihan, tanggal: e.target.value })}
                         />
                         <textarea
                             placeholder="Deskripsi Pelatihan"
-                            className="w-full p-2 mb-3 border rounded-lg"
+                            className="w-full p-2 mb-3 border rounded-lg dark:text-gray-800"
                             rows={8}
                             value={newPelatihan.deskripsi}
                             onChange={(e) => setNewPelatihan({ ...newPelatihan, deskripsi: e.target.value })}
@@ -278,31 +291,31 @@ export default function Pelatihan() {
             {/* Modal Detail Pelatihan */}
             {showDetailModal && selectedPelatihan && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl">
-                        <h2 className="text-lg font-semibold mb-4">Detail Pelatihan</h2>
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl dark:bg-gray-800">
+                        <h2 className="text-lg font-semibold mb-4 dark:text-white">Detail Pelatihan</h2>
                         <form>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Judul</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-white">Judul</label>
                                 <input
                                     type="text"
-                                    className="w-full p-2 border rounded-lg bg-gray-100"
+                                    className="w-full p-2 border rounded-lg bg-gray-100 dark:text-gray-800"
                                     value={selectedPelatihan.judul_pelatihan}
                                     readOnly
                                 />
                             </div>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Tanggal</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-white">Tanggal</label>
                                 <input
                                     type="text"
-                                    className="w-full p-2 border rounded-lg bg-gray-100"
+                                    className="w-full p-2 border rounded-lg bg-gray-100 dark:text-gray-800"
                                     value={formatDate(selectedPelatihan.tanggal_pelatihan)}
                                     readOnly
                                 />
                             </div>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Deskripsi</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-white">Deskripsi</label>
                                 <textarea
-                                    className="w-full p-2 border rounded-lg bg-gray-100"
+                                    className="w-full p-2 border rounded-lg bg-gray-100 dark:text-gray-800"
                                     rows={8}
                                     value={selectedPelatihan.deskripsi_pelatihan}
                                     readOnly
@@ -324,24 +337,24 @@ export default function Pelatihan() {
             {/* Modal Edit Pelatihan */}
             {showEditModal && selectedPelatihan && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl dark:bg-gray-800">
                         <h2 className="text-lg font-semibold mb-4">Edit Pelatihan</h2>
                         <input
                             type="text"
                             placeholder="Judul Pelatihan"
-                            className="w-full p-2 mb-3 border rounded-lg"
+                            className="w-full p-2 mb-3 border rounded-lg dark:text-gray-800"
                             value={selectedPelatihan.judul_pelatihan}
                             onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, judul_pelatihan: e.target.value })}
                         />
                         <input
                             type="datetime-local"
-                            className="w-full p-2 mb-3 border rounded-lg"
+                            className="w-full p-2 mb-3 border rounded-lg dark:text-gray-800"
                             value={selectedPelatihan.tanggal_pelatihan}
                             onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, tanggal_pelatihan: e.target.value })}
                         />
                         <textarea
                             placeholder="Deskripsi Pelatihan"
-                            className="w-full p-2 mb-3 border rounded-lg"
+                            className="w-full p-2 mb-3 border rounded-lg dark:text-gray-800"
                             rows={8}
                             value={selectedPelatihan.deskripsi_pelatihan}
                             onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, deskripsi_pelatihan: e.target.value })}
@@ -367,7 +380,7 @@ export default function Pelatihan() {
             {/* Modal Konfirmasi Hapus Pelatihan */}
             {showDeleteModal && selectedPelatihan && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-96 dark:bg-gray-800">
                         <h2 className="text-lg font-semibold mb-4">Hapus Pelatihan</h2>
                         <p>Apakah Anda yakin ingin menghapus pelatihan <strong>{selectedPelatihan.judul_pelatihan}</strong>?</p>
                         <div className="flex justify-end mt-4">
@@ -387,6 +400,16 @@ export default function Pelatihan() {
                     </div>
                 </div>
             )}
+            {/* Pagination */}
+            <div className="mt-6">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    goToPage={goToPage}
+                    prevPage={prevPage}
+                    nextPage={nextPage}
+                />
+            </div>
         </div>
     );
 }
