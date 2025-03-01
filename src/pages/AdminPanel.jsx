@@ -65,13 +65,11 @@ export default function AdminPanel() {
                     {activeMenu === 'Galeri Kegiatan' && <Gallery />}
                     {/* {activeMenu === 'Laporan Member' && <MemberTable />} */}
                     {activeMenu === 'Laporan Keuangan' && <FinanceReport />}
-                    {activeMenu === 'Pengeluaran' && <Pengeluaran/>}
+                    {activeMenu === 'Pengeluaran' && <Pengeluaran />}
                     {activeMenu === 'Pemasukan' && <Pemasukan />}
-                   
+
                 </div>
             </div>
         </div>
     );
 }
-
-// asuuuu
