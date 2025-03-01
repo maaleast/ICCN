@@ -27,7 +27,7 @@ export default function SearchByDate({ onSearch }) {
                 onChange={(date) => setSelectedDate(date)}
                 dateFormat="dd/MM/yyyy"
                 placeholderText="Pilih tanggal"
-                className="p-2 border rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="p-2 border rounded-lg dark:bg-gray-600 dark:text-gray-300 dark:border-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 isClearable
             />
             <div className="flex gap-2">
