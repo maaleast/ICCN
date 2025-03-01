@@ -2,21 +2,20 @@ import { useEffect, useState } from 'react';
 import { API_BASE_URL } from "../config";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Pagination from './Pagination'; // Import komponen Pagination
+import Pagination from './Pagination';
+import SearchByDate from './SearchByDate'; // Import komponen SearchByDate
 
 export default function Pemasukan() {
     const [transactions, setTransactions] = useState([]);
+    const [filteredTransactions, setFilteredTransactions] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [formData, setFormData] = useState({ jumlah: '', deskripsi: '' });
     const [editingId, setEditingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
-
-    // State untuk pagination
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    // Ambil data pemasukan
     useEffect(() => {
         fetchData();
     }, []);
@@ -29,17 +28,30 @@ export default function Pemasukan() {
             // Filter hanya transaksi dengan status MASUK
             const pemasukan = data.filter(t => t.status === 'MASUK');
             setTransactions(pemasukan);
+            setFilteredTransactions(pemasukan); // Set filteredTransactions dengan data awal
         } catch (error) {
             console.error('Gagal mengambil data:', error);
         }
     };
 
-    // Hitung total halaman dan data yang ditampilkan
-    const totalPages = Math.ceil(transactions.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentTransactions = transactions.slice(startIndex, startIndex + itemsPerPage);
+    const handleSearch = (date) => {
+        if (date) {
+            const filtered = transactions.filter(t => {
+                // Konversi ke format YYYY-MM-DD (timezone lokal)
+                const transactionDate = new Date(t.tanggal_waktu).toLocaleDateString('en-CA');
+                return transactionDate === date;
+            });
+            setFilteredTransactions(filtered);
+        } else {
+            setFilteredTransactions(transactions); // Reset ke semua data jika tanggal kosong
+        }
+        setCurrentPage(1); // Reset ke halaman pertama setelah pencarian
+    };
 
-    // Fungsi untuk navigasi pagination
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentTransactions = filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
+
     const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
     const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const goToPage = (page) => setCurrentPage(page);
@@ -144,7 +156,6 @@ export default function Pemasukan() {
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            {/* Notifikasi */}
             <ToastContainer
                 position="bottom-right"
                 autoClose={3000}
@@ -156,6 +167,94 @@ export default function Pemasukan() {
                 draggable
                 pauseOnHover
             />
+
+            {/* Tabel Pemasukan */}
+            <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-semibold dark:text-gray-100">Daftar Pemasukan</h3>
+                <div className="flex items-center gap-4">
+                    <SearchByDate onSearch={handleSearch} />
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
+                    >
+                        Tambah Pemasukan
+                    </button>
+                </div>
+            </div>
+
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th className="text-left py-3 px-4 text-sm font-semibold">Deskripsi</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold">Tanggal</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold">Jumlah</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currentTransactions.length === 0 ? (
+                            <tr>
+                                <td colSpan="4" className="py-4 text-center text-gray-500 dark:text-gray-400">
+                                    Tidak ada data yang ditemukan
+                                </td>
+                            </tr>
+                        ) : (
+                            currentTransactions.map((t) => (
+                                <tr key={t.id} className="border-t dark:border-gray-700">
+                                    <td className="py-3 px-4 dark:text-gray-300">{t.deskripsi}</td>
+                                    <td className="py-3 px-4 dark:text-gray-300">
+                                        {new Date(t.tanggal_waktu).toLocaleDateString('id-ID')}
+                                    </td>
+                                    <td className="py-3 px-4 dark:text-gray-300">
+                                        {new Intl.NumberFormat('id-ID', {
+                                            style: 'currency',
+                                            currency: 'IDR',
+                                            minimumFractionDigits: 0,
+                                        }).format(t.jumlah)}
+                                    </td>
+                                    <td className="py-3 px-4">
+                                        <button
+                                            onClick={() => {
+                                                setEditingId(t.id);
+                                                setFormData({
+                                                    jumlah: new Intl.NumberFormat('id-ID', {
+                                                        style: 'currency',
+                                                        currency: 'IDR',
+                                                        minimumFractionDigits: 0,
+                                                    }).format(t.jumlah),
+                                                    deskripsi: t.deskripsi
+                                                });
+                                                setIsModalOpen(true);
+                                            }}
+                                            className="text-blue-600 hover:underline mr-3"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteConfirmation(t.id)}
+                                            className="text-red-600 hover:underline"
+                                        >
+                                            Hapus
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="mt-6">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    goToPage={goToPage}
+                    prevPage={prevPage}
+                    nextPage={nextPage}
+                />
+            </div>
 
             {/* Modal Tambah/Edit Pemasukan */}
             {isModalOpen && (
@@ -266,83 +365,6 @@ export default function Pemasukan() {
                     </div>
                 </div>
             )}
-
-            {/* Tabel Pemasukan */}
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold dark:text-gray-100">Daftar Pemasukan</h3>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
-                >
-                    Tambah Pemasukan
-                </button>
-            </div>
-
-            <div className="overflow-x-auto">
-                <table className="w-full">
-                    <thead className="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th className="text-left py-3 px-4 text-sm font-semibold">Deskripsi</th>
-                            <th className="text-left py-3 px-4 text-sm font-semibold">Tanggal</th>
-                            <th className="text-left py-3 px-4 text-sm font-semibold">Jumlah</th>
-                            <th className="text-left py-3 px-4 text-sm font-semibold">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentTransactions.map((t) => (
-                            <tr key={t.id} className="border-t dark:border-gray-700">
-                                <td className="py-3 px-4 dark:text-gray-300">{t.deskripsi}</td>
-                                <td className="py-3 px-4 dark:text-gray-300">
-                                    {new Date(t.tanggal_waktu).toLocaleDateString('id-ID')}
-                                </td>
-                                <td className="py-3 px-4 dark:text-gray-300">
-                                    {new Intl.NumberFormat('id-ID', {
-                                        style: 'currency',
-                                        currency: 'IDR',
-                                        minimumFractionDigits: 0,
-                                    }).format(t.jumlah)}
-                                </td>
-                                <td className="py-3 px-4">
-                                    <button
-                                        onClick={() => {
-                                            setEditingId(t.id);
-                                            setFormData({
-                                                jumlah: new Intl.NumberFormat('id-ID', {
-                                                    style: 'currency',
-                                                    currency: 'IDR',
-                                                    minimumFractionDigits: 0,
-                                                }).format(t.jumlah),
-                                                deskripsi: t.deskripsi
-                                            });
-                                            setIsModalOpen(true);
-                                        }}
-                                        className="text-blue-600 hover:underline mr-3"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteConfirmation(t.id)}
-                                        className="text-red-600 hover:underline"
-                                    >
-                                        Hapus
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="mt-6">
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    goToPage={goToPage}
-                    prevPage={prevPage}
-                    nextPage={nextPage}
-                />
-            </div>
         </div>
     );
 }

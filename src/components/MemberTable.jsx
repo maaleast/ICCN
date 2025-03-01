@@ -9,6 +9,7 @@ export default function MemberTable() {
     const [selectedMember, setSelectedMember] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentMembers, setCurrentMembers] = useState([]);
+    const [searchKeyword, setSearchKeyword] = useState("");
     const itemsPerPage = 10;
 
     useEffect(() => {
@@ -30,8 +31,11 @@ export default function MemberTable() {
     useEffect(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
-        setCurrentMembers(members.slice(startIndex, endIndex));
-    }, [currentPage, members]);
+        const filtered = members.filter(member =>
+            member.nama_pembayar.toLowerCase().includes(searchKeyword.toLowerCase())
+        );
+        setCurrentMembers(filtered.slice(startIndex, endIndex));
+    }, [currentPage, members, searchKeyword]);
 
     const formatDate = (dateString) => {
         const options = { day: "numeric", month: "short", year: "numeric" };
@@ -62,7 +66,21 @@ export default function MemberTable() {
         }
     };
 
-    const totalPages = Math.ceil(members.length / itemsPerPage);
+    const handleSearch = (e) => {
+        e.preventDefault();
+        const keyword = searchKeyword.toLowerCase();
+        const filtered = members.filter(member =>
+            member.nama_pembayar.toLowerCase().includes(keyword)
+        );
+        setCurrentMembers(filtered.slice(0, itemsPerPage));
+        setCurrentPage(1);
+    };
+
+    const totalPages = Math.ceil(
+        members.filter(member =>
+            member.nama_pembayar.toLowerCase().includes(searchKeyword.toLowerCase())
+        ).length / itemsPerPage
+    );
     const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
     const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const goToPage = (page) => setCurrentPage(page);
@@ -115,16 +133,21 @@ export default function MemberTable() {
             {/* Tabel */}
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold dark:text-gray-100">Daftar Member Baru</h3>
-                <div className="flex space-x-2">
+                <form onSubmit={handleSearch} className="flex space-x-2">
                     <input
                         type="text"
                         placeholder="Cari member..."
+                        value={searchKeyword}
+                        onChange={(e) => setSearchKeyword(e.target.value)}
                         className="border rounded-lg px-4 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
                     />
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800">
-                        Filter
+                    <button
+                        type="submit"
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+                    >
+                        Cari
                     </button>
-                </div>
+                </form>
             </div>
 
             <div className="overflow-x-auto">
@@ -138,44 +161,52 @@ export default function MemberTable() {
                         </tr>
                     </thead>
                     <tbody>
-                        {currentMembers.map((member) => (
-                            <tr key={member.id} className="border-t dark:border-gray-700">
-                                <td className="py-3 px-4 dark:text-gray-300">{member.nama_pembayar}</td>
-                                <td className="py-3 px-4 dark:text-gray-300">{formatDate(member.tanggal_submit)}</td>
-                                <td className="py-3 px-4">
-                                    <span
-                                        className={`px-2 py-1 rounded-full text-xs ${member.status_verifikasi === "PENDING"
-                                            ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-800 dark:text-yellow-200"
-                                            : member.status_verifikasi === "DITERIMA"
-                                                ? "bg-green-100 text-green-600 dark:bg-green-800 dark:text-green-200"
-                                                : "bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-200"
-                                            }`}
-                                    >
-                                        {member.status_verifikasi}
-                                    </span>
-                                </td>
-                                <td className="py-3 px-4">
-                                    <button
-                                        onClick={() => setSelectedMember(member)}
-                                        className="text-blue-600 hover:underline mr-3 dark:text-blue-400"
-                                    >
-                                        Detail
-                                    </button>
-                                    <button
-                                        onClick={() => handleVerification(member.id, "DITERIMA")}
-                                        className="text-green-600 hover:underline mr-3 dark:text-green-400"
-                                    >
-                                        Diterima
-                                    </button>
-                                    <button
-                                        onClick={() => handleVerification(member.id, "DITOLAK")}
-                                        className="text-red-600 hover:underline dark:text-red-400"
-                                    >
-                                        Tolak
-                                    </button>
+                        {currentMembers.length === 0 ? (
+                            <tr>
+                                <td colSpan="4" className="py-4 text-center text-gray-500 dark:text-gray-400">
+                                    Tidak ada data yang ditemukan
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            currentMembers.map((member) => (
+                                <tr key={member.id} className="border-t dark:border-gray-700">
+                                    <td className="py-3 px-4 dark:text-gray-300">{member.nama_pembayar}</td>
+                                    <td className="py-3 px-4 dark:text-gray-300">{formatDate(member.tanggal_submit)}</td>
+                                    <td className="py-3 px-4">
+                                        <span
+                                            className={`px-2 py-1 rounded-full text-xs ${member.status_verifikasi === "PENDING"
+                                                ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-800 dark:text-yellow-200"
+                                                : member.status_verifikasi === "DITERIMA"
+                                                    ? "bg-green-100 text-green-600 dark:bg-green-800 dark:text-green-200"
+                                                    : "bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-200"
+                                                }`}
+                                        >
+                                            {member.status_verifikasi}
+                                        </span>
+                                    </td>
+                                    <td className="py-3 px-4">
+                                        <button
+                                            onClick={() => setSelectedMember(member)}
+                                            className="text-blue-600 hover:underline mr-3 dark:text-blue-400"
+                                        >
+                                            Detail
+                                        </button>
+                                        <button
+                                            onClick={() => handleVerification(member.id, "DITERIMA")}
+                                            className="text-green-600 hover:underline mr-3 dark:text-green-400"
+                                        >
+                                            Diterima
+                                        </button>
+                                        <button
+                                            onClick={() => handleVerification(member.id, "DITOLAK")}
+                                            className="text-red-600 hover:underline dark:text-red-400"
+                                        >
+                                            Tolak
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

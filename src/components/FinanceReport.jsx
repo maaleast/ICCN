@@ -3,9 +3,11 @@ import { API_BASE_URL } from "../config";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Pagination from './Pagination';
+import SearchByDate from './SearchByDate'; // Import komponen SearchByDate
 
 export default function FinanceReport() {
     const [transactions, setTransactions] = useState([]);
+    const [filteredTransactions, setFilteredTransactions] = useState([]);
     const [pendapatanBulanIni, setPendapatanBulanIni] = useState(0);
     const [pengeluaranBulanIni, setPengeluaranBulanIni] = useState(0);
     const [saldoAkhir, setSaldoAkhir] = useState(0);
@@ -22,8 +24,8 @@ export default function FinanceReport() {
     useEffect(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
-        setCurrentTransactions(transactions.slice(startIndex, endIndex));
-    }, [currentPage, transactions]);
+        setCurrentTransactions(filteredTransactions.slice(startIndex, endIndex));
+    }, [currentPage, filteredTransactions]);
 
     const fetchData = async () => {
         try {
@@ -38,6 +40,7 @@ export default function FinanceReport() {
             const responseAll = await fetch(`${API_BASE_URL}/admin/keuangan`);
             const dataAll = await responseAll.json();
             setTransactions(dataAll);
+            setFilteredTransactions(dataAll); // Set filteredTransactions dengan data awal
 
             // Ambil saldo akhir dari backend
             const responseSaldo = await fetch(`${API_BASE_URL}/admin/keuangan/saldo-akhir`);
@@ -50,6 +53,25 @@ export default function FinanceReport() {
         }
     };
 
+    const handleSearch = (date) => {
+        if (date) {
+            const filtered = transactions.filter(t => {
+                // Konversi ke tanggal lokal tanpa waktu
+                const transactionDate = new Date(t.tanggal_waktu);
+                transactionDate.setHours(0, 0, 0, 0); // Reset jam ke 00:00:00
+
+                const searchDateObj = new Date(date);
+                searchDateObj.setHours(0, 0, 0, 0); // Reset jam ke 00:00:00
+
+                return transactionDate.getTime() === searchDateObj.getTime();
+            });
+            setFilteredTransactions(filtered);
+        } else {
+            setFilteredTransactions(transactions); // Reset ke semua data jika tanggal kosong
+        }
+        setCurrentPage(1); // Reset ke halaman pertama setelah pencarian
+    };
+
     // Format mata uang
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('id-ID', {
@@ -60,7 +82,7 @@ export default function FinanceReport() {
     };
 
     // Hitung total halaman
-    const totalPages = Math.ceil(transactions.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
     const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
     const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const goToPage = (page) => setCurrentPage(page);
@@ -110,7 +132,12 @@ export default function FinanceReport() {
 
             {/* History Transaksi */}
             <div>
-                <h3 className="text-lg font-semibold mb-6 dark:text-gray-100">History Transaksi</h3>
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-semibold dark:text-gray-100">History Transaksi</h3>
+                    <div className="flex items-center gap-4">
+                        <SearchByDate onSearch={handleSearch} />
+                    </div>
+                </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50 dark:bg-gray-700">
@@ -121,26 +148,34 @@ export default function FinanceReport() {
                             </tr>
                         </thead>
                         <tbody>
-                            {currentTransactions.map((t) => (
-                                <tr key={t.id} className="border-t dark:border-gray-700">
-                                    <td className="py-3 px-4 dark:text-gray-300">
-                                        {new Date(t.tanggal_waktu).toLocaleString('id-ID')}
-                                    </td>
-                                    <td className="py-3 px-4">
-                                        <span
-                                            className={`px-2 py-1 rounded-full text-xs ${t.status === 'MASUK'
-                                                    ? 'bg-green-100 text-green-600 dark:bg-green-800 dark:text-green-200'
-                                                    : 'bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-200'
-                                                }`}
-                                        >
-                                            {t.status}
-                                        </span>
-                                    </td>
-                                    <td className="py-3 px-4 dark:text-gray-300">
-                                        {formatCurrency(t.jumlah)}
+                            {currentTransactions.length === 0 ? (
+                                <tr>
+                                    <td colSpan="3" className="py-4 text-center text-gray-500 dark:text-gray-400">
+                                        Tidak ada data yang ditemukan
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                currentTransactions.map((t) => (
+                                    <tr key={t.id} className="border-t dark:border-gray-700">
+                                        <td className="py-3 px-4 dark:text-gray-300">
+                                            {new Date(t.tanggal_waktu).toLocaleString('id-ID')}
+                                        </td>
+                                        <td className="py-3 px-4">
+                                            <span
+                                                className={`px-2 py-1 rounded-full text-xs ${t.status === 'MASUK'
+                                                    ? 'bg-green-100 text-green-600 dark:bg-green-800 dark:text-green-200'
+                                                    : 'bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-200'
+                                                    }`}
+                                            >
+                                                {t.status}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 px-4 dark:text-gray-300">
+                                            {formatCurrency(t.jumlah)}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
