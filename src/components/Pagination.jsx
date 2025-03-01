@@ -20,7 +20,7 @@ const Pagination = ({ currentPage, totalPages, goToPage, prevPage, nextPage }) =
 
     return (
         <div className="flex justify-center mt-6"> {/* Container utama untuk pagination */}
-            <div className="bg-gray-100 dark:bg-gray-800 rounded-md p-2 inline-block"> {/* Container pagination */}
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-md p-2 inline-block"> {/* Container pagination */}
                 <div className="flex items-center space-x-2">
                     {/* Tombol Previous */}
                     <button

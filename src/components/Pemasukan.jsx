@@ -173,7 +173,7 @@ export default function Pemasukan() {
                                 <input
                                     type="text"
                                     placeholder="Rp. 0"
-                                    className="w-full p-2 border rounded"
+                                    className="w-full dark:text-gray-800 p-2 border rounded"
                                     value={formData.jumlah}
                                     onChange={handleJumlahChange}
                                     required
@@ -206,7 +206,7 @@ export default function Pemasukan() {
                                 <input
                                     type="text"
                                     placeholder="Deskripsi"
-                                    className="w-full p-2 border rounded"
+                                    className="w-full dark:text-gray-800 p-2 border rounded"
                                     value={formData.deskripsi}
                                     onChange={(e) => setFormData({ ...formData, deskripsi: e.target.value })}
                                     required
