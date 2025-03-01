@@ -136,14 +136,14 @@ export default function Pelatihan() {
             title: message,
             showConfirmButton: false,
             timer: 3000,
-            toast: true, // Menjadikan notifikasi sebagai toast
-            width: '400px', // Menyesuaikan lebar notifikasi
-            background: '#f0f0f0', // Warna background notifikasi
+            toast: true,
+            width: '400px',
+            background: '#f0f0f0',
             customClass: {
-                popup: 'custom-popup', // Class custom untuk styling tambahan
-                title: 'custom-title', // Class custom untuk judul
+                popup: 'custom-popup',
+                title: 'custom-title',
             },
-            backdrop: false, // Menghilangkan backdrop gelap
+            backdrop: false,
         });
     };
 
@@ -155,14 +155,14 @@ export default function Pelatihan() {
             title: message,
             showConfirmButton: false,
             timer: 3000,
-            toast: true, // Menjadikan notifikasi sebagai toast
-            width: '400px', // Menyesuaikan lebar notifikasi
-            background: '#f0f0f0', // Warna background notifikasi
+            toast: true,
+            width: '400px',
+            background: '#f0f0f0',
             customClass: {
-                popup: 'custom-popup', // Class custom untuk styling tambahan
-                title: 'custom-title', // Class custom untuk judul
+                popup: 'custom-popup',
+                title: 'custom-title',
             },
-            backdrop: false, // Menghilangkan backdrop gelap
+            backdrop: false,
         });
     };
 
@@ -177,7 +177,7 @@ export default function Pelatihan() {
     const goToPage = (page) => setCurrentPage(page);
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 overflow-hidden">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold dark:text-gray-100">Daftar Pelatihan</h3>
                 <button
@@ -247,7 +247,7 @@ export default function Pelatihan() {
 
             {/* Modal Tambah Pelatihan */}
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl dark:bg-gray-800">
                         <h2 className="text-lg font-semibold mb-4 dark:text-white">Tambah Pelatihan</h2>
                         <input
@@ -290,7 +290,7 @@ export default function Pelatihan() {
 
             {/* Modal Detail Pelatihan */}
             {showDetailModal && selectedPelatihan && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl dark:bg-gray-800">
                         <h2 className="text-lg font-semibold mb-4 dark:text-white">Detail Pelatihan</h2>
                         <form>
@@ -336,7 +336,7 @@ export default function Pelatihan() {
 
             {/* Modal Edit Pelatihan */}
             {showEditModal && selectedPelatihan && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl dark:bg-gray-800">
                         <h2 className="text-lg font-semibold mb-4">Edit Pelatihan</h2>
                         <input
@@ -379,7 +379,7 @@ export default function Pelatihan() {
 
             {/* Modal Konfirmasi Hapus Pelatihan */}
             {showDeleteModal && selectedPelatihan && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96 dark:bg-gray-800">
                         <h2 className="text-lg font-semibold mb-4">Hapus Pelatihan</h2>
                         <p>Apakah Anda yakin ingin menghapus pelatihan <strong>{selectedPelatihan.judul_pelatihan}</strong>?</p>
@@ -400,6 +400,7 @@ export default function Pelatihan() {
                     </div>
                 </div>
             )}
+
             {/* Pagination */}
             <div className="mt-6">
                 <Pagination
