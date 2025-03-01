@@ -209,60 +209,56 @@ export default function Pelatihan() {
                 <p className="text-gray-500 dark:text-gray-300">Memuat data...</p>
             ) : (
                 <>
+                    {/* Tabel */}
                     <table className="w-full">
                         <thead className="bg-gray-50 dark:bg-gray-900">
                             <tr>
-                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-white">Judul</th>
-                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-white">Tanggal Mulai</th>
-                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-white">Aksi</th>
+                                <th className="text-left py-3 px-4">Judul</th>
+                                <th className="text-left py-3 px-4">Mulai</th>
+                                <th className="text-left py-3 px-4">Berakhir</th>
+                                <th className="text-left py-3 px-4">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {displayedPelatihan.length > 0 ? (
-                                displayedPelatihan.map((item) => (
-                                    <tr key={item.id} className="border-t">
-                                        <td className="py-3 px-4">{item.judul_pelatihan}</td>
-                                        <td className="py-3 px-4">{formatDate(item.tanggal_pelatihan)}</td>
-                                        <td className="py-3 px-4 flex gap-2">
-                                            <button
-                                                className="text-green-600 hover:underline"
-                                                onClick={() => {
-                                                    setSelectedPelatihan(item);
-                                                    setShowDetailModal(true);
-                                                }}
-                                            >
-                                                Detail
-                                            </button>
-                                            <button
-                                                className="text-blue-600 hover:underline"
-                                                onClick={() => {
-                                                    setSelectedPelatihan(item);
-                                                    setShowEditModal(true);
-                                                }}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                className="text-red-600 hover:underline"
-                                                onClick={() => {
-                                                    setSelectedPelatihan(item);
-                                                    setShowDeleteModal(true);
-                                                }}
-                                            >
-                                                Hapus
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="3" className="text-center py-4 text-gray-500">
-                                        Tidak ada data pelatihan.
+                            {displayedPelatihan.map((item) => (
+                                <tr key={item.id} className="border-t">
+                                    <td className="py-3 px-4">{item.judul_pelatihan}</td>
+                                    <td className="py-3 px-4">{formatDate(item.tanggal_pelatihan)}</td>
+                                    <td className="py-3 px-4">{formatDate(item.tanggal_berakhir)}</td>
+                                    <td className="py-3 px-4 flex gap-2">
+                                        <button
+                                            className="text-blue-600 hover:underline"
+                                            onClick={() => {
+                                                setSelectedPelatihan(item);
+                                                setShowDetailModal(true);
+                                            }}
+                                        >
+                                            Detail
+                                        </button>
+                                        <button
+                                            className="text-green-600 hover:underline"
+                                            onClick={() => {
+                                                setSelectedPelatihan(item);
+                                                setShowEditModal(true);
+                                            }}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="text-red-600 hover:underline"
+                                            onClick={() => {
+                                                setSelectedPelatihan(item);
+                                                setShowDeleteModal(true);
+                                            }}
+                                        >
+                                            Hapus
+                                        </button>
                                     </td>
                                 </tr>
-                            )}
+                            ))}
                         </tbody>
                     </table>
+
                     <div className="mt-6">
                         <Pagination
                             currentPage={currentPage}
