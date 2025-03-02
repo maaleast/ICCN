@@ -158,9 +158,6 @@ export default function FinanceReport() {
                 </div>
             </div>
 
-            {/* Grafik Saldo Harian */}
-            <DailyBalanceChart transactions={transactions} />
-
             {/* History Transaksi */}
             <div>
                 <div className="flex justify-between items-center mb-6">
@@ -222,6 +219,9 @@ export default function FinanceReport() {
                     nextPage={nextPage}
                 />
             </div>
+
+            {/* Grafik Saldo Harian */}
+            <DailyBalanceChart transactions={transactions} />
         </div>
     );
 }
