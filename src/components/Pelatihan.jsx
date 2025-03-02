@@ -39,26 +39,6 @@ export default function Pelatihan() {
         }
     };
 
-    // Fungsi hapus pelatihan
-    const handleDelete = async (id) => {
-        try {
-            const res = await fetch(`${API_BASE_URL}/admin/pelatihan/delete/${id}`, {
-                method: "DELETE",
-            });
-
-            if (res.ok) {
-                setPelatihan(pelatihan.filter((item) => item.id !== id));
-                setShowDeleteModal(false);
-                showSuccessNotification("Pelatihan berhasil dihapus!");
-            } else {
-                showErrorNotification("Gagal menghapus pelatihan");
-            }
-        } catch (error) {
-            console.error("❌ Error menghapus data:", error);
-            showErrorNotification("Terjadi kesalahan saat menghapus data");
-        }
-    };
-
     // Fungsi tambah pelatihan
     const handleTambahPelatihan = async () => {
         const { judul, tanggal_mulai, tanggal_berakhir, deskripsi, link } = newPelatihan;
@@ -68,14 +48,20 @@ export default function Pelatihan() {
             return;
         }
 
+        // Format tanggal sebagai string lokal (YYYY-MM-DD HH:mm:ss)
+        const formatTanggal = (date) => {
+            const pad = (num) => num.toString().padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        };
+
         try {
             const res = await fetch(`${API_BASE_URL}/admin/pelatihan/tambah`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     judul_pelatihan: judul,
-                    tanggal_pelatihan: tanggal_mulai.toISOString(),
-                    tanggal_berakhir: tanggal_berakhir.toISOString(),
+                    tanggal_pelatihan: formatTanggal(tanggal_mulai),
+                    tanggal_berakhir: formatTanggal(tanggal_berakhir),
                     deskripsi_pelatihan: deskripsi,
                     link: link,
                 }),
@@ -88,7 +74,7 @@ export default function Pelatihan() {
                     tanggal_mulai: null,
                     tanggal_berakhir: null,
                     deskripsi: "",
-                    link: ""
+                    link: "",
                 });
                 fetchPelatihan();
                 showSuccessNotification("Pelatihan berhasil ditambahkan!");
@@ -110,14 +96,20 @@ export default function Pelatihan() {
             return;
         }
 
+        // Format tanggal sebagai string lokal (YYYY-MM-DD HH:mm:ss)
+        const formatTanggal = (date) => {
+            const pad = (num) => num.toString().padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        };
+
         try {
             const res = await fetch(`${API_BASE_URL}/admin/pelatihan/edit/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     judul_pelatihan,
-                    tanggal_pelatihan: new Date(tanggal_pelatihan).toISOString(),
-                    tanggal_berakhir: new Date(tanggal_berakhir).toISOString(),
+                    tanggal_pelatihan: formatTanggal(new Date(tanggal_pelatihan)),
+                    tanggal_berakhir: formatTanggal(new Date(tanggal_berakhir)),
                     deskripsi_pelatihan,
                     link,
                 }),
@@ -136,21 +128,42 @@ export default function Pelatihan() {
         }
     };
 
+    // Fungsi hapus pelatihan
+    const handleDelete = async (id) => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/admin/pelatihan/delete/${id}`, {
+                method: "DELETE",
+            });
+
+            if (res.ok) {
+                setPelatihan(pelatihan.filter((item) => item.id !== id));
+                setShowDeleteModal(false);
+                showSuccessNotification("Pelatihan berhasil dihapus!");
+            } else {
+                showErrorNotification("Gagal menghapus pelatihan");
+            }
+        } catch (error) {
+            console.error("❌ Error menghapus data:", error);
+            showErrorNotification("Terjadi kesalahan saat menghapus data");
+        }
+    };
+
     // Fungsi format tanggal
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const options = {
+            day: "2-digit",
+            month: "2-digit",
             year: "numeric",
-            month: "long",
-            day: "numeric",
             hour: "2-digit",
             minute: "2-digit",
-            hour12: false
+            hour12: false,
+            timeZone: "Asia/Jakarta",
         };
-        return date.toLocaleDateString("id-ID", options);
+        return date.toLocaleString("id-ID", options);
     };
 
-    // Fungsi untuk menampilkan notifikasi sukses
+    // Fungsi untuk notifikasi
     const showSuccessNotification = (message) => {
         Swal.fire({
             icon: "success",
@@ -160,7 +173,6 @@ export default function Pelatihan() {
         });
     };
 
-    // Fungsi untuk menampilkan notifikasi error
     const showErrorNotification = (message) => {
         Swal.fire({
             icon: "error",
@@ -214,8 +226,8 @@ export default function Pelatihan() {
                         <thead className="bg-gray-50 dark:bg-gray-900">
                             <tr>
                                 <th className="text-left py-3 px-4">Judul</th>
-                                <th className="text-left py-3 px-4">Mulai</th>
-                                <th className="text-left py-3 px-4">Berakhir</th>
+                                <th className="text-left py-3 px-4">Tanggal Mulai</th>
+                                <th className="text-left py-3 px-4">Tanggal Berakhir</th>
                                 <th className="text-left py-3 px-4">Aksi</th>
                             </tr>
                         </thead>
@@ -271,7 +283,6 @@ export default function Pelatihan() {
                 </>
             )}
 
-
             {/* Modal Tambah Pelatihan */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -285,7 +296,9 @@ export default function Pelatihan() {
                                     selected={newPelatihan.tanggal_mulai}
                                     onChange={(date) => setNewPelatihan({ ...newPelatihan, tanggal_mulai: date })}
                                     showTimeSelect
-                                    dateFormat="Pp"
+                                    dateFormat="dd/MM/yyyy HH:mm"
+                                    timeIntervals={15}
+                                    timeCaption="Waktu"
                                     className="w-full p-2 border rounded-lg dark:bg-gray-600"
                                 />
                             </div>
@@ -295,7 +308,9 @@ export default function Pelatihan() {
                                     selected={newPelatihan.tanggal_berakhir}
                                     onChange={(date) => setNewPelatihan({ ...newPelatihan, tanggal_berakhir: date })}
                                     showTimeSelect
-                                    dateFormat="Pp"
+                                    dateFormat="dd/MM/yyyy HH:mm" // Format tanggal/bulan/tahun jam:menit
+                                    timeIntervals={15}
+                                    timeCaption="Waktu"
                                     className="w-full p-2 border rounded-lg dark:bg-gray-600"
                                 />
                             </div>
@@ -393,10 +408,12 @@ export default function Pelatihan() {
                                     selected={new Date(selectedPelatihan.tanggal_pelatihan)}
                                     onChange={(date) => setSelectedPelatihan({
                                         ...selectedPelatihan,
-                                        tanggal_pelatihan: date
+                                        tanggal_pelatihan: date,
                                     })}
                                     showTimeSelect
-                                    dateFormat="Pp"
+                                    dateFormat="dd/MM/yyyy HH:mm" // Format tanggal/bulan/tahun jam:menit
+                                    timeIntervals={15}
+                                    timeCaption="Waktu"
                                     className="w-full p-2 border rounded-lg dark:bg-gray-600"
                                 />
                             </div>
@@ -406,10 +423,12 @@ export default function Pelatihan() {
                                     selected={new Date(selectedPelatihan.tanggal_berakhir)}
                                     onChange={(date) => setSelectedPelatihan({
                                         ...selectedPelatihan,
-                                        tanggal_berakhir: date
+                                        tanggal_berakhir: date,
                                     })}
                                     showTimeSelect
-                                    dateFormat="Pp"
+                                    dateFormat="dd/MM/yyyy HH:mm" // Format tanggal/bulan/tahun jam:menit
+                                    timeIntervals={15}
+                                    timeCaption="Waktu"
                                     className="w-full p-2 border rounded-lg dark:bg-gray-600"
                                 />
                             </div>
@@ -422,7 +441,7 @@ export default function Pelatihan() {
                             value={selectedPelatihan.judul_pelatihan}
                             onChange={(e) => setSelectedPelatihan({
                                 ...selectedPelatihan,
-                                judul_pelatihan: e.target.value
+                                judul_pelatihan: e.target.value,
                             })}
                         />
                         <textarea
@@ -432,7 +451,7 @@ export default function Pelatihan() {
                             value={selectedPelatihan.deskripsi_pelatihan}
                             onChange={(e) => setSelectedPelatihan({
                                 ...selectedPelatihan,
-                                deskripsi_pelatihan: e.target.value
+                                deskripsi_pelatihan: e.target.value,
                             })}
                         />
                         <input
@@ -442,7 +461,7 @@ export default function Pelatihan() {
                             value={selectedPelatihan.link}
                             onChange={(e) => setSelectedPelatihan({
                                 ...selectedPelatihan,
-                                link: e.target.value
+                                link: e.target.value,
                             })}
                         />
 

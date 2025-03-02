@@ -3,7 +3,35 @@ import { API_BASE_URL } from "../config";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Pagination from './Pagination';
-import SearchByDate from './SearchByDate'; // Import komponen SearchByDate
+import SearchByDate from './SearchByDate';
+import DailyBalanceChart from './DailyBalanceChart'; // Import komponen grafik saldo harian
+
+// Fungsi untuk mengambil data pendapatan bulanan
+export const getPendapatanBulanan = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/keuangan/bulan-ini`);
+        const data = await response.json();
+        return {
+            pendapatanBulanan: parseFloat(data.total_pendapatan || "0"),
+            pengeluaranBulanIni: parseFloat(data.total_pengeluaran || "0"),
+        };
+    } catch (error) {
+        console.error('Gagal mengambil data pendapatan bulanan:', error);
+        return { pendapatanBulanan: 0, pengeluaranBulanIni: 0 };
+    }
+};
+
+// Fungsi untuk mengambil saldo akhir
+export const getSaldoAkhir = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/keuangan/saldo-akhir`);
+        const data = await response.json();
+        return parseFloat(data.saldo_akhir || 0);
+    } catch (error) {
+        console.error('Gagal mengambil saldo akhir:', error);
+        return 0;
+    }
+};
 
 export default function FinanceReport() {
     const [transactions, setTransactions] = useState([]);
@@ -129,6 +157,9 @@ export default function FinanceReport() {
                     </p>
                 </div>
             </div>
+
+            {/* Grafik Saldo Harian */}
+            <DailyBalanceChart transactions={transactions} />
 
             {/* History Transaksi */}
             <div>
