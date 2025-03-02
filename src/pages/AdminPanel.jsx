@@ -6,11 +6,10 @@ import Pelatihan from '../components/Pelatihan';
 import Gallery from '../components/Gallery';
 import FinanceReport from '../components/FinanceReport';
 import Pemasukan from '../components/Pemasukan';
-// import PriceSetting from '../components/PriceSetting';
 import Pengeluaran from '../components/Pengeluaran';
 import { getPendapatanBulanan, getSaldoAkhir } from '../components/FinanceReport';
 import { API_BASE_URL } from '../config';
-import MemberGrowthChart from '../components/MemberGrowthChart'; // Import komponen grafik pertumbuhan member
+import MemberGrowthChart from '../components/MemberGrowthChart';
 import { FaUser, FaBook, FaMoneyBill, FaCamera } from 'react-icons/fa';
 
 export default function AdminPanel() {
@@ -24,6 +23,7 @@ export default function AdminPanel() {
         grafikMember: {},
         saldoAkhir: 0
     });
+    const [aktivitasTerbaru, setAktivitasTerbaru] = useState([]); // Tambahkan state untuk aktivitas terkini
 
     // Fetch data dashboard
     useEffect(() => {
@@ -41,8 +41,8 @@ export default function AdminPanel() {
 
                 // Format data untuk grafik pertumbuhan member bulanan
                 const memberPerBulan = members.reduce((acc, member) => {
-                    const date = new Date(member.tanggal_submit); // Pastikan format tanggal sesuai
-                    const month = date.toLocaleString('default', { month: 'short' }); // Ambil nama bulan singkat (Jan, Feb, dst.)
+                    const date = new Date(member.tanggal_submit);
+                    const month = date.toLocaleString('default', { month: 'short' });
 
                     if (!acc[month]) {
                         acc[month] = 0;
@@ -59,7 +59,7 @@ export default function AdminPanel() {
                     aktivitasTerbaru: [
                         `${members.slice(-5).length} Member Baru`
                     ],
-                    grafikMember: memberPerBulan // Simpan data pertumbuhan member per bulan
+                    grafikMember: memberPerBulan
                 });
 
             } catch (error) {
@@ -68,6 +68,88 @@ export default function AdminPanel() {
         };
 
         fetchDashboardData();
+    }, []);
+
+    const fetchAktivitasTerbaru = async () => {
+        try {
+            // Fetch data dari semua endpoint
+            const [membersRes, keuanganRes, photosRes] = await Promise.all([
+                fetch(`${API_BASE_URL}/admin/all-members`),
+                fetch(`${API_BASE_URL}/admin/keuangan`),
+                fetch(`${API_BASE_URL}/admin/gallery`)
+            ]);
+
+            const members = await membersRes.json();
+            const keuangan = await keuanganRes.json();
+            const photos = await photosRes.json();
+
+            // Format data menjadi aktivitas
+            const aktivitas = [];
+
+            // Aktivitas member baru
+            const memberBaruHariIni = members.filter(member => {
+                const tanggalDaftar = new Date(member.tanggal_submit).toDateString();
+                const hariIni = new Date().toDateString();
+                return tanggalDaftar === hariIni;
+            });
+            if (memberBaruHariIni.length > 0) {
+                aktivitas.push({
+                    type: 'member',
+                    description: `${memberBaruHariIni.length} member telah mendaftar hari ini`,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            // Aktivitas keuangan (pemasukan dan pengeluaran)
+            const transaksiHariIni = keuangan.filter(t => {
+                const tanggalTransaksi = new Date(t.tanggal_waktu).toDateString();
+                const hariIni = new Date().toDateString();
+                return tanggalTransaksi === hariIni;
+            });
+
+            transaksiHariIni.forEach(t => {
+                if (t.status === 'MASUK') {
+                    aktivitas.push({
+                        type: 'uang',
+                        description: `Pemasukan sebesar Rp ${parseFloat(t.jumlah).toLocaleString('id-ID')} dari ${t.deskripsi}`,
+                        timestamp: t.tanggal_waktu
+                    });
+                } else if (t.status === 'KELUAR') {
+                    aktivitas.push({
+                        type: 'uang',
+                        description: `Pengeluaran sebesar Rp ${parseFloat(t.jumlah).toLocaleString('id-ID')} untuk ${t.deskripsi}`,
+                        timestamp: t.tanggal_waktu
+                    });
+                }
+            });
+
+            // Aktivitas upload foto
+            const fotoHariIni = photos.filter(photo => {
+                const tanggalUpload = new Date(photo.created_at).toDateString(); // Gunakan created_at
+                const hariIni = new Date().toDateString();
+                return tanggalUpload === hariIni;
+            });
+
+            if (fotoHariIni.length > 0) {
+                aktivitas.push({
+                    type: 'foto',
+                    description: `Sebanyak ${fotoHariIni.length} foto telah ditambahkan hari ini`,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            // Urutkan aktivitas berdasarkan timestamp (terbaru ke terlama)
+            aktivitas.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            // Batasi hanya 10 aktivitas terbaru
+            setAktivitasTerbaru(aktivitas.slice(0, 6));
+        } catch (error) {
+            console.error("Error fetching recent activities:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAktivitasTerbaru();
     }, []);
 
     return (
@@ -94,6 +176,14 @@ export default function AdminPanel() {
                     {/* Dashboard */}
                     {activeMenu === 'Dashboard' && (
                         <>
+                            {/* Welcome Card */}
+                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md mb-6">
+                                <h1 className="text-2xl font-bold">Selamat Datang, Admin ICCN! 👋</h1>
+                                <p className="text-gray-600 dark:text-gray-300 mt-2">
+                                    Selamat Berpuasa, Tetap Semangat Kerjanya Ya!
+                                </p>
+                            </div>
+
                             {/* Cards */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                                 {/* Card Total Member */}
@@ -129,6 +219,8 @@ export default function AdminPanel() {
                                 </div>
                             </div>
 
+                            <h2 className="text-xl font-bold mb-4 mt-4">Grafik & Recently Activity</h2>
+
                             {/* Grafik dan Aktivitas */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                                 {/* Grafik Pertumbuhan Member */}
@@ -145,17 +237,27 @@ export default function AdminPanel() {
                                         Aktivitas Terkini
                                     </h3>
                                     <div className="space-y-4">
-                                        {dashboardData.aktivitasTerbaru.map((aktivitas, index) => (
+                                        {aktivitasTerbaru.map((aktivitas, index) => (
                                             <div
                                                 key={index}
                                                 className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
                                             >
-                                                <p className="text-sm dark:text-gray-200">{aktivitas}</p>
+                                                <p className="text-sm dark:text-gray-200">
+                                                    {aktivitas.type === 'uang' && '💵 '}
+                                                    {aktivitas.type === 'foto' && '📷 '}
+                                                    {aktivitas.type === 'member' && '👤 '}
+                                                    {aktivitas.description}
+                                                </p>
+                                                <p className="text-xs text-gray-400 dark:text-gray-300 mt-1">
+                                                    {new Date(aktivitas.timestamp).toLocaleString()}
+                                                </p>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
+
+                            <h2 className="text-xl font-bold mb-4 mt-4">Quick Actions</h2>
 
                             {/* Quick Actions */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -190,7 +292,6 @@ export default function AdminPanel() {
                     {/* Menu Lainnya */}
                     {activeMenu === 'Aktivasi Member' && <MemberTable />}
                     {activeMenu === 'Kelola Pelatihan' && <Pelatihan />}
-                    {/* {activeMenu === 'Pengaturan Harga' && <PriceSetting />} */}
                     {activeMenu === 'Galeri Kegiatan' && <Gallery />}
                     {activeMenu === 'Laporan Keuangan' && <FinanceReport />}
                     {activeMenu === 'Pengeluaran' && <Pengeluaran />}
