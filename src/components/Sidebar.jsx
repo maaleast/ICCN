@@ -5,13 +5,13 @@ export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMen
         { name: 'Dashboard', icon: FiActivity },
         { name: 'Aktivasi Member', icon: FiUsers },
         { name: 'Kelola Pelatihan', icon: FiFileText },
-        { name: 'Pengaturan Harga', icon: FiSettings },
+        // { name: 'Pengaturan Harga', icon: FiSettings },
         { name: 'Galeri Kegiatan', icon: FiImage },
         // { name: 'Laporan Member', icon: FiUsers },
         { name: 'Laporan Keuangan', icon: FiDollarSign },
         { name: 'Pengeluaran', icon: FiDollarSign },
         { name: 'Pemasukan', icon: FiDollarSign },
-     
+
     ];
 
     const memberMenus = [

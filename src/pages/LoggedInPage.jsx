@@ -67,7 +67,7 @@ const LoggedInPage = () => {
                     confirmButtonText: "OK",
                 });
             } else if (data.status === "DITERIMA") {
-                navigate("/member"); 
+                navigate("/member");
             } else {
                 navigate("/membership-registration");
             }
