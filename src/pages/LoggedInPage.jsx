@@ -158,8 +158,8 @@ const LoggedInPage = () => {
 
                     {/* Tombol Scroll ke Tentang ICCN */}
                     <motion.div
-                       initial={{ opacity: 1, y: 0 }} // Pastikan tombol terlihat dari awal
-                       animate={{ y: [0, -10, 0] }} // Dari atas ke bawah (negatif = turun)
+                        initial={{ opacity: 1, y: 0 }} // Pastikan tombol terlihat dari awal
+                        animate={{ y: [0, -10, 0] }} // Dari atas ke bawah (negatif = turun)
                         transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                         className="mt-64"
                     >
