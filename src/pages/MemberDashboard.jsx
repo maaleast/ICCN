@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FaTimesCircle, FaHourglassHalf } from 'react-icons/fa'; // Ikon untuk animasi
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import TrainingCard from '../components/TrainingCard';
@@ -17,8 +18,25 @@ export default function MemberDashboard() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [trainings, setTrainings] = useState([]);
     const [selectedTraining, setSelectedTraining] = useState(null);
+    const [verificationStatus, setVerificationStatus] = useState(null); // State untuk status verifikasi
     const navigate = useNavigate();
 
+    // Fetch status verifikasi saat komponen dimuat
+    useEffect(() => {
+        const fetchVerificationStatus = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/members/checkVerificationStatus/${localStorage.getItem('user_id')}`);
+                const data = await response.json();
+                setVerificationStatus(data.status); // Simpan status verifikasi
+            } catch (error) {
+                console.error('Error fetching verification status:', error);
+            }
+        };
+
+        fetchVerificationStatus();
+    }, []);
+
+    // Fetch data pelatihan
     useEffect(() => {
         const fetchTrainings = async () => {
             try {
@@ -38,23 +56,20 @@ export default function MemberDashboard() {
     }, []);
 
     const getTrainingStatus = (startDate, endDate) => {
-        const currentDate = new Date(); // Waktu saat ini
-        const trainingStartDate = new Date(startDate); // Waktu mulai pelatihan
-        const trainingEndDate = new Date(endDate); // Waktu berakhir pelatihan
+        const currentDate = new Date();
+        const trainingStartDate = new Date(startDate);
+        const trainingEndDate = new Date(endDate);
 
         if (currentDate < trainingStartDate) {
-            return 'upcoming'; // Jika waktu saat ini sebelum waktu mulai
+            return 'upcoming';
         } else if (currentDate >= trainingStartDate && currentDate <= trainingEndDate) {
-            return 'active'; // Jika waktu saat ini dalam rentang waktu pelatihan
+            return 'active';
         } else {
-            return 'completed'; // Jika waktu saat ini setelah waktu berakhir
+            return 'completed';
         }
     };
 
-    // Menghitung jumlah pelatihan aktif
     const activeTrainingsCount = trainings.filter(training => training.status === 'active').length;
-
-    // Menghitung jumlah pelatihan yang akan datang
     const upcomingTrainingsCount = trainings.filter(training => training.status === 'upcoming').length;
 
     const handleTrainingClick = (training) => {
@@ -73,6 +88,7 @@ export default function MemberDashboard() {
                 sidebarOpen={sidebarOpen}
                 activeMenu={activeMenu}
                 setActiveMenu={setActiveMenu}
+                verificationStatus={verificationStatus} // Kirim status verifikasi ke Sidebar
             />
 
             {/* Konten Utama */}
@@ -246,6 +262,34 @@ export default function MemberDashboard() {
                         >
                             Tutup
                         </button>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Modal Status Verifikasi (Non-Closable) */}
+            {verificationStatus && verificationStatus !== 'DITERIMA' && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md text-center"
+                    >
+                        <h2 className="text-2xl font-bold mb-4">
+                            {verificationStatus === 'DITOLAK' ? 'Anda Ditolak' : 'Tunggu Verifikasi'}
+                        </h2>
+                        <div className="flex justify-center mb-4">
+                            {verificationStatus === 'DITOLAK' ? (
+                                <FaTimesCircle className="text-red-500 text-6xl animate-bounce" />
+                            ) : (
+                                <FaHourglassHalf className="text-orange-500 text-6xl animate-spin" />
+                            )}
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-300 mb-4">
+                            {verificationStatus === 'DITOLAK'
+                                ? 'Anda ditolak, silahkan coba daftar ulang di Tahun berikutnya, terimakasih.'
+                                : 'Anda sudah berhasil menjadi member ICCN, silahkan tunggu sampai admin memverifikasi akun Anda untuk bisa mengakses seluruh fitur yang ada di Dashboard Member.'}
+                        </p>
+                        {/* Tidak ada tombol close */}
                     </motion.div>
                 </div>
             )}
