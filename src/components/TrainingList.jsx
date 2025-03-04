@@ -31,6 +31,7 @@ export default function TrainingList({ trainings }) {
                             key={training.id}
                             training={training}
                             onDetailClick={() => setSelectedTraining(training)}
+                            className="dark:bg-gray-600"
                         />
                     ))}
                 </div>
@@ -121,8 +122,8 @@ function TrainingCard({ training, onDetailClick }) {
                 onClick={onDetailClick}
                 disabled={training.status !== 'active'}
                 className={`w-full mt-6 py-2 rounded-lg font-medium transition-all ${training.status === 'active'
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-100 text-gray-500 cursor-not-allowed'
                     }`}
             >
                 {training.status === 'active' ? 'Lanjutkan Belajar' : training.status === 'upcoming' ? 'Segera Hadir' : 'Selesai'}

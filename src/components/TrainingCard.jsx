@@ -43,8 +43,8 @@ export default function TrainingCard({ title, startDate, endDate, status, onRegi
                     onClick={onRegister}
                     disabled={status !== 'active'}
                     className={`w-full mt-6 py-2 rounded-lg font-medium transition-all ${status === 'active'
-                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                            : 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-gray-100 text-gray-500 cursor-not-allowed'
                         }`}
                 >
                     {status === 'active' ? 'Lanjutkan Belajar' : status === 'upcoming' ? 'Segera Hadir' : 'Selesai'}

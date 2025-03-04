@@ -3,7 +3,7 @@ import { API_BASE_URL } from "../config";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Pagination from './Pagination';
-import SearchByDate from './SearchByDate'; // Import komponen SearchByDate
+import FiturSearchKeuangan from './FiturSearchKeuangan'; // Ganti SearchByDate dengan FiturSearchKeuangan
 
 export default function Pemasukan() {
     const [transactions, setTransactions] = useState([]);
@@ -34,18 +34,30 @@ export default function Pemasukan() {
         }
     };
 
-    const handleSearch = (date) => {
+    const handleSearch = ({ date, description, amount }) => {
+        let filtered = transactions;
+
         if (date) {
-            const filtered = transactions.filter(t => {
-                // Konversi ke format YYYY-MM-DD (timezone lokal)
+            filtered = filtered.filter(t => {
                 const transactionDate = new Date(t.tanggal_waktu).toLocaleDateString('en-CA');
                 return transactionDate === date;
             });
-            setFilteredTransactions(filtered);
-        } else {
-            setFilteredTransactions(transactions); // Reset ke semua data jika tanggal kosong
         }
-        setCurrentPage(1); // Reset ke halaman pertama setelah pencarian
+
+        if (description) {
+            filtered = filtered.filter(t => t.deskripsi.toLowerCase().includes(description.toLowerCase()));
+        }
+
+        if (amount !== null && amount !== '') {
+            filtered = filtered.filter(t => t.jumlah.toString().includes(amount));
+        }
+
+        setFilteredTransactions(filtered);
+
+        // Hanya reset halaman jika hasil pencarian berubah secara signifikan
+        if (currentPage > Math.ceil(filtered.length / itemsPerPage)) {
+            setCurrentPage(1);
+        }
     };
 
     const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
@@ -172,7 +184,7 @@ export default function Pemasukan() {
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold dark:text-gray-100">Daftar Pemasukan</h3>
                 <div className="flex items-center gap-4">
-                    <SearchByDate onSearch={handleSearch} />
+                    <FiturSearchKeuangan onSearch={handleSearch} /> {/* Ganti SearchByDate dengan FiturSearchKeuangan */}
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
