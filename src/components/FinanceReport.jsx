@@ -3,8 +3,8 @@ import { API_BASE_URL } from "../config";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Pagination from './Pagination';
-import SearchByDate from './SearchByDate';
-import DailyBalanceChart from './DailyBalanceChart'; // Import komponen grafik saldo harian
+import FiturSearchKeuangan from './FiturSearchKeuangan';
+import DailyBalanceChart from './DailyBalanceChart';
 
 // Fungsi untuk mengambil data pendapatan bulanan
 export const getPendapatanBulanan = async () => {
@@ -50,29 +50,49 @@ export default function FinanceReport() {
     }, []);
 
     useEffect(() => {
+        // Pastikan transaksi tetap terurut dari yang terbaru ke yang lama
+        const sortedTransactions = [...filteredTransactions].sort(
+            (a, b) => new Date(b.tanggal_waktu) - new Date(a.tanggal_waktu)
+        );
+
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
-        setCurrentTransactions(filteredTransactions.slice(startIndex, endIndex));
+
+        setCurrentTransactions(sortedTransactions.slice(startIndex, endIndex));
+
+        // Reset ke page 1 kalau currentPage lebih besar dari total halaman
+        if (currentPage > Math.ceil(sortedTransactions.length / itemsPerPage) && sortedTransactions.length > 0) {
+            setCurrentPage(1);
+        }
     }, [currentPage, filteredTransactions]);
 
     const fetchData = async () => {
         try {
-            // Ambil data untuk card
-            const responseBulanIni = await fetch(`${API_BASE_URL}/admin/keuangan/bulan-ini`);
-            const dataBulanIni = await responseBulanIni.json();
+            // Fetch data untuk pendapatan & pengeluaran bulan ini
+            const [responseBulanIni, responseAll, responseSaldo] = await Promise.all([
+                fetch(`${API_BASE_URL}/admin/keuangan/bulan-ini`),
+                fetch(`${API_BASE_URL}/admin/keuangan`),
+                fetch(`${API_BASE_URL}/admin/keuangan/saldo-akhir`)
+            ]);
 
+            // Convert response ke JSON
+            const [dataBulanIni, dataAll, dataSaldo] = await Promise.all([
+                responseBulanIni.json(),
+                responseAll.json(),
+                responseSaldo.json()
+            ]);
+
+            // Set state untuk pendapatan dan pengeluaran bulan ini
             setPendapatanBulanIni(parseFloat(dataBulanIni.total_pendapatan || "0"));
             setPengeluaranBulanIni(parseFloat(dataBulanIni.total_pengeluaran || "0"));
 
-            // Ambil semua data untuk history
-            const responseAll = await fetch(`${API_BASE_URL}/admin/keuangan`);
-            const dataAll = await responseAll.json();
-            setTransactions(dataAll);
-            setFilteredTransactions(dataAll); // Set filteredTransactions dengan data awal
+            // Urutkan data dari terbaru ke lama berdasarkan tanggal_waktu
+            const sortedTransactions = dataAll.sort((a, b) => new Date(b.tanggal_waktu) - new Date(a.tanggal_waktu));
 
-            // Ambil saldo akhir dari backend
-            const responseSaldo = await fetch(`${API_BASE_URL}/admin/keuangan/saldo-akhir`);
-            const dataSaldo = await responseSaldo.json();
+            setTransactions(sortedTransactions);
+            setFilteredTransactions(sortedTransactions);
+
+            // Set saldo akhir
             setSaldoAkhir(Number(dataSaldo.saldo_akhir || 0));
 
         } catch (error) {
@@ -81,23 +101,31 @@ export default function FinanceReport() {
         }
     };
 
-    const handleSearch = (date) => {
+
+    const handleSearch = ({ date, description, amount }) => {
+        let filtered = transactions;
+
         if (date) {
-            const filtered = transactions.filter(t => {
-                // Konversi ke tanggal lokal tanpa waktu
-                const transactionDate = new Date(t.tanggal_waktu);
-                transactionDate.setHours(0, 0, 0, 0); // Reset jam ke 00:00:00
-
-                const searchDateObj = new Date(date);
-                searchDateObj.setHours(0, 0, 0, 0); // Reset jam ke 00:00:00
-
-                return transactionDate.getTime() === searchDateObj.getTime();
+            filtered = filtered.filter(t => {
+                const transactionDate = new Date(t.tanggal_waktu).toLocaleDateString('en-CA');
+                return transactionDate === date;
             });
-            setFilteredTransactions(filtered);
-        } else {
-            setFilteredTransactions(transactions); // Reset ke semua data jika tanggal kosong
         }
-        setCurrentPage(1); // Reset ke halaman pertama setelah pencarian
+
+        if (description) {
+            filtered = filtered.filter(t => t.deskripsi.toLowerCase().includes(description.toLowerCase()));
+        }
+
+        if (amount !== null && amount !== '') {
+            filtered = filtered.filter(t => t.jumlah.toString().includes(amount));
+        }
+
+        setFilteredTransactions(filtered);
+
+        // Hanya reset halaman jika hasil pencarian berubah secara signifikan
+        if (currentPage > Math.ceil(filtered.length / itemsPerPage)) {
+            setCurrentPage(1);
+        }
     };
 
     // Format mata uang
@@ -110,10 +138,26 @@ export default function FinanceReport() {
     };
 
     // Hitung total halaman
-    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-    const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
-    const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
-    const goToPage = (page) => setCurrentPage(page);
+    const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / itemsPerPage));
+
+    // Fungsi untuk navigasi pagination
+    const nextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const prevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const goToPage = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -163,22 +207,23 @@ export default function FinanceReport() {
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-semibold dark:text-gray-100">History Transaksi</h3>
                     <div className="flex items-center gap-4">
-                        <SearchByDate onSearch={handleSearch} />
+                        <FiturSearchKeuangan onSearch={handleSearch} />
                     </div>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Tanggal & Waktu</th>
+                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Deskripsi</th>
                                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Status</th>
+                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Tanggal & Waktu</th>
                                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Jumlah</th>
                             </tr>
                         </thead>
                         <tbody>
                             {currentTransactions.length === 0 ? (
                                 <tr>
-                                    <td colSpan="3" className="py-4 text-center text-gray-500 dark:text-gray-400">
+                                    <td colSpan="4" className="py-4 text-center text-gray-500 dark:text-gray-400">
                                         Tidak ada data yang ditemukan
                                     </td>
                                 </tr>
@@ -186,7 +231,7 @@ export default function FinanceReport() {
                                 currentTransactions.map((t) => (
                                     <tr key={t.id} className="border-t dark:border-gray-700">
                                         <td className="py-3 px-4 dark:text-gray-300">
-                                            {new Date(t.tanggal_waktu).toLocaleString('id-ID')}
+                                            {t.deskripsi}
                                         </td>
                                         <td className="py-3 px-4">
                                             <span
@@ -198,6 +243,7 @@ export default function FinanceReport() {
                                                 {t.status}
                                             </span>
                                         </td>
+                                        <td className="py-3 px-4 dark:text-gray-300">{new Date(t.tanggal_waktu).toLocaleString('id-ID')}</td>
                                         <td className="py-3 px-4 dark:text-gray-300">
                                             {formatCurrency(t.jumlah)}
                                         </td>
@@ -215,8 +261,8 @@ export default function FinanceReport() {
                     currentPage={currentPage}
                     totalPages={totalPages}
                     goToPage={goToPage}
-                    prevPage={prevPage}
-                    nextPage={nextPage}
+                    prevPage={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    nextPage={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 />
             </div>
 

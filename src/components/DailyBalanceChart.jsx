@@ -24,6 +24,7 @@ export default function DailyBalanceChart({ transactions }) {
     // Fungsi untuk menghitung saldo harian berdasarkan saldo_akhir
     const calculateDailyBalance = () => {
         const dailyBalance = {};
+        let lastKnownBalance = 0;
 
         // Urutkan transaksi berdasarkan tanggal
         const sortedTransactions = transactions.sort((a, b) => new Date(a.tanggal_waktu) - new Date(b.tanggal_waktu));
@@ -37,24 +38,33 @@ export default function DailyBalanceChart({ transactions }) {
 
             // Hanya proses data untuk bulan ini
             if (month === currentMonth && date.getFullYear() === currentYear) {
-                dailyBalance[dayOfMonth] = transaction.saldo_akhir; // Gunakan saldo_akhir dari transaksi
+                lastKnownBalance = transaction.saldo_akhir; // Update saldo terakhir
+                dailyBalance[dayOfMonth] = lastKnownBalance;
             }
         });
+
+        // Isi hari yang kosong dengan saldo terakhir yang diketahui
+        const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+        for (let day = 1; day <= daysInMonth; day++) {
+            if (!(day in dailyBalance)) {
+                dailyBalance[day] = lastKnownBalance; // Gunakan saldo terakhir
+            }
+        }
 
         return dailyBalance;
     };
 
     // Format data untuk grafik
     const dailyBalance = calculateDailyBalance();
-    const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate(); // Jumlah hari dalam bulan ini
-    const labels = Array.from({ length: daysInMonth }, (_, i) => `Hari ${i + 1}`); // Label hari (1-31)
+    const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+    const labels = Array.from({ length: daysInMonth }, (_, i) => `Hari ${i + 1}`);
     const data = {
         labels,
         datasets: [
             {
                 label: 'Saldo Harian',
-                data: labels.map((_, index) => dailyBalance[index + 1] || 0),
-                borderColor: '#3B82F6', // Warna biru untuk saldo
+                data: labels.map((_, index) => dailyBalance[index + 1]),
+                borderColor: '#3B82F6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 tension: 0.4,
                 fill: true,
@@ -68,29 +78,27 @@ export default function DailyBalanceChart({ transactions }) {
             legend: {
                 position: 'top',
                 labels: {
-                    color: '#6B7280', // Warna teks legenda (abu-abu)
+                    color: '#6B7280',
                 },
             },
             title: {
                 display: true,
                 text: 'Grafik Saldo Harian',
-                color: '#6B7280', // Warna teks judul (abu-abu)
+                color: '#6B7280',
             },
         },
         scales: {
             y: {
                 beginAtZero: false,
                 ticks: {
-                    color: '#6B7280', // Warna teks sumbu Y (abu-abu)
-                    stepSize: 1000000, // Kelipatan 500.000
-                    callback: (value) => {
-                        return `Rp ${(value / 1000000).toFixed(1)} Jt`; // Format dalam jutaan
-                    },
+                    color: '#6B7280',
+                    stepSize: 1000000,
+                    callback: (value) => `Rp ${(value / 1000000).toFixed(1)} Jt`,
                 },
             },
             x: {
                 ticks: {
-                    color: '#6B7280', // Warna teks sumbu X (abu-abu)
+                    color: '#6B7280',
                 },
             },
         },

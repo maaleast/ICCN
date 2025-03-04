@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { API_BASE_URL } from '../config'; // Import API_BASE_URL dari config.js
 import { FaTrash, FaPlus, FaTimes } from "react-icons/fa"; // Import ikon sampah, plus, dan close dari FontAwesome
+import Pagination from "./Pagination";
 
 export default function Gallery() {
     const [photos, setPhotos] = useState([]); // Inisialisasi dengan array kosong
@@ -149,6 +150,29 @@ export default function Gallery() {
         setIsModalOpen(false);
     };
 
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const photosPerPage = 8; // Jumlah foto per halaman
+    const totalPages = Math.ceil(photos.length / photosPerPage);
+
+    // Pagination functions
+    const goToPage = (page) => {
+        setCurrentPage(page);
+    };
+
+    const prevPage = () => {
+        if (currentPage > 1) setCurrentPage(currentPage - 1);
+    };
+
+    const nextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+    };
+
+    const indexOfLastPhoto = currentPage * photosPerPage;
+    const indexOfFirstPhoto = indexOfLastPhoto - photosPerPage;
+    const currentPhotos = photos.slice(indexOfFirstPhoto, indexOfLastPhoto);
+
+
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
@@ -162,13 +186,13 @@ export default function Gallery() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {photos.map((photo) => (
+                {currentPhotos.map((photo) => (
                     <div key={photo.id} className="relative group">
                         <img
                             src={photo.image_url}
                             alt={`Kegiatan ${photo.id}`}
                             className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                            onClick={() => openModal(photo)} // Buka modal saat foto di-klik
+                            onClick={() => openModal(photo)}
                         />
                         <button
                             className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -205,6 +229,17 @@ export default function Gallery() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Pagination */}
+            {photos.length > photosPerPage && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    goToPage={goToPage}
+                    prevPage={prevPage}
+                    nextPage={nextPage}
+                />
             )}
 
             {/* Modal untuk upload multiple foto */}
