@@ -36,7 +36,7 @@ const PerpanjangMember = () => {
                 const response = await fetch(`${API_BASE_URL}/members/checkVerificationStatus/${user_id}`);
                 const data = await response.json();
 
-                if (data.status === 'PENDING PERPANJANG') {
+                if (data.status === 'PERPANJANG') {
                     setIsAllowed(true); // Izinkan akses jika status adalah 'PENDING PERPANJANG'
                 } else {
                     Swal.fire({
