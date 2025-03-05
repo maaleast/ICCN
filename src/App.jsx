@@ -6,6 +6,7 @@ import AdminPanel from "./pages/AdminPanel";
 import MemberDashboard from "./pages/MemberDashboard";
 import MembershipRegistration from "./pages/MembershipRegistration";
 import LoggedInPage from "./pages/LoggedInPage";
+import PerpanjangMember from "./pages/PerpanjangMember";
 
 function ProtectedRoute({ children, allowedRoles }) {
   const token = localStorage.getItem("token");
@@ -31,6 +32,12 @@ function App() {
         <Route path="/membership-registration" element={
           <ProtectedRoute>
             <MembershipRegistration />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/perpanjang" element={
+          <ProtectedRoute>
+            <PerpanjangMember />
           </ProtectedRoute>
         } />
 

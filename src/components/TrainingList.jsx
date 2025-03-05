@@ -31,7 +31,6 @@ export default function TrainingList({ trainings }) {
                             key={training.id}
                             training={training}
                             onDetailClick={() => setSelectedTraining(training)}
-                            className="dark:bg-gray-600"
                         />
                     ))}
                 </div>

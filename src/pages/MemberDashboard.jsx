@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimesCircle, FaHourglassHalf } from 'react-icons/fa'; // Ikon untuk animasi
+import { FaTimesCircle, FaHourglassHalf, FaExclamationCircle } from 'react-icons/fa'; // Ikon untuk animasi
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import TrainingCard from '../components/TrainingCard';
@@ -78,6 +78,14 @@ export default function MemberDashboard() {
 
     const handleCloseModal = () => {
         setSelectedTraining(null);
+    };
+
+    const handleBackToHome = () => {
+        navigate('/home'); // Navigasi ke /home
+    };
+
+    const handlePerpanjang = () => {
+        navigate('/perpanjang'); // Navigasi ke /perpanjang
     };
 
     return (
@@ -275,11 +283,21 @@ export default function MemberDashboard() {
                         className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md text-center"
                     >
                         <h2 className="text-2xl font-bold mb-4">
-                            {verificationStatus === 'DITOLAK' ? 'Anda Ditolak' : 'Tunggu Verifikasi'}
+                            {verificationStatus === 'DITOLAK'
+                                ? 'Anda Ditolak'
+                                : verificationStatus === 'PENDING PERPANJANG' // Periksa 'PENDING PERPANJANG'
+                                    ? 'Menunggu Verifikasi Perpanjangan'
+                                    : verificationStatus === 'PERPANJANG'
+                                        ? 'Masa Berlaku Member Anda Habis'
+                                        : 'Tunggu Verifikasi'}
                         </h2>
                         <div className="flex justify-center mb-4">
                             {verificationStatus === 'DITOLAK' ? (
                                 <FaTimesCircle className="text-red-500 text-6xl animate-bounce" />
+                            ) : verificationStatus === 'PENDING PERPANJANG' ? ( // Periksa 'PENDING PERPANJANG'
+                                <FaHourglassHalf className="text-orange-500 text-6xl animate-spin" />
+                            ) : verificationStatus === 'PERPANJANG' ? (
+                                <FaExclamationCircle className="text-orange-500 text-6xl animate-pulse" />
                             ) : (
                                 <FaHourglassHalf className="text-orange-500 text-6xl animate-spin" />
                             )}
@@ -287,9 +305,35 @@ export default function MemberDashboard() {
                         <p className="text-gray-600 dark:text-gray-300 mb-4">
                             {verificationStatus === 'DITOLAK'
                                 ? 'Anda ditolak, silahkan coba daftar ulang di Tahun berikutnya, terimakasih.'
-                                : 'Anda sudah berhasil menjadi member ICCN, silahkan tunggu sampai admin memverifikasi akun Anda untuk bisa mengakses seluruh fitur yang ada di Dashboard Member.'}
+                                : verificationStatus === 'PENDING PERPANJANG' // Periksa 'PENDING PERPANJANG'
+                                    ? 'Anda sudah berhasil mengirim bukti pembayaran untuk memperpanjang member, silahkan tunggu hingga pembayaran Anda diverifikasi. Terimakasih.'
+                                    : verificationStatus === 'PERPANJANG'
+                                        ? 'Masa berlaku member Anda sudah habis, silahkan perpanjang lagi member Anda untuk mengakses seluruh fitur yang ada lagi.'
+                                        : 'Anda sudah berhasil menjadi member ICCN, silahkan tunggu sampai admin memverifikasi akun Anda untuk bisa mengakses seluruh fitur yang ada di Dashboard Member.'}
                         </p>
-                        {/* Tidak ada tombol close */}
+                        {/* Tombol Kembali atau Perpanjang */}
+                        {verificationStatus === 'PERPANJANG' ? (
+                            <button
+                                onClick={handlePerpanjang}
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                Perpanjang
+                            </button>
+                        ) : verificationStatus === 'PENDING PERPANJANG' ? ( // Periksa 'PENDING PERPANJANG'
+                            <button
+                                onClick={handleBackToHome}
+                                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                            >
+                                Kembali
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleBackToHome}
+                                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                            >
+                                Kembali
+                            </button>
+                        )}
                     </motion.div>
                 </div>
             )}
