@@ -22,6 +22,7 @@ export default function Pelatihan() {
         link: "",
         narasumber: "",
         upload_banner: null,
+        kode: "",
         badge: "",
     });
     const [searchTerm, setSearchTerm] = useState("");
@@ -48,9 +49,9 @@ export default function Pelatihan() {
     };
 
     const handleTambahPelatihan = async () => {
-        const { judul, tanggal_mulai, tanggal_berakhir, deskripsi, link, narasumber, upload_banner, badge } = newPelatihan;
+        const { judul, tanggal_mulai, tanggal_berakhir, deskripsi, link, narasumber, upload_banner, badge, kode } = newPelatihan;
 
-        if (!judul || !tanggal_mulai || !tanggal_berakhir || !deskripsi || !link || !narasumber || !upload_banner || !badge) {
+        if (!judul || !tanggal_mulai || !tanggal_berakhir || !deskripsi || !link || !narasumber || !upload_banner || !badge || !kode) {
             showErrorNotification("Semua field harus diisi!");
             return;
         }
@@ -69,6 +70,7 @@ export default function Pelatihan() {
         formData.append('narasumber', narasumber);
         formData.append('banner', upload_banner);
         formData.append('badge', badge);
+        formData.append('kode', kode); // Kirim kode ke backend
 
         try {
             const res = await fetch(`${API_BASE_URL}/admin/pelatihan/tambah`, {
@@ -87,8 +89,9 @@ export default function Pelatihan() {
                     narasumber: "",
                     upload_banner: null,
                     badge: "",
+                    kode: "", // Reset kode
                 });
-                fetchPelatihan(); // Fetch data kembali setelah menambah
+                fetchPelatihan();
                 showSuccessNotification("Pelatihan berhasil ditambahkan!");
             } else {
                 showErrorNotification("Gagal menambah pelatihan");
@@ -100,10 +103,19 @@ export default function Pelatihan() {
     };
 
     const handleEditPelatihan = async () => {
-        const { id, judul_pelatihan, tanggal_pelatihan, tanggal_berakhir, deskripsi_pelatihan, link, narasumber, upload_banner, badge } = selectedPelatihan;
+        const { id, judul_pelatihan, tanggal_pelatihan, tanggal_berakhir, deskripsi_pelatihan, link, narasumber, upload_banner, badge, kode } = selectedPelatihan;
 
-        if (!judul_pelatihan || !tanggal_pelatihan || !tanggal_berakhir || !deskripsi_pelatihan || !link || !narasumber || !badge) {
+        if (!judul_pelatihan || !tanggal_pelatihan || !tanggal_berakhir || !deskripsi_pelatihan || !link || !narasumber || !badge || !kode) {
             showErrorNotification("Semua field harus diisi!");
+            return;
+        }
+
+        // Validasi apakah pelatihan sudah berakhir
+        const currentDate = new Date();
+        const endDate = new Date(tanggal_berakhir);
+
+        if (endDate > currentDate) {
+            showErrorNotification("Kode pelatihan tidak dapat diubah sampai pelatihan berakhir.");
             return;
         }
 
@@ -120,6 +132,7 @@ export default function Pelatihan() {
         formData.append("link", link);
         formData.append("narasumber", narasumber);
         formData.append("badge", badge);
+        formData.append("kode", kode);
 
         // Hanya kirim file jika ada perubahan
         if (upload_banner instanceof File) {
@@ -216,6 +229,11 @@ export default function Pelatihan() {
         { name: "Grandmaster", icon: <FaAward color="#ffcc00" />, value: "grandmaster" },
         { name: "Celestial", icon: <FaCrown color="#ffb3e6" />, value: "celestial" },
     ];
+
+    const generateKode = () => {
+        const randomString = Math.random().toString(36).substring(2, 8).toUpperCase(); // Generate random string
+        setNewPelatihan({ ...newPelatihan, kode: randomString });
+    };
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -374,6 +392,23 @@ export default function Pelatihan() {
                             onChange={(e) => setNewPelatihan({ ...newPelatihan, narasumber: e.target.value })}
                         />
 
+                        {/* Input Kode */}
+                        <div className="flex gap-2 mb-4">
+                            <input
+                                type="text"
+                                placeholder="Kode Pelatihan"
+                                className="w-full p-2 border rounded-lg dark:bg-gray-600"
+                                value={newPelatihan.kode}
+                                onChange={(e) => setNewPelatihan({ ...newPelatihan, kode: e.target.value })}
+                            />
+                            <button
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
+                                onClick={generateKode}
+                            >
+                                Generate Kode
+                            </button>
+                        </div>
+
                         {/* Banner */}
                         <input
                             type="file"
@@ -442,6 +477,10 @@ export default function Pelatihan() {
                             <div>
                                 <label className="block font-medium">Narasumber:</label>
                                 <p>{selectedPelatihan.narasumber}</p>
+                            </div>
+                            <div>
+                                <label className="block font-medium">Kode:</label>
+                                <p>{selectedPelatihan.kode}</p> {/* Tampilkan kode */}
                             </div>
                             <div>
                                 <label className="block font-medium">Badge:</label>
@@ -541,6 +580,35 @@ export default function Pelatihan() {
                             value={selectedPelatihan.narasumber}
                             onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, narasumber: e.target.value })}
                         />
+
+                        {/* Input Kode (Nonaktif jika pelatihan belum berakhir) */}
+                        <div className="flex gap-2 mb-4">
+                            <input
+                                type="text"
+                                placeholder="Kode Pelatihan"
+                                className="w-full p-2 border rounded-lg dark:bg-gray-600"
+                                value={selectedPelatihan.kode}
+                                onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, kode: e.target.value })}
+                                disabled={new Date(selectedPelatihan.tanggal_berakhir) > new Date()} // Nonaktif jika pelatihan belum berakhir
+                            />
+                            <button
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:bg-gray-400"
+                                onClick={() => {
+                                    const randomString = Math.random().toString(36).substring(2, 8).toUpperCase();
+                                    setSelectedPelatihan({ ...selectedPelatihan, kode: randomString });
+                                }}
+                                disabled={new Date(selectedPelatihan.tanggal_berakhir) > new Date()} // Nonaktif jika pelatihan belum berakhir
+                            >
+                                Generate Kode
+                            </button>
+                        </div>
+
+                        {/* Pesan Informasi */}
+                        {new Date(selectedPelatihan.tanggal_berakhir) > new Date() && (
+                            <p className="text-sm text-gray-500 mb-4">
+                                Kode pelatihan tidak dapat diubah sampai pelatihan berakhir.
+                            </p>
+                        )}
 
                         {/* Banner */}
                         <input

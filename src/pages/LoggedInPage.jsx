@@ -100,7 +100,9 @@ const LoggedInPage = () => {
                     <div className="absolute right-0 top-0 h-full w-64 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-900 clip-path-trapezoid-reverse"></div>
 
                     <nav className="w-full px-10 flex justify-between items-center p-4 relative">
-                        <div className="text-4xl font-bold text-blue-700 z-20">ICCN</div>
+                        <div className="text-4xl font-bold text-blue-700 z-20">
+                            <button onClick={() => navigate("/home")}>ICCN</button>
+                        </div>
 
                         <ul className="flex space-x-8 font-semibold text-gray-700 z-20">
                             <li>
@@ -109,8 +111,8 @@ const LoggedInPage = () => {
                                 </button>
                             </li>
                             <li>
-                                <button onClick={() => navigate("/services")} className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200">
-                                    Layanan
+                                <button onClick={() => navigate("/page-gallery")} className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200">
+                                    Gallery
                                 </button>
                             </li>
                             <li>
@@ -208,7 +210,7 @@ const LoggedInPage = () => {
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan ICCN</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {gallery.map((item, index) => (
+                            {gallery.slice(0, 11).map((item, index) => (
                                 <motion.div
                                     key={index}
                                     initial={{ opacity: 0, y: 20 }}
@@ -223,6 +225,20 @@ const LoggedInPage = () => {
                                     />
                                 </motion.div>
                             ))}
+                            {/* Tombol (+angka) untuk melihat lebih banyak */}
+                            {gallery.length > 11 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.5 }}
+                                    className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-400 transition-shadow duration-300 flex items-center justify-center bg-gray-300 cursor-pointer"
+                                    onClick={() => navigate("/page-gallery")}
+                                >
+                                    <div className="text-white text-2xl font-bold">
+                                        +{gallery.length - 11}
+                                    </div>
+                                </motion.div>
+                            )}
                         </div>
                     </div>
                 </section>

@@ -6,6 +6,7 @@ import AdminPanel from "./pages/AdminPanel";
 import MemberDashboard from "./pages/MemberDashboard";
 import MembershipRegistration from "./pages/MembershipRegistration";
 import LoggedInPage from "./pages/LoggedInPage";
+import PageGallery from "./pages/PageGallery";
 import PerpanjangMember from "./pages/PerpanjangMember";
 
 function ProtectedRoute({ children, allowedRoles }) {
@@ -27,6 +28,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/page-gallery" element={<PageGallery />} />
 
 
         <Route path="/membership-registration" element={

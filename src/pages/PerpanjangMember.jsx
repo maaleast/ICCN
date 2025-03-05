@@ -203,9 +203,8 @@ const PerpanjangMember = () => {
                                     name="receiptName"
                                     value={formData.receiptName}
                                     onChange={handleChange}
-                                    className={`mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300 ${
-                                        errors.receiptName ? "border-red-500" : ""
-                                    }`}
+                                    className={`mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300 ${errors.receiptName ? "border-red-500" : ""
+                                        }`}
                                     placeholder="Nama yang muncul di kuitansi"
                                 />
                                 {errors.receiptName && (
@@ -221,9 +220,8 @@ const PerpanjangMember = () => {
                                     name="transferAmount"
                                     value={formData.transferAmount}
                                     onChange={handleChange}
-                                    className={`mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300 ${
-                                        errors.transferAmount ? "border-red-500" : ""
-                                    }`}
+                                    className={`mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300 ${errors.transferAmount ? "border-red-500" : ""
+                                        }`}
                                     placeholder="Contoh: 500000"
                                 />
                                 {errors.transferAmount && (
@@ -241,9 +239,8 @@ const PerpanjangMember = () => {
                                     type="file"
                                     name="buktiPembayaran"
                                     onChange={handleFileChange}
-                                    className={`mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300 ${
-                                        errors.buktiPembayaran ? "border-red-500" : ""
-                                    }`}
+                                    className={`mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300 ${errors.buktiPembayaran ? "border-red-500" : ""
+                                        }`}
                                 />
                                 {errors.buktiPembayaran && (
                                     <p className="text-red-500 text-sm mt-1">{errors.buktiPembayaran}</p>
