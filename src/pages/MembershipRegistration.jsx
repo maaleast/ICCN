@@ -21,29 +21,31 @@ const MembershipRegistration = () => {
         receiptName: "",
         additionalRegistrations: "", // Opsional
         documentFile: null,
+        pembayaranBukti: null,
+        logoFile: null, // Tambahkan state untuk logo
     });
 
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
 
-    // Handle perubahan input text, select, dan number
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    // Handle perubahan file upload
     const handleFileChange = (e) => {
         setFormData({ ...formData, documentFile: e.target.files[0] });
     };
 
-    // Handle bukti pembayaran
     const handleBuktiBayar = (e) => {
         setFormData({ ...formData, pembayaranBukti: e.target.files[0] });
     };
 
-    // Handle perubahan input jumlah transfer (format currency)
+    const handleLogoChange = (e) => {
+        setFormData({ ...formData, logoFile: e.target.files[0] });
+    };
+
     const handleMoneyChange = (e) => {
         let rawValue = e.target.value.replace(/[^\d]/g, "");
         if (!rawValue) {
@@ -62,7 +64,6 @@ const MembershipRegistration = () => {
         setFormData({ ...formData, transferAmount: formattedValue, transferAmountRaw: rawValue });
     };
 
-    // Validasi form
     const validateForm = () => {
         let newErrors = {};
         if (!formData.userType) newErrors.userType = "Tipe Keanggotaan wajib diisi!";
@@ -76,13 +77,14 @@ const MembershipRegistration = () => {
         if (!formData.receiptName) newErrors.receiptName = "Nama pada Kuitansi wajib diisi!";
         if (!formData.documentFile) newErrors.documentFile = "Dokumen SK wajib diupload!";
         if (!formData.pembayaranBukti) newErrors.pembayaranBukti = "Bukti Pembayaran wajib diupload!";
-        // Pendaftaran tambahan (additionalRegistrations) bersifat opsional, tidak perlu divalidasi
+        if (["Universitas", "Perusahaan"].includes(formData.userType) && !formData.logoFile) {
+            newErrors.logoFile = "Logo wajib diupload untuk tipe keanggotaan ini!";
+        }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    // Handle submit form
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validateForm()) {
@@ -108,7 +110,6 @@ const MembershipRegistration = () => {
         });
     };
 
-    // Fungsi submitForm() untuk mengirimkan data
     const submitForm = async () => {
         setIsSubmitting(true);
 
@@ -129,6 +130,9 @@ const MembershipRegistration = () => {
         formDataToSend.append("additional_members_info", formData.additionalRegistrations || "");
         formDataToSend.append("file_sk", formData.documentFile);
         formDataToSend.append("bukti_pembayaran", formData.pembayaranBukti);
+        if (formData.logoFile) {
+            formDataToSend.append("logo", formData.logoFile);
+        }
 
         try {
             const response = await fetch(`${API_BASE_URL}/members/register-member`, {
@@ -145,13 +149,13 @@ const MembershipRegistration = () => {
                 throw new Error(data.message || "Gagal mendaftar member");
             }
 
-            Swal.fire({
+            await Swal.fire({
                 icon: "success",
                 title: "Berhasil!",
                 text: "Pendaftaran member berhasil, menunggu verifikasi",
-            }).then(() => {
-                navigate("/home", { state: { membershipData: data } });
             });
+
+            navigate("/member", { state: { membershipData: data } });
         } catch (error) {
             Swal.fire({
                 icon: "error",
@@ -182,8 +186,7 @@ const MembershipRegistration = () => {
                             <FaArrowLeft size={20} className="mr-2" />
                         </button>
 
-                        {/* Bagian Atas - Nomor Rekening */}
-                        <div className="mb-24"> {/* Tambahin mt-16 biar makin renggang */}
+                        <div className="mb-24">
                             <h2 className="text-3xl font-extrabold mb-4">Bergabung Sekarang!</h2>
                             <p className="text-lg leading-relaxed mb-4">
                                 Daftarkan institusi atau perusahaan Anda dan dapatkan akses eksklusif ke komunitas kami!
@@ -193,8 +196,7 @@ const MembershipRegistration = () => {
                             </div>
                         </div>
 
-                        {/* Bagian Bawah - Konten Existing */}
-                        <div className="mt-24"> {/* Tambahin mb-16 buat jarak lebih besar */}
+                        <div className="mt-24">
                             <h3 className="text-xl font-bold mb-4">Transfer ke Rekening ICCN:</h3>
                             <div className="bg-white/10 p-4 rounded-lg">
                                 <p className="font-mono text-lg mb-2">BCA: 123 456 7890</p>
@@ -218,7 +220,7 @@ const MembershipRegistration = () => {
                                     <select
                                         name="userType"
                                         value={formData.userType}
-                                        onChange={handleChange} // Pastikan handleChange bekerja dengan benar
+                                        onChange={handleChange}
                                         className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
                                     >
                                         <option value="">Pilih...</option>
@@ -234,7 +236,6 @@ const MembershipRegistration = () => {
                                 </div>
                             </div>
 
-                            {/* Link Website & Email */}
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Link Website</label>
@@ -246,7 +247,6 @@ const MembershipRegistration = () => {
                                 </div>
                             </div>
 
-                            {/* Alamat & Wilayah */}
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Alamat</label>
@@ -258,7 +258,6 @@ const MembershipRegistration = () => {
                                 </div>
                             </div>
 
-                            {/* Nama Personal */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-600">
                                     Nama Personal <span className="text-red-500">*</span>
@@ -269,7 +268,6 @@ const MembershipRegistration = () => {
                                 <input type="text" name="personalName" value={formData.personalName} onChange={handleChange} className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300" placeholder="Masukkan nama Anda" />
                             </div>
 
-                            {/* Nama Kuitansi & Jumlah Transfer */}
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Nama pada Kuitansi</label>
@@ -289,7 +287,6 @@ const MembershipRegistration = () => {
                             </div>
 
                             <div className="grid grid-cols-2 gap-6">
-                                {/* No WhatsApp untuk Grup */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">
                                         Nomor Whatsapp <span className="text-red-500">*</span>
@@ -300,7 +297,6 @@ const MembershipRegistration = () => {
                                     <input type="text" name="whatsappGroupNumber" value={formData.whatsappGroupNumber} onChange={handleChange} className="mt-6 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300" placeholder="Contoh: 081234567890" />
                                 </div>
 
-                                {/* Form Pendaftaran Tambahan (Opsional) */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">
                                         Pendaftaran Tambahan (Opsional) <span className="text-red-500">*</span>
@@ -338,6 +334,22 @@ const MembershipRegistration = () => {
                                 />
                             </div>
 
+                            {/* Conditional Rendering untuk Upload Logo */}
+                            {["Universitas", "Perusahaan"].includes(formData.userType) && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600">Upload Logo</label>
+                                    <p className="text-xs text-gray-500 mb-2">
+                                        Silahkan Upload Logo Institusi/Perusahaan Anda (Format: PNG/JPG)
+                                    </p>
+                                    <input
+                                        type="file"
+                                        name="logoFile"
+                                        onChange={handleLogoChange}
+                                        className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
+                                    />
+                                </div>
+                            )}
+
                             <button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
@@ -353,4 +365,4 @@ const MembershipRegistration = () => {
     );
 };
 
-export default MembershipRegistration;
+export default MembershipRegistration
