@@ -10,6 +10,7 @@ export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMen
         { name: 'Laporan Keuangan', icon: FiDollarSign },
         { name: 'Pengeluaran', icon: FiDollarSign },
         { name: 'Pemasukan', icon: FiDollarSign },
+        { name: 'Kelola Berita', icon: FiFileText }, // Tambahkan menu Berita di sini
     ];
 
     const memberMenus = [

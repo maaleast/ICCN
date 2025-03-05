@@ -1,3 +1,4 @@
+// AdminPanel.jsx
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
@@ -7,10 +8,11 @@ import Gallery from '../components/Gallery';
 import FinanceReport from '../components/FinanceReport';
 import Pemasukan from '../components/Pemasukan';
 import Pengeluaran from '../components/Pengeluaran';
+import Berita from '../components/Berita'; // Import komponen Berita
 import { getPendapatanBulanan, getSaldoAkhir } from '../components/FinanceReport';
 import { API_BASE_URL } from '../config';
 import MemberGrowthChart from '../components/MemberGrowthChart';
-import { FaUser, FaBook, FaMoneyBill, FaCamera } from 'react-icons/fa';
+import { FaUser, FaBook, FaMoneyBill, FaCamera, FaNewspaper } from 'react-icons/fa';
 
 export default function AdminPanel() {
     const [activeMenu, setActiveMenu] = useState('Dashboard');
@@ -23,7 +25,7 @@ export default function AdminPanel() {
         grafikMember: {},
         saldoAkhir: 0
     });
-    const [aktivitasTerbaru, setAktivitasTerbaru] = useState([]); // Tambahkan state untuk aktivitas terkini
+    const [aktivitasTerbaru, setAktivitasTerbaru] = useState([]);
 
     // Fetch data dashboard
     useEffect(() => {
@@ -39,7 +41,6 @@ export default function AdminPanel() {
                 const members = await membersRes.json();
                 const users = await usersRes.json();
 
-                // Format data untuk grafik pertumbuhan member bulanan
                 const memberPerBulan = members.reduce((acc, member) => {
                     const date = new Date(member.tanggal_submit);
                     const month = date.toLocaleString('default', { month: 'short' });
@@ -72,7 +73,6 @@ export default function AdminPanel() {
 
     const fetchAktivitasTerbaru = async () => {
         try {
-            // Fetch data dari semua endpoint
             const [membersRes, keuanganRes, photosRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/admin/all-members`),
                 fetch(`${API_BASE_URL}/admin/keuangan`),
@@ -83,10 +83,8 @@ export default function AdminPanel() {
             const keuangan = await keuanganRes.json();
             const photos = await photosRes.json();
 
-            // Format data menjadi aktivitas
             const aktivitas = [];
 
-            // Aktivitas member baru
             const memberBaruHariIni = members.filter(member => {
                 const tanggalDaftar = new Date(member.tanggal_submit).toDateString();
                 const hariIni = new Date().toDateString();
@@ -100,7 +98,6 @@ export default function AdminPanel() {
                 });
             }
 
-            // Aktivitas keuangan (pemasukan dan pengeluaran)
             const transaksiHariIni = keuangan.filter(t => {
                 const tanggalTransaksi = new Date(t.tanggal_waktu).toDateString();
                 const hariIni = new Date().toDateString();
@@ -123,9 +120,8 @@ export default function AdminPanel() {
                 }
             });
 
-            // Aktivitas upload foto
             const fotoHariIni = photos.filter(photo => {
-                const tanggalUpload = new Date(photo.created_at).toDateString(); // Gunakan created_at
+                const tanggalUpload = new Date(photo.created_at).toDateString();
                 const hariIni = new Date().toDateString();
                 return tanggalUpload === hariIni;
             });
@@ -138,10 +134,8 @@ export default function AdminPanel() {
                 });
             }
 
-            // Urutkan aktivitas berdasarkan timestamp (terbaru ke terlama)
             aktivitas.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-            // Batasi hanya 10 aktivitas terbaru
             setAktivitasTerbaru(aktivitas.slice(0, 6));
         } catch (error) {
             console.error("Error fetching recent activities:", error);
@@ -285,6 +279,12 @@ export default function AdminPanel() {
                                 >
                                     <FaCamera className="mr-2" /> Kelola Foto
                                 </button>
+                                <button
+                                    onClick={() => setActiveMenu('Kelola Berita')}
+                                    className="p-4 bg-blue-100 dark:bg-blue-600 text-blue-600 dark:text-white rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition flex items-center justify-center"
+                                >
+                                    <FaNewspaper className="mr-2" /> Kelola Berita
+                                </button>
                             </div>
                         </>
                     )}
@@ -296,6 +296,7 @@ export default function AdminPanel() {
                     {activeMenu === 'Laporan Keuangan' && <FinanceReport />}
                     {activeMenu === 'Pengeluaran' && <Pengeluaran />}
                     {activeMenu === 'Pemasukan' && <Pemasukan />}
+                    {activeMenu === 'Kelola Berita' && <Berita />} {/* Tambahkan komponen Berita */}
                 </div>
             </div>
         </div>

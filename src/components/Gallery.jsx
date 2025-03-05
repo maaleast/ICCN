@@ -11,6 +11,13 @@ export default function Gallery() {
     const [uploadModalOpen, setUploadModalOpen] = useState(false); // State untuk mengontrol tampilan modal upload
     const [selectedFiles, setSelectedFiles] = useState([]); // State untuk menyimpan file yang dipilih
 
+    // Fungsi untuk memformat tanggal
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('id-ID', options); // Format tanggal Indonesia
+    };
+
     // Ambil data foto dari backend
     useEffect(() => {
         fetchPhotos();
@@ -201,7 +208,7 @@ export default function Gallery() {
                             <FaTrash />
                         </button>
                         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <p className="text-sm">Foto Kegiatan {photo.id}</p>
+                            <p className="text-sm">Foto Kegiatan ICCN ({formatDate(photo.created_at)})</p>
                         </div>
                     </div>
                 ))}
@@ -224,7 +231,7 @@ export default function Gallery() {
                         />
                         <div className="mt-4 text-center">
                             <p className="text-sm text-gray-700 dark:text-gray-300">
-                                Foto Kegiatan {selectedPhoto.id}
+                                Foto Kegiatan ICCN ({formatDate(selectedPhoto.created_at)})
                             </p>
                         </div>
                     </div>
