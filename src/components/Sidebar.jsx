@@ -25,13 +25,17 @@ export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMen
     const getStatusText = () => {
         switch (verificationStatus) {
             case 'DITERIMA':
-                return { text: 'AKTIF', color: 'text-green-500' };
+                return { text: 'AKTIF', color: 'text-green-500 font-bold' };
             case 'DITOLAK':
-                return { text: 'DITOLAK', color: 'text-red-500' };
+                return { text: 'DITOLAK', color: 'text-red-500 font-bold' };
             case 'PENDING':
-                return { text: 'Menunggu Verifikasi', color: 'text-orange-500' };
+                return { text: 'Menunggu Verifikasi', color: 'text-orange-500 font-bold' };
+            case 'PERPANJANG':
+                return { text: 'Masa Member Habis', color: 'text-red-500 font-bold' };
+            case 'PENDING PERPANJANG':
+                return { text: 'Menunggu Verifikasi Perpanjangan', color: 'text-yellow-500 font-bold' };
             default:
-                return { text: 'Status Tidak Diketahui', color: 'text-gray-500' };
+                return { text: 'Status Tidak Diketahui', color: 'text-red-500 font-bold' };
         }
     };
 
@@ -44,8 +48,8 @@ export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMen
                     {isAdmin ? 'Admin Panel' : 'Dashboard Member'}
                 </h1>
                 {!isAdmin && sidebarOpen && (
-                    <p className={`mt-2 text-sm ${status.color}`}>
-                        Status Akun: {status.text}
+                    <p className="mt-2 text-sm text-gray-900 dark:text-gray-200">
+                        Status Akun: <span className={status.color}>{status.text}</span>
                     </p>
                 )}
             </div>

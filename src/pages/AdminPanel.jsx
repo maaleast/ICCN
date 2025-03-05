@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import MemberTable from '../components/MemberTable';
+import AktivasiMember from '../components/AktivasiMember';
 import Pelatihan from '../components/Pelatihan';
 import Gallery from '../components/Gallery';
 import FinanceReport from '../components/FinanceReport';
@@ -290,7 +290,7 @@ export default function AdminPanel() {
                     )}
 
                     {/* Menu Lainnya */}
-                    {activeMenu === 'Aktivasi Member' && <MemberTable />}
+                    {activeMenu === 'Aktivasi Member' && <AktivasiMember />}
                     {activeMenu === 'Kelola Pelatihan' && <Pelatihan />}
                     {activeMenu === 'Galeri Kegiatan' && <Gallery />}
                     {activeMenu === 'Laporan Keuangan' && <FinanceReport />}
