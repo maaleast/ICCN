@@ -6,11 +6,8 @@ import AdminPanel from "./pages/AdminPanel";
 import MemberDashboard from "./pages/MemberDashboard";
 import MembershipRegistration from "./pages/MembershipRegistration";
 import LoggedInPage from "./pages/LoggedInPage";
-<<<<<<< HEAD
 import PageGallery from "./pages/PageGallery";
-=======
 import PerpanjangMember from "./pages/PerpanjangMember";
->>>>>>> 5a516bea7569a7589be35de067311bec8c58e86e
 
 function ProtectedRoute({ children, allowedRoles }) {
   const token = localStorage.getItem("token");

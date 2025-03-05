@@ -293,10 +293,11 @@ export default function AdminPanel() {
                     {activeMenu === 'Aktivasi Member' && <AktivasiMember />}
                     {activeMenu === 'Kelola Pelatihan' && <Pelatihan />}
                     {activeMenu === 'Galeri Kegiatan' && <Gallery />}
+                    {activeMenu === 'Kelola Berita' && <Berita />}
                     {activeMenu === 'Laporan Keuangan' && <FinanceReport />}
                     {activeMenu === 'Pengeluaran' && <Pengeluaran />}
                     {activeMenu === 'Pemasukan' && <Pemasukan />}
-                    {activeMenu === 'Kelola Berita' && <Berita />} {/* Tambahkan komponen Berita */}
+
                 </div>
             </div>
         </div>

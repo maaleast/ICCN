@@ -7,10 +7,10 @@ export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMen
         { name: 'Aktivasi Member', icon: FiUsers },
         { name: 'Kelola Pelatihan', icon: FiFileText },
         { name: 'Galeri Kegiatan', icon: FiImage },
+        { name: 'Kelola Berita', icon: FiFileText },
         { name: 'Laporan Keuangan', icon: FiDollarSign },
         { name: 'Pengeluaran', icon: FiDollarSign },
         { name: 'Pemasukan', icon: FiDollarSign },
-        { name: 'Kelola Berita', icon: FiFileText }, // Tambahkan menu Berita di sini
     ];
 
     const memberMenus = [
