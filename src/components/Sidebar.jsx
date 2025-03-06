@@ -16,7 +16,9 @@ export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMen
     const memberMenus = [
         { name: 'Dashboard', icon: FiActivity },
         { name: 'Pelatihan', icon: FiUsers },
+        { name: 'Penghargaan', icon: FiAward },
         { name: 'Pengaturan', icon: FiSettings },
+        { name: 'Profil', icon: FiSettings },
     ];
 
     const menus = isAdmin ? adminMenus : memberMenus;

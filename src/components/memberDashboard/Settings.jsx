@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL } from "../../config";
 import { useNavigate } from "react-router-dom";
 
 export default function Settings() {

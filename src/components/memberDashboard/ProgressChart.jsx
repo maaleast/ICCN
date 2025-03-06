@@ -20,13 +20,10 @@ ChartJS.register(
     Legend
 );
 
-export default function ProgressChart({ trainings }) {
-    // Filter pelatihan yang sudah selesai
-    const completedTrainings = trainings.filter(training => training.status === 'completed');
-
-    // Hitung jumlah pelatihan yang selesai per bulan
-    const monthlyCompletedTrainings = completedTrainings.reduce((acc, training) => {
-        const month = new Date(training.tanggal_berakhir).toLocaleString('default', { month: 'short' });
+export default function ProgressChart({ badges }) {
+    // Hitung jumlah pelatihan yang selesai per bulan berdasarkan badges
+    const monthlyCompletedTrainings = badges.reduce((acc, badge) => {
+        const month = new Date(badge.tanggal_selesai).toLocaleString('default', { month: 'short' });
         if (!acc[month]) {
             acc[month] = 0;
         }
