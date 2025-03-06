@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL } from "../../config";
 import Swal from "sweetalert2";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import Pagination from "./Pagination";
+import Pagination from "../Pagination";
 import { FaMedal, FaCrown, FaGem, FaStar, FaTrophy, FaAward } from "react-icons/fa";
 
 export default function Pelatihan() {

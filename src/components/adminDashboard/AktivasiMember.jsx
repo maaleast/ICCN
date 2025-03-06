@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { API_BASE_URL } from "../config";
-import MemberTable from "./MemberTable";
+import { API_BASE_URL } from "../../config";
+import MemberTable from "../MemberTable";
 
 export default function AktivasiMember() {
     const [members, setMembers] = useState([]);

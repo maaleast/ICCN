@@ -2,14 +2,14 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import AktivasiMember from '../components/AktivasiMember';
-import Pelatihan from '../components/Pelatihan';
-import Gallery from '../components/Gallery';
-import FinanceReport from '../components/FinanceReport';
-import Pemasukan from '../components/Pemasukan';
-import Pengeluaran from '../components/Pengeluaran';
-import Berita from '../components/Berita'; // Import komponen Berita
-import { getPendapatanBulanan, getSaldoAkhir } from '../components/FinanceReport';
+import AktivasiMember from '../components/adminDashboard/AktivasiMember';
+import Pelatihan from '../components/adminDashboard/Pelatihan';
+import Gallery from '../components/adminDashboard/Gallery';
+import FinanceReport from '../components/adminDashboard/FinanceReport';
+import Pemasukan from '../components/adminDashboard/Pemasukan';
+import Pengeluaran from '../components/adminDashboard/Pengeluaran';
+import Berita from '../components/adminDashboard/Berita'; // Import komponen Berita
+import { getPendapatanBulanan, getSaldoAkhir } from '../components/adminDashboard/FinanceReport';
 import { API_BASE_URL } from '../config';
 import MemberGrowthChart from '../components/MemberGrowthChart';
 import { FaUser, FaBook, FaMoneyBill, FaCamera, FaNewspaper } from 'react-icons/fa';
@@ -245,9 +245,9 @@ export default function AdminPanel() {
                                             <div
                                                 key={index}
                                                 className={`p-4 rounded-lg ${aktivitas.type === 'member' ? 'bg-blue-100 dark:bg-blue-800' :
-                                                        aktivitas.type === 'uang' && aktivitas.description.includes('Pemasukan') ? 'bg-green-100 dark:bg-green-800' :
-                                                            aktivitas.type === 'uang' && aktivitas.description.includes('Pengeluaran') ? 'bg-red-100 dark:bg-red-800' :
-                                                                'bg-gray-50 dark:bg-gray-700'
+                                                    aktivitas.type === 'uang' && aktivitas.description.includes('Pemasukan') ? 'bg-green-100 dark:bg-green-800' :
+                                                        aktivitas.type === 'uang' && aktivitas.description.includes('Pengeluaran') ? 'bg-red-100 dark:bg-red-800' :
+                                                            'bg-gray-50 dark:bg-gray-700'
                                                     }`}
                                             >
                                                 <p className="text-sm dark:text-gray-200">

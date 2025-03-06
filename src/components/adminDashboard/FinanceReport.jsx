@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL } from "../../config";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Pagination from './Pagination';
-import FiturSearchKeuangan from './FiturSearchKeuangan';
-import DailyBalanceChart from './DailyBalanceChart';
+import Pagination from '../Pagination';
+import FiturSearchKeuangan from '../FiturSearchKeuangan';
+import DailyBalanceChart from '../DailyBalanceChart';
 
 // Fungsi untuk mengambil data pendapatan bulanan
 export const getPendapatanBulanan = async () => {

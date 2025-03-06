@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL } from "../../config";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Pagination from './Pagination';
-import FiturSearchKeuangan from './FiturSearchKeuangan'; // Ganti SearchByDate dengan FiturSearchKeuangan
+import Pagination from '../Pagination';
+import FiturSearchKeuangan from '../FiturSearchKeuangan';
 
 export default function Pemasukan() {
     const [transactions, setTransactions] = useState([]);

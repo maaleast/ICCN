@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { API_BASE_URL } from '../config'; // Import API_BASE_URL dari config.js
+import { API_BASE_URL } from '../../config'; // Import API_BASE_URL dari config.js
 import { FaTrash, FaPlus, FaTimes } from "react-icons/fa"; // Import ikon sampah, plus, dan close dari FontAwesome
-import Pagination from "./Pagination";
+import Pagination from "../Pagination";
 
 export default function Gallery() {
     const [photos, setPhotos] = useState([]); // Inisialisasi dengan array kosong

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL } from '../../config';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArchive, faTag, faClock, faNewspaper } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
@@ -537,8 +537,8 @@ const Berita = () => {
                             <button
                                 onClick={() => handleArchiveBerita(item.id, item.status)}
                                 className={`group flex items-center justify-center w-10 h-10 border rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:w-auto px-3 ${item.status === 'archived'
-                                        ? 'bg-gray-600 text-white border-gray-600 hover:bg-gray-800'
-                                        : 'bg-gray-500 text-white border-gray-500 hover:bg-gray-700'
+                                    ? 'bg-gray-600 text-white border-gray-600 hover:bg-gray-800'
+                                    : 'bg-gray-500 text-white border-gray-500 hover:bg-gray-700'
                                     }`}
                             >
                                 <FaArchive className="text-xl transition-all duration-300" />
@@ -550,8 +550,8 @@ const Berita = () => {
                             <button
                                 onClick={() => handleUpdateStatus(item.id, item.status)}
                                 className={`group flex items-center justify-center w-10 h-10 border rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:w-auto px-3 ${item.status === 'branding'
-                                        ? 'bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-700'
-                                        : 'bg-yellow-400 text-white border-yellow-400 hover:bg-yellow-600'
+                                    ? 'bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-700'
+                                    : 'bg-yellow-400 text-white border-yellow-400 hover:bg-yellow-600'
                                     }`}
                             >
                                 <FaAward className="text-xl transition-all duration-300" />
