@@ -21,34 +21,37 @@ ChartJS.register(
 );
 
 export default function DailyBalanceChart({ transactions }) {
-    // Fungsi untuk menghitung saldo harian berdasarkan saldo_akhir
+    // Fungsi untuk menghitung saldo harian
     const calculateDailyBalance = () => {
         const dailyBalance = {};
         let lastKnownBalance = 0;
 
+        // Ambil bulan dan tahun saat ini
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+
         // Urutkan transaksi berdasarkan tanggal
         const sortedTransactions = transactions.sort((a, b) => new Date(a.tanggal_waktu) - new Date(b.tanggal_waktu));
 
-        sortedTransactions.forEach((transaction) => {
-            const date = new Date(transaction.tanggal_waktu);
-            const dayOfMonth = date.getDate(); // Ambil tanggal (1-31)
-            const month = date.getMonth(); // Ambil bulan (0-11)
-            const currentMonth = new Date().getMonth(); // Bulan saat ini
-            const currentYear = new Date().getFullYear(); // Tahun saat ini
-
-            // Hanya proses data untuk bulan ini
-            if (month === currentMonth && date.getFullYear() === currentYear) {
-                lastKnownBalance = transaction.saldo_akhir; // Update saldo terakhir
-                dailyBalance[dayOfMonth] = lastKnownBalance;
-            }
-        });
-
-        // Isi hari yang kosong dengan saldo terakhir yang diketahui
-        const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+        // Iterasi setiap hari dalam bulan
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         for (let day = 1; day <= daysInMonth; day++) {
-            if (!(day in dailyBalance)) {
-                dailyBalance[day] = lastKnownBalance; // Gunakan saldo terakhir
+            // Cari transaksi pada hari ini
+            const transactionsOnDay = sortedTransactions.filter(t => {
+                const date = new Date(t.tanggal_waktu);
+                return (
+                    date.getDate() === day &&
+                    date.getMonth() === currentMonth &&
+                    date.getFullYear() === currentYear
+                );
+            });
+
+            // Update saldo berdasarkan transaksi pada hari ini
+            if (transactionsOnDay.length > 0) {
+                lastKnownBalance = transactionsOnDay[transactionsOnDay.length - 1].saldo_akhir;
             }
+            dailyBalance[day] = lastKnownBalance;
         }
 
         return dailyBalance;
@@ -56,7 +59,8 @@ export default function DailyBalanceChart({ transactions }) {
 
     // Format data untuk grafik
     const dailyBalance = calculateDailyBalance();
-    const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+    const currentDate = new Date();
+    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
     const labels = Array.from({ length: daysInMonth }, (_, i) => `Hari ${i + 1}`);
     const data = {
         labels,

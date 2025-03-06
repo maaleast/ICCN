@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaArrowLeft, FaTimes } from "react-icons/fa"; // Import ikon ArrowLeft dan Times dari FontAwesome
-import Swal from "sweetalert2";
+import { FaArrowLeft, FaTimes, FaChevronDown } from "react-icons/fa";
 import { API_BASE_URL } from "../config";
 
 const PageGallery = () => {
     const [gallery, setGallery] = useState([]);
-    const [selectedPhoto, setSelectedPhoto] = useState(null); // State untuk menyimpan foto yang dipilih
-    const [isModalOpen, setIsModalOpen] = useState(false); // State untuk mengontrol tampilan modal
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeYear, setActiveYear] = useState(null);
     const navigate = useNavigate();
 
     // Ambil data gallery dari backend
@@ -22,7 +22,6 @@ const PageGallery = () => {
                 console.error("Error fetching gallery data:", error);
             }
         };
-
         fetchGallery();
     }, []);
 
@@ -41,6 +40,16 @@ const PageGallery = () => {
 
     const groupedPhotos = groupPhotosByYear();
 
+    // Fungsi untuk memformat tanggal
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("id-ID", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+    };
+
     // Fungsi untuk logout
     const handleLogout = () => {
         localStorage.removeItem('authToken');
@@ -49,20 +58,8 @@ const PageGallery = () => {
         navigate('/login');
     };
 
-    // Fungsi untuk membuka modal dan menyimpan foto yang dipilih
-    const openModal = (photo) => {
-        setSelectedPhoto(photo);
-        setIsModalOpen(true);
-    };
-
-    // Fungsi untuk menutup modal
-    const closeModal = () => {
-        setSelectedPhoto(null);
-        setIsModalOpen(false);
-    };
-
     return (
-        <div className="bg-gradient-to-br from-blue-900 via-blue-600 to-blue-400 min-h-screen">
+        <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-600 to-blue-400">
             {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-10 shadow-lg">
                 <div className="relative bg-white opacity-80 h-full">
@@ -85,8 +82,8 @@ const PageGallery = () => {
                                 </button>
                             </li>
                             <li>
-                                <button onClick={() => navigate("/contact")} className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200">
-                                    Hubungi Kami
+                                <button onClick={() => navigate("/page-berita")} className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200">
+                                    Berita
                                 </button>
                             </li>
                             <li>
@@ -106,66 +103,88 @@ const PageGallery = () => {
             </header>
 
             {/* Main Content */}
-            <main className="pt-28">
-                {/* Container untuk konten */}
-                <div className="container mx-auto px-4 py-8 bg-white rounded-lg shadow-lg">
-                    {/* Tombol Back */}
-                    <div className="mb-6">
-                        <button
-                            onClick={() => navigate(-1)} // Kembali ke halaman sebelumnya
-                            className="flex items-center text-blue-600 hover:text-blue-800 transition duration-300"
-                        >
-                            <FaArrowLeft className="text-2xl" />
-                        </button>
-                    </div>
+            <main className="pt-24 pb-12 px-4 md:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <h1 className="text-4xl md:text-5xl font-bold text-center text-white mb-8">
+                        Galeri Kegiatan ICCN
+                    </h1>
 
-                    {/* Gallery Section */}
-                    <div>
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Semua Foto Kegiatan ICCN</h2>
-                        {Object.keys(groupedPhotos)
-                            .sort((a, b) => b - a) // Urutkan tahun dari terbaru ke terlama
-                            .map((year) => (
-                                <div key={year} className="mb-12">
-                                    <h3 className="text-2xl font-bold text-blue-900 mb-6">Tahun {year}</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {/* Tahun Accordion */}
+                    {Object.keys(groupedPhotos)
+                        .sort((a, b) => b - a)
+                        .map((year) => (
+                            <div
+                                key={year}
+                                className="mb-8 bg-white/10 backdrop-blur-sm rounded-xl p-6"
+                            >
+                                <button
+                                    onClick={() => setActiveYear(activeYear === year ? null : year)}
+                                    className="w-full flex justify-between items-center text-white text-2xl font-semibold p-4 hover:bg-white/5 rounded-lg"
+                                >
+                                    <span>Tahun {year}</span>
+                                    <FaChevronDown
+                                        className={`transition-transform ${activeYear === year ? "rotate-180" : ""
+                                            }`}
+                                    />
+                                </button>
+
+                                {activeYear === year && (
+                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                                         {groupedPhotos[year].map((photo, index) => (
                                             <motion.div
                                                 key={index}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ duration: 0.5, delay: index * 0.1 }}
-                                                className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-                                                onClick={() => openModal(photo)} // Buka modal saat gambar diklik
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 0.3, delay: index * 0.05 }}
+                                                className="relative group cursor-pointer"
+                                                onClick={() => {
+                                                    setSelectedPhoto(photo);
+                                                    setIsModalOpen(true);
+                                                }}
                                             >
                                                 <img
                                                     src={photo.image_url}
-                                                    alt={`Gallery ${index + 1}`}
-                                                    className="w-full h-48 object-cover"
+                                                    alt={`Kegiatan ICCN ${year}`}
+                                                    className="w-full h-48 object-cover rounded-lg transform transition-transform group-hover:scale-105"
                                                 />
+                                                <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <span className="text-white font-medium">
+                                                        Lihat Detail
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-white bg-black/50 p-2 rounded-b-lg text-center">
+                                                    {formatDate(photo.created_at)}
+                                                </p>
                                             </motion.div>
                                         ))}
                                     </div>
-                                </div>
-                            ))}
-                    </div>
+                                )}
+                            </div>
+                        ))}
                 </div>
             </main>
 
             {/* Modal untuk menampilkan gambar secara penuh */}
             {isModalOpen && selectedPhoto && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 relative">
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50 p-4">
+                    <div className="bg-white rounded-xl max-w-5xl w-full overflow-hidden relative">
                         <button
-                            className="absolute top-4 right-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300"
-                            onClick={closeModal}
+                            className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 z-50"
+                            onClick={() => setIsModalOpen(false)}
                         >
-                            <FaTimes className="w-5 h-5" />
+                            <FaTimes className="w-8 h-8" />
                         </button>
-                        <img
-                            src={selectedPhoto.image_url}
-                            alt={`Gallery Full`}
-                            className="w-full h-auto rounded-lg"
-                        />
+
+                        <div className="flex flex-col items-center p-6">
+                            <img
+                                src={selectedPhoto.image_url}
+                                alt="Detail Kegiatan ICCN"
+                                className="w-full max-h-[80vh] object-contain rounded-lg"
+                            />
+                            <p className="text-sm text-gray-600 mt-4">
+                                {formatDate(selectedPhoto.created_at)}
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}

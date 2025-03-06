@@ -154,19 +154,18 @@ export default function AktivasiMember() {
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className={`border rounded-lg px-4 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 ${
-                            statusFilter === "SEMUA"
-                                ? "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-200"
-                                : statusFilter === "PENDING"
-                                    ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-800 dark:text-yellow-200"
-                                    : statusFilter === "PENDING PERPANJANG"
-                                        ? "bg-blue-100 text-blue-600 dark:bg-blue-800 dark:text-blue-200"
-                                        : statusFilter === "DITERIMA"
-                                            ? "bg-green-100 text-green-600 dark:bg-green-800 dark:text-green-200"
-                                            : statusFilter === "DITOLAK"
-                                                ? "bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-200"
-                                                : "bg-purple-100 text-purple-600 dark:bg-purple-800 dark:text-purple-200"
-                        }`}
+                        className={`border rounded-lg px-4 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 ${statusFilter === "SEMUA"
+                            ? "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-200"
+                            : statusFilter === "PENDING"
+                                ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-800 dark:text-yellow-200"
+                                : statusFilter === "PENDING PERPANJANG"
+                                    ? "bg-blue-100 text-blue-600 dark:bg-blue-800 dark:text-blue-200"
+                                    : statusFilter === "DITERIMA"
+                                        ? "bg-green-100 text-green-600 dark:bg-green-800 dark:text-green-200"
+                                        : statusFilter === "DITOLAK"
+                                            ? "bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-200"
+                                            : "bg-purple-100 text-purple-600 dark:bg-purple-800 dark:text-purple-200"
+                            }`}
                     >
                         <option value="SEMUA">Semua Member</option>
                         <option value="PENDING">Member Belum di Verifikasi</option>
@@ -210,109 +209,191 @@ export default function AktivasiMember() {
 
             {/* Modal Detail Member */}
             {isDetailModalOpen && detailMember && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-4xl">
-            <h2 className="text-2xl font-bold mb-4 dark:text-gray-100">Detail Member</h2>
-            <div className="grid grid-cols-2 gap-4">
-                {/* Field yang sudah ada */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nama Pembayar</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.nama_pembayar}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Tipe Anggota</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.tipe_keanggotaan}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Tanggal Daftar</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{formatDate(detailMember.tanggal_submit)}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Status Verifikasi</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.status_verifikasi}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Masa Aktif</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{formatDate(detailMember.masa_aktif)}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Institusi</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.institusi}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Email</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.email}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Alamat</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.alamat}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nomor WA</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.nomor_wa}</p>
-                </div>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-4xl">
+                        <h2 className="text-2xl font-bold mb-4 dark:text-gray-100">Detail Member</h2>
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Field yang sudah ada */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nama Pembayar</label>
+                                <input
+                                    type="text"
+                                    value={detailMember.nama_pembayar}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
 
-                {/* Field baru yang ditambahkan */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Website</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.website || "-"}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Wilayah</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.wilayah || "-"}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nominal Transfer</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.nominal_transfer || "-"}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nama Kuitansi</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.nama_kuitansi || "-"}</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Informasi Tambahan</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-100 p-2 rounded-lg">{detailMember.additional_members_info || "-"}</p>
-                </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Tipe Anggota</label>
+                                <input
+                                    type="text"
+                                    value={detailMember.tipe_keanggotaan}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
 
-                {/* Field yang sudah ada */}
-                {detailMember.tipe_keanggotaan !== "Individu" && (
-                    <div>
-                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Logo</label>
-                        <img src={`${API_BASE_URL}${detailMember.logo}`} alt="Logo" className="mt-1 w-20 h-20 object-cover rounded-lg" />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Tanggal Daftar</label>
+                                <input
+                                    type="text"
+                                    value={formatDate(detailMember.tanggal_submit)}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Status Verifikasi</label>
+                                <input
+                                    type="text"
+                                    value={detailMember.status_verifikasi}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Masa Aktif</label>
+                                <input
+                                    type="text"
+                                    value={formatDate(detailMember.masa_aktif)}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Institusi</label>
+                                <input
+                                    type="text"
+                                    value={detailMember.institusi}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Email</label>
+                                <input
+                                    type="text"
+                                    value={detailMember.email}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Alamat</label>
+                                <textarea
+                                    value={detailMember.alamat}
+                                    readOnly
+                                    rows={3}
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nomor WA</label>
+                                <input
+                                    type="text"
+                                    value={detailMember.nomor_wa}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            {/* Field baru yang ditambahkan */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Website</label>
+                                <input
+                                    type="text"
+                                    value={detailMember.website || "-"}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Wilayah</label>
+                                <input
+                                    type="text"
+                                    value={detailMember.wilayah || "-"}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nominal Transfer</label>
+                                <input
+                                    type="text"
+                                    value={detailMember.nominal_transfer || "-"}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nama Kuitansi</label>
+                                <input
+                                    type="text"
+                                    value={detailMember.nama_kuitansi || "-"}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Informasi Tambahan</label>
+                                <textarea
+                                    value={detailMember.additional_members_info || "-"}
+                                    readOnly
+                                    rows={3}
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
+
+                            {/* Field yang sudah ada */}
+                            {detailMember.tipe_keanggotaan !== "Individu" && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Bukti Pembayaran</label>
+                                    <a
+                                        href={`${API_BASE_URL}${detailMember.bukti_pembayaran}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:underline dark:text-blue-400"
+                                    >
+                                        Lihat Bukti Pembayaran
+                                    </a>
+                                </div>
+                            )}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">File SK</label>
+                                <a
+                                    href={`${API_BASE_URL}${detailMember.file_sk}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline dark:text-blue-400"
+                                >
+                                    Lihat File SK
+                                </a>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Logo</label>
+                                <img src={`${API_BASE_URL}${detailMember.logo}`} alt="Logo" className="mt-1 w-20 h-20 object-cover rounded-lg" />
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setIsDetailModalOpen(false)}
+                            className="mt-6 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                            Tutup
+                        </button>
                     </div>
-                )}
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">File SK</label>
-                    <a
-                        href={`${API_BASE_URL}${detailMember.file_sk}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline dark:text-blue-400"
-                    >
-                        Lihat File SK
-                    </a>
                 </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Bukti Pembayaran</label>
-                    <a
-                        href={`${API_BASE_URL}${detailMember.bukti_pembayaran}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline dark:text-blue-400"
-                    >
-                        Lihat Bukti Pembayaran
-                    </a>
-                </div>
-            </div>
-            <button
-                onClick={() => setIsDetailModalOpen(false)}
-                className="mt-6 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-            >
-                Tutup
-            </button>
-        </div>
-    </div>
-)}
+            )}
         </div>
     );
 }

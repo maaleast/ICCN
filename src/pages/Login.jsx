@@ -42,6 +42,8 @@ export default function Login() {
                 const decoded = JSON.parse(atob(token.split(".")[1]));
                 const { id, role, is_verified } = decoded;
 
+                console.log("Decoded token:", decoded); // Debugging
+
                 localStorage.setItem("user_id", id);
                 localStorage.setItem("role", role);
                 localStorage.setItem("is_verified", is_verified.toString());
@@ -53,14 +55,13 @@ export default function Login() {
 
                 if (role === "admin") {
                     navigate("/admin");
-                } 
-                if (role === "member") {
+                } else if (role === "member") {
                     navigate("/member");
-                } 
-                else {
+                } else {
                     navigate("/home");
                 }
             } catch (decodeError) {
+                console.error("Decode error:", decodeError); // Debugging
                 setError("Token tidak valid.");
                 localStorage.removeItem("token");
             }

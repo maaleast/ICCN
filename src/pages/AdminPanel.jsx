@@ -13,6 +13,7 @@ import { getPendapatanBulanan, getSaldoAkhir } from '../components/FinanceReport
 import { API_BASE_URL } from '../config';
 import MemberGrowthChart from '../components/MemberGrowthChart';
 import { FaUser, FaBook, FaMoneyBill, FaCamera, FaNewspaper } from 'react-icons/fa';
+import { motion } from "framer-motion";
 
 export default function AdminPanel() {
     const [activeMenu, setActiveMenu] = useState('Dashboard');
@@ -172,7 +173,16 @@ export default function AdminPanel() {
                         <>
                             {/* Welcome Card */}
                             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md mb-6">
-                                <h1 className="text-2xl font-bold">Selamat Datang, Admin ICCN! 👋</h1>
+                                <h1 className="text-2xl font-bold flex items-center">
+                                    Selamat Datang, Admin ICCN!
+                                    <motion.span
+                                        animate={{ rotate: [0, 20, 0, -20, 0] }}
+                                        transition={{ duration: 1, repeat: Infinity }}
+                                        className="ml-2"
+                                    >
+                                        👋
+                                    </motion.span>
+                                </h1>
                                 <p className="text-gray-600 dark:text-gray-300 mt-2">
                                     Selamat Berpuasa, Tetap Semangat Kerjanya Ya!
                                 </p>
@@ -234,7 +244,11 @@ export default function AdminPanel() {
                                         {aktivitasTerbaru.map((aktivitas, index) => (
                                             <div
                                                 key={index}
-                                                className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                                                className={`p-4 rounded-lg ${aktivitas.type === 'member' ? 'bg-blue-100 dark:bg-blue-800' :
+                                                        aktivitas.type === 'uang' && aktivitas.description.includes('Pemasukan') ? 'bg-green-100 dark:bg-green-800' :
+                                                            aktivitas.type === 'uang' && aktivitas.description.includes('Pengeluaran') ? 'bg-red-100 dark:bg-red-800' :
+                                                                'bg-gray-50 dark:bg-gray-700'
+                                                    }`}
                                             >
                                                 <p className="text-sm dark:text-gray-200">
                                                     {aktivitas.type === 'uang' && '💵 '}

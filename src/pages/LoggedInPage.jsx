@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Link as ScrollLink } from "react-scroll";
-import Swal from "sweetalert2";
 import { API_BASE_URL } from "../config";
+import { FaTimes } from "react-icons/fa"; // Import ikon Times
+import Swal from "sweetalert2"; // Import SweetAlert2
+import { Link as ScrollLink } from "react-scroll";
 
 const LoggedInPage = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userData, setUserData] = useState(null);
     const [isVerified, setIsVerified] = useState(false);
     const [gallery, setGallery] = useState([]);
+    const [berita, setBerita] = useState([]);
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [selectedBerita, setSelectedBerita] = useState(null);
+    const [selectedPhoto, setSelectedPhoto] = useState(null); // State untuk foto yang dipilih
+    const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false); // State untuk modal ga
     const navigate = useNavigate();
     const user_id = localStorage.getItem("user_id");
 
@@ -41,8 +47,31 @@ const LoggedInPage = () => {
             }
         };
 
+        const fetchBerita = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/berita/all-berita`);
+                const data = await response.json();
+                if (data.success) {
+                    // Filter berita yang hanya memiliki status 'latest' atau 'branding'
+                    const filteredBerita = data.data.filter(
+                        (item) => item.status === "latest" || item.status === "branding"
+                    );
+                    // Urutkan berita: 'branding' lebih diutamakan
+                    const sortedBerita = filteredBerita.sort((a, b) => {
+                        if (a.status === "branding" && b.status !== "branding") return -1;
+                        if (a.status !== "branding" && b.status === "branding") return 1;
+                        return 0;
+                    });
+                    setBerita(sortedBerita);
+                }
+            } catch (error) {
+                console.error("Error fetching berita:", error);
+            }
+        };
+
         checkLoginStatus();
         fetchGallery();
+        fetchBerita();
         window.addEventListener("storage", checkLoginStatus);
 
         return () => window.removeEventListener("storage", checkLoginStatus);
@@ -92,6 +121,34 @@ const LoggedInPage = () => {
         }
     };
 
+    // Handle tampilkan detail berita
+    const handleShowDetail = (berita) => {
+        setSelectedBerita(berita);
+        setShowDetailModal(true);
+    };
+
+    // Fungsi untuk membuka modal gallery
+    const openGalleryModal = (photo) => {
+        setSelectedPhoto(photo);
+        setIsGalleryModalOpen(true);
+    };
+
+    // Fungsi untuk menutup modal gallery
+    const closeGalleryModal = () => {
+        setSelectedPhoto(null);
+        setIsGalleryModalOpen(false);
+    };
+
+    // Fungsi untuk memformat tanggal
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("id-ID", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+    };
+
     return (
         <div className="bg-gradient-to-br from-blue-900 via-blue-600 to-blue-400 min-h-screen">
             {/* Header */}
@@ -116,8 +173,8 @@ const LoggedInPage = () => {
                                 </button>
                             </li>
                             <li>
-                                <button onClick={() => navigate("/contact")} className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200">
-                                    Hubungi Kami
+                                <button onClick={() => navigate("/page-berita")} className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200">
+                                    Berita
                                 </button>
                             </li>
                             <li>
@@ -146,8 +203,8 @@ const LoggedInPage = () => {
 
                     {/* Tombol Scroll ke Tentang ICCN */}
                     <motion.div
-                        initial={{ opacity: 1, y: 0 }}
-                        animate={{ y: [0, -10, 0] }}
+                        initial={{ opacity: 1, y: 0 }} // Pastikan tombol terlihat dari awal
+                        animate={{ y: [0, -10, 0] }} // Dari atas ke bawah (negatif = turun)
                         transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                         className="mt-64"
                     >
@@ -205,18 +262,68 @@ const LoggedInPage = () => {
                     </div>
                 </section>
 
+                {/* Berita Section */}
+                <section className="py-12 bg-gray-100">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Berita Terbaru</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                            {berita.slice(0, 4).map((item) => (
+                                <motion.div
+                                    key={item.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                                    onClick={() => handleShowDetail(item)}
+                                >
+                                    {item.gambar && (
+                                        <img
+                                            src={`${API_BASE_URL}/uploads/berita/${item.gambar}`}
+                                            alt={item.judul}
+                                            className="w-full h-48 object-cover"
+                                        />
+                                    )}
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-semibold text-blue-900 mb-2">{item.judul}</h3>
+                                        <p className="text-gray-700 line-clamp-3">{item.deskripsi}</p>
+                                        <p className="text-sm text-gray-500 mt-4">
+                                            {new Date(item.waktu_tayang).toLocaleDateString()}
+                                        </p>
+                                        {item.status === "branding" && (
+                                            <span className="inline-block bg-yellow-500 text-white px-2 py-1 rounded-full text-xs mt-2">
+                                                Hot!
+                                            </span>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            ))}
+                            {/* Tombol + untuk menuju PageBerita */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.5 }}
+                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+                                onClick={() => navigate("/page-berita")}
+                            >
+                                <div className="p-6 text-4xl font-bold text-white">+{berita.length - 4}</div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* Gallery Section */}
                 <section className="py-12 bg-gray-100">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan ICCN</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {gallery.slice(0, 11).map((item, index) => (
+                            {gallery.slice(0, 7).map((item, index) => (
                                 <motion.div
                                     key={index}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                                    className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                                    onClick={() => openGalleryModal(item)} // Buka modal saat gambar diklik
                                 >
                                     <img
                                         src={item.image_url}
@@ -226,7 +333,7 @@ const LoggedInPage = () => {
                                 </motion.div>
                             ))}
                             {/* Tombol (+angka) untuk melihat lebih banyak */}
-                            {gallery.length > 11 && (
+                            {gallery.length > 7 && (
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -235,13 +342,35 @@ const LoggedInPage = () => {
                                     onClick={() => navigate("/page-gallery")}
                                 >
                                     <div className="text-white text-2xl font-bold">
-                                        +{gallery.length - 11}
+                                        +{gallery.length - 7}
                                     </div>
                                 </motion.div>
                             )}
                         </div>
                     </div>
                 </section>
+
+                {/* Modal Gallery */}
+                {isGalleryModalOpen && selectedPhoto && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 relative">
+                            <button
+                                className="absolute top-4 right-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300"
+                                onClick={closeGalleryModal}
+                            >
+                                <FaTimes className="w-5 h-5" />
+                            </button>
+                            <img
+                                src={selectedPhoto.image_url}
+                                alt={`Gallery Full`}
+                                className="w-full h-auto rounded-lg"
+                            />
+                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-4">
+                                Foto Kegiatan ICCN ({formatDate(selectedPhoto.created_at)})
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Partner Section */}
                 <section className="py-12 bg-white">
@@ -295,6 +424,38 @@ const LoggedInPage = () => {
                         </div>
                     </div>
                 </section>
+
+                {/* Modal Detail Berita */}
+                {showDetailModal && selectedBerita && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-3xl">
+                            <h3 className="text-2xl font-bold mb-4">{selectedBerita.judul}</h3>
+                            {selectedBerita.gambar && (
+                                <img
+                                    src={`${API_BASE_URL}/uploads/berita/${selectedBerita.gambar}`}
+                                    alt={selectedBerita.judul}
+                                    className="w-full h-64 object-cover rounded-lg mb-4"
+                                />
+                            )}
+                            <div className="max-h-96 overflow-y-auto">
+                                <p className="text-sm text-gray-600 whitespace-pre-line">
+                                    {selectedBerita.deskripsi}
+                                </p>
+                            </div>
+                            <p className="text-sm text-gray-500 mt-4">
+                                {new Date(selectedBerita.waktu_tayang).toLocaleDateString()}
+                            </p>
+                            <div className="flex justify-end mt-4">
+                                <button
+                                    onClick={() => setShowDetailModal(false)}
+                                    className="px-4 py-2 bg-gray-500 text-white rounded-lg"
+                                >
+                                    Tutup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </main>
         </div>
     );

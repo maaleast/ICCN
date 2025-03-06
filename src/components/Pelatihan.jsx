@@ -105,16 +105,17 @@ export default function Pelatihan() {
     const handleEditPelatihan = async () => {
         const { id, judul_pelatihan, tanggal_pelatihan, tanggal_berakhir, deskripsi_pelatihan, link, narasumber, upload_banner, badge, kode } = selectedPelatihan;
 
-        if (!judul_pelatihan || !tanggal_pelatihan || !tanggal_berakhir || !deskripsi_pelatihan || !link || !narasumber || !badge || !kode) {
+        // Validasi field wajib diisi (kecuali kode jika pelatihan belum berakhir)
+        if (!judul_pelatihan || !tanggal_pelatihan || !tanggal_berakhir || !deskripsi_pelatihan || !link || !narasumber || !badge) {
             showErrorNotification("Semua field harus diisi!");
             return;
         }
 
-        // Validasi apakah pelatihan sudah berakhir
+        // Validasi apakah pelatihan sudah berakhir untuk mengubah kode
         const currentDate = new Date();
         const endDate = new Date(tanggal_berakhir);
 
-        if (endDate > currentDate) {
+        if (endDate > currentDate && kode !== selectedPelatihan.kode) {
             showErrorNotification("Kode pelatihan tidak dapat diubah sampai pelatihan berakhir.");
             return;
         }
@@ -132,7 +133,7 @@ export default function Pelatihan() {
         formData.append("link", link);
         formData.append("narasumber", narasumber);
         formData.append("badge", badge);
-        formData.append("kode", kode);
+        formData.append("kode", kode); // Tetap kirim kode, tetapi backend harus memvalidasi juga
 
         // Hanya kirim file jika ada perubahan
         if (upload_banner instanceof File) {
@@ -220,15 +221,48 @@ export default function Pelatihan() {
     const displayedPelatihan = filteredPelatihan.slice(startIndex, startIndex + itemsPerPage);
     const totalPages = Math.ceil(filteredPelatihan.length / itemsPerPage);
 
-    const badgeOptions = [
-        { name: "Bronze", icon: <FaMedal color="#cd7f32" />, value: "bronze" },
-        { name: "Silver", icon: <FaStar color="#c0c0c0" />, value: "silver" },
-        { name: "Gold", icon: <FaTrophy color="#ffd700" />, value: "gold" },
-        { name: "Platinum", icon: <FaCrown color="#e5e4e2" />, value: "platinum" },
-        { name: "Diamond", icon: <FaGem color="#b9fbc0" />, value: "diamond" },
-        { name: "Grandmaster", icon: <FaAward color="#ffcc00" />, value: "grandmaster" },
-        { name: "Celestial", icon: <FaCrown color="#ffb3e6" />, value: "celestial" },
-    ];
+    const badgeIcons = {
+        bronze: <FaMedal className="text-5xl shine-animation bronze-glow" color="#cd7f32" />,
+        silver: <FaStar className="text-5xl shine-animation silver-glow" color="#c0c0c0" />,
+        gold: <FaTrophy className="text-5xl shine-animation gold-glow" color="#ffd700" />,
+        platinum: <FaCrown className="text-5xl shine-animation platinum-glow" color="#2fcde4" />,
+        diamond: <FaGem className="text-5xl shine-animation diamond-glow" color="#2f72e4" />,
+        grandmaster: <FaAward className="text-5xl shine-animation grandmaster-glow" color="#e42f72" />,
+        celestial: <FaCrown className="text-5xl shine-animation celestial-glow" color="#b0179c" />,
+    };
+
+    // CSS untuk efek animasi mengkilap
+    const styles = `
+@keyframes shine {
+    0% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 0.8; transform: scale(1); }
+}
+.shine-animation {
+        animation: shine 2s infinite;
+    }
+    .bronze-glow {
+        filter: drop-shadow(0 0 8px #cd7f32);
+    }
+    .silver-glow {
+        filter: drop-shadow(0 0 8px #c0c0c0);
+    }
+    .gold-glow {
+        filter: drop-shadow(0 0 8px #ffd700);
+    }
+    .platinum-glow {
+        filter: drop-shadow(0 0 8px #2fcde4);
+    }
+    .diamond-glow {
+        filter: drop-shadow(0 0 8px #2f72e4);
+    }
+    .grandmaster-glow {
+        filter: drop-shadow(0 0 8px #e42f72);
+    }
+    .celestial-glow {
+        filter: drop-shadow(0 0 8px #b0179c);
+    }
+;`
 
     const generateKode = () => {
         const randomString = Math.random().toString(36).substring(2, 8).toUpperCase(); // Generate random string
@@ -237,6 +271,7 @@ export default function Pelatihan() {
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <style>{styles}</style>
             {/* Header dan Tabel */}
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold dark:text-gray-100">Daftar Pelatihan</h3>
@@ -399,6 +434,7 @@ export default function Pelatihan() {
                                 placeholder="Kode Pelatihan"
                                 className="w-full p-2 border rounded-lg dark:bg-gray-600"
                                 value={newPelatihan.kode}
+                                readOnly
                                 onChange={(e) => setNewPelatihan({ ...newPelatihan, kode: e.target.value })}
                             />
                             <button
@@ -424,7 +460,7 @@ export default function Pelatihan() {
                                     className={`cursor-pointer p-2 rounded-lg flex flex-col items-center ${newPelatihan.badge === badge.value ? 'border-2 border-blue-500' : ''}`}
                                     onClick={() => setNewPelatihan({ ...newPelatihan, badge: badge.value })}
                                 >
-                                    {badge.icon}
+                                    {badgeIcons[badge.value]}
                                     <span className="text-sm">{badge.name}</span>
                                 </div>
                             ))}
@@ -451,58 +487,126 @@ export default function Pelatihan() {
 
             {showDetailModal && selectedPelatihan && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl dark:bg-gray-800">
-                        <h2 className="text-lg font-semibold mb-4">Detail Pelatihan</h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block font-medium">Judul:</label>
-                                <p>{selectedPelatihan.judul_pelatihan}</p>
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-4xl dark:bg-gray-800">
+                        <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-white">Detail Pelatihan</h2>
+
+                        {/* Banner di Paling Atas dan Center */}
+                        {selectedPelatihan.upload_banner && (
+                            <div className="flex justify-center mb-6">
+                                <img
+                                    src={`${API_BASE_URL}${selectedPelatihan.upload_banner}`}
+                                    alt="Banner Pelatihan"
+                                    className="max-w-full h-auto rounded-lg"
+                                />
                             </div>
-                            <div>
-                                <label className="block font-medium">Tanggal Mulai:</label>
-                                <p>{formatDate(selectedPelatihan.tanggal_pelatihan)}</p>
-                            </div>
-                            <div>
-                                <label className="block font-medium">Tanggal Berakhir:</label>
-                                <p>{formatDate(selectedPelatihan.tanggal_berakhir)}</p>
-                            </div>
-                            <div>
-                                <label className="block font-medium">Deskripsi:</label>
-                                <p>{selectedPelatihan.deskripsi_pelatihan}</p>
-                            </div>
-                            <div>
-                                <label className="block font-medium">Link:</label>
-                                <p>{selectedPelatihan.link}</p>
-                            </div>
-                            <div>
-                                <label className="block font-medium">Narasumber:</label>
-                                <p>{selectedPelatihan.narasumber}</p>
-                            </div>
-                            <div>
-                                <label className="block font-medium">Kode:</label>
-                                <p>{selectedPelatihan.kode}</p> {/* Tampilkan kode */}
-                            </div>
-                            <div>
-                                <label className="block font-medium">Badge:</label>
-                                <div className="flex items-center gap-2">
-                                    {badgeOptions.find((badge) => badge.value === selectedPelatihan.badge)?.icon}
-                                    <p>{selectedPelatihan.badge}</p>
+                        )}
+
+                        {/* Grid untuk Detail Pelatihan */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Kolom Pertama */}
+                            <div className="space-y-4">
+                                {/* Judul Pelatihan */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Judul:</label>
+                                    <input
+                                        type="text"
+                                        value={selectedPelatihan.judul_pelatihan}
+                                        readOnly
+                                        className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    />
+                                </div>
+
+                                {/* Tanggal Mulai */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Tanggal Mulai:</label>
+                                    <input
+                                        type="text"
+                                        value={formatDate(selectedPelatihan.tanggal_pelatihan)}
+                                        readOnly
+                                        className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    />
+                                </div>
+
+                                {/* Tanggal Berakhir */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Tanggal Berakhir:</label>
+                                    <input
+                                        type="text"
+                                        value={formatDate(selectedPelatihan.tanggal_berakhir)}
+                                        readOnly
+                                        className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    />
+                                </div>
+
+                                {/* Narasumber */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Narasumber:</label>
+                                    <input
+                                        type="text"
+                                        value={selectedPelatihan.narasumber}
+                                        readOnly
+                                        className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    />
+                                </div>
+
+                                {/* Kode */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Kode:</label>
+                                    <input
+                                        type="text"
+                                        value={selectedPelatihan.kode}
+                                        readOnly
+                                        className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    />
                                 </div>
                             </div>
-                            <div>
-                                <label className="block font-medium">Banner:</label>
-                                {selectedPelatihan.upload_banner && (
-                                    <img
-                                        src={`${API_BASE_URL}${selectedPelatihan.upload_banner}`}
-                                        alt="Banner Pelatihan"
-                                        className="mt-2 max-h-64 object-cover"
+
+                            {/* Kolom Kedua */}
+                            <div className="space-y-4">
+                                {/* Deskripsi */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Deskripsi:</label>
+                                    <textarea
+                                        value={selectedPelatihan.deskripsi_pelatihan}
+                                        readOnly
+                                        rows={4}
+                                        className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     />
-                                )}
+                                </div>
+
+                                {/* Link */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Link:</label>
+                                    <input
+                                        type="text"
+                                        value={selectedPelatihan.link}
+                                        readOnly
+                                        className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    />
+                                </div>
+
+                                {/* Badge dengan Ikon Besar dan Efek Animasi */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Badge:</label>
+                                    <div className="flex items-center gap-3">
+                                        <div className="animate-pulse">
+                                            {badgeIcons[selectedPelatihan.badge]}
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={selectedPelatihan.badge}
+                                            readOnly
+                                            className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div className="flex justify-end mt-4">
+
+                        {/* Tombol Tutup */}
+                        <div className="flex justify-end mt-6">
                             <button
-                                className="bg-gray-500 text-white px-4 py-2 rounded-lg"
+                                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200"
                                 onClick={() => setShowDetailModal(false)}
                             >
                                 Tutup
