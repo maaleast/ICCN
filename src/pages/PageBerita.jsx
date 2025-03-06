@@ -83,11 +83,6 @@ const PageBerita = () => {
                                     Berita
                                 </button>
                             </li>
-                            <li>
-                                <button onClick={() => navigate("/projects")} className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200">
-                                    Proyek Kami
-                                </button>
-                            </li>
                         </ul>
 
                         <div className="z-20 relative flex items-center space-x-6">
