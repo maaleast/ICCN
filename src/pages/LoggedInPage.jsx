@@ -71,7 +71,11 @@ const LoggedInPage = () => {
 
             if (data.role === "member") {
                 navigate("/member");
-            } else {
+            }
+            if (data.role === "admin") {
+                navigate("/admin");
+            }
+            else {
                 navigate("/membership-registration");
             }
         } catch (error) {

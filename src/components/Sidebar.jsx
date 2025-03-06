@@ -1,4 +1,4 @@
-import { FiUsers, FiFileText, FiImage, FiActivity, FiDollarSign, FiSettings } from 'react-icons/fi';
+import { FiUsers, FiFileText, FiImage, FiActivity, FiDollarSign, FiSettings, FiAward } from 'react-icons/fi';
 import { FaTimesCircle, FaHourglassHalf } from 'react-icons/fa'; // Ikon untuk status
 
 export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMenu, verificationStatus }) {
@@ -16,7 +16,9 @@ export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMen
     const memberMenus = [
         { name: 'Dashboard', icon: FiActivity },
         { name: 'Pelatihan', icon: FiUsers },
+        { name: 'Penghargaan', icon: FiAward },
         { name: 'Pengaturan', icon: FiSettings },
+        { name: 'Profil', icon: FiSettings },
     ];
 
     const menus = isAdmin ? adminMenus : memberMenus;
