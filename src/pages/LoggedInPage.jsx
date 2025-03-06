@@ -14,8 +14,9 @@ const LoggedInPage = () => {
     const [berita, setBerita] = useState([]);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedBerita, setSelectedBerita] = useState(null);
-    const [selectedPhoto, setSelectedPhoto] = useState(null); // State untuk foto yang dipilih
-    const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false); // State untuk modal ga
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
+    const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+    const [partners, setPartners] = useState([]); // State untuk menyimpan data partner
     const navigate = useNavigate();
     const user_id = localStorage.getItem("user_id");
 
@@ -52,11 +53,9 @@ const LoggedInPage = () => {
                 const response = await fetch(`${API_BASE_URL}/berita/all-berita`);
                 const data = await response.json();
                 if (data.success) {
-                    // Filter berita yang hanya memiliki status 'latest' atau 'branding'
                     const filteredBerita = data.data.filter(
                         (item) => item.status === "latest" || item.status === "branding"
                     );
-                    // Urutkan berita: 'branding' lebih diutamakan
                     const sortedBerita = filteredBerita.sort((a, b) => {
                         if (a.status === "branding" && b.status !== "branding") return -1;
                         if (a.status !== "branding" && b.status === "branding") return 1;
@@ -69,9 +68,22 @@ const LoggedInPage = () => {
             }
         };
 
+        const fetchPartners = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/partner/partners`);
+                const data = await response.json();
+                if (data.success) {
+                    setPartners(data.data);
+                }
+            } catch (error) {
+                console.error("Error fetching partners data:", error);
+            }
+        };
+
         checkLoginStatus();
         fetchGallery();
         fetchBerita();
+        fetchPartners(); // Ambil data partner
         window.addEventListener("storage", checkLoginStatus);
 
         return () => window.removeEventListener("storage", checkLoginStatus);
@@ -181,11 +193,6 @@ const LoggedInPage = () => {
                                     Berita
                                 </button>
                             </li>
-                            <li>
-                                <button onClick={() => navigate("/projects")} className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200">
-                                    Proyek Kami
-                                </button>
-                            </li>
                         </ul>
 
                         <div className="z-20 relative flex items-center space-x-6">
@@ -207,8 +214,8 @@ const LoggedInPage = () => {
 
                     {/* Tombol Scroll ke Tentang ICCN */}
                     <motion.div
-                        initial={{ opacity: 1, y: 0 }} // Pastikan tombol terlihat dari awal
-                        animate={{ y: [0, -10, 0] }} // Dari atas ke bawah (negatif = turun)
+                        initial={{ opacity: 1, y: 0 }}
+                        animate={{ y: [0, -10, 0] }}
                         transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                         className="mt-64"
                     >
@@ -354,6 +361,55 @@ const LoggedInPage = () => {
                     </div>
                 </section>
 
+                {/* Partner Section */}
+                <section className="py-12 bg-white">
+                    <div className="container mx-auto px-4">
+                        {/* Partner Narasumber */}
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Partner Narasumber</h2>
+                        <div className="flex flex-wrap justify-center gap-8 mb-12">
+                            {partners
+                                .filter(partner => partner.tipe_keanggotaan === "Perusahaan")
+                                .map((partner, index) => (
+                                    <motion.div
+                                        key={index}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                                        className="w-40 h-40 bg-white rounded-lg shadow-md flex items-center justify-center p-4 hover:shadow-lg transition-shadow duration-300"
+                                    >
+                                        <img
+                                            src={`${API_BASE_URL}${partner.logo}`}
+                                            alt={`Partner Narasumber ${index + 1}`}
+                                            className="w-full h-full object-contain"
+                                        />
+                                    </motion.div>
+                                ))}
+                        </div>
+
+                        {/* Partner Perguruan Tinggi */}
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Partner Perguruan Tinggi</h2>
+                        <div className="flex flex-wrap justify-center gap-8">
+                            {partners
+                                .filter(partner => partner.tipe_keanggotaan === "Universitas")
+                                .map((partner, index) => (
+                                    <motion.div
+                                        key={index}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                                        className="w-40 h-40 bg-white rounded-lg shadow-md flex items-center justify-center p-4 hover:shadow-lg transition-shadow duration-300"
+                                    >
+                                        <img
+                                            src={`${API_BASE_URL}${partner.logo}`}
+                                            alt={`Partner Perguruan Tinggi ${index + 1}`}
+                                            className="w-full h-full object-contain"
+                                        />
+                                    </motion.div>
+                                ))}
+                        </div>
+                    </div>
+                </section>
+
                 {/* Modal Gallery */}
                 {isGalleryModalOpen && selectedPhoto && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
@@ -375,59 +431,6 @@ const LoggedInPage = () => {
                         </div>
                     </div>
                 )}
-
-                {/* Partner Section */}
-                <section className="py-12 bg-white">
-                    <div className="container mx-auto px-4">
-                        {/* Partner Narasumber */}
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Partner Narasumber</h2>
-                        <div className="flex flex-wrap justify-center gap-8 mb-12">
-                            {[
-                                "https://example.com/partner1.png",
-                                "https://example.com/partner2.png",
-                                // Tambahkan URL gambar partner lainnya di sini
-                            ].map((imageUrl, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="w-40 h-40 bg-white rounded-lg shadow-md flex items-center justify-center p-4 hover:shadow-lg transition-shadow duration-300"
-                                >
-                                    <img
-                                        src={imageUrl}
-                                        alt={`Partner Narasumber ${index + 1}`}
-                                        className="w-full h-full object-contain"
-                                    />
-                                </motion.div>
-                            ))}
-                        </div>
-
-                        {/* Partner Perguruan Tinggi */}
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Partner Perguruan Tinggi</h2>
-                        <div className="flex flex-wrap justify-center gap-8">
-                            {[
-                                "https://example.com/university1.png",
-                                "https://example.com/university2.png",
-                                // Tambahkan URL gambar perguruan tinggi lainnya di sini
-                            ].map((imageUrl, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="w-40 h-40 bg-white rounded-lg shadow-md flex items-center justify-center p-4 hover:shadow-lg transition-shadow duration-300"
-                                >
-                                    <img
-                                        src={imageUrl}
-                                        alt={`Partner Perguruan Tinggi ${index + 1}`}
-                                        className="w-full h-full object-contain"
-                                    />
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
 
                 {/* Modal Detail Berita */}
                 {showDetailModal && selectedBerita && (

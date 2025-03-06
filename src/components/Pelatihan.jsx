@@ -133,7 +133,7 @@ export default function Pelatihan() {
         formData.append("link", link);
         formData.append("narasumber", narasumber);
         formData.append("badge", badge);
-        formData.append("kode", kode); // Tetap kirim kode, tetapi backend harus memvalidasi juga
+        formData.append("kode", kode);
 
         // Hanya kirim file jika ada perubahan
         if (upload_banner instanceof File) {
@@ -151,7 +151,8 @@ export default function Pelatihan() {
                 setShowEditModal(false);
                 showSuccessNotification("Pelatihan berhasil diperbarui!");
             } else {
-                showErrorNotification("Gagal memperbarui pelatihan");
+                const errorData = await res.json(); // Ambil pesan error dari backend
+                showErrorNotification(errorData.message || "Gagal memperbarui pelatihan");
             }
         } catch (error) {
             console.error("❌ Error mengedit data:", error);
@@ -488,8 +489,8 @@ export default function Pelatihan() {
             )}
 
             {showDetailModal && selectedPelatihan && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-4xl dark:bg-gray-800">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-4xl max-h-[90vh] overflow-y-auto dark:bg-gray-800">
                         <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-white">Detail Pelatihan</h2>
 
                         {/* Banner di Paling Atas dan Center */}
@@ -498,7 +499,7 @@ export default function Pelatihan() {
                                 <img
                                     src={`${API_BASE_URL}${selectedPelatihan.upload_banner}`}
                                     alt="Banner Pelatihan"
-                                    className="max-w-full h-auto rounded-lg"
+                                    className="max-w-full h-auto max-h-[300px] rounded-lg object-contain"
                                 />
                             </div>
                         )}
