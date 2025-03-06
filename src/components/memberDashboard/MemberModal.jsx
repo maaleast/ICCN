@@ -1,11 +1,22 @@
-import { useState } from 'react'; // Tambahkan ini
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaTimesCircle, FaHourglassHalf, FaExclamationCircle } from 'react-icons/fa';
-import { FaTimes } from "react-icons/fa";
+import { 
+  FaTimesCircle, 
+  FaHourglassHalf, 
+  FaExclamationCircle, 
+  FaCheckCircle, 
+  FaTimes 
+} from 'react-icons/fa';
 import { API_BASE_URL } from "../../config";
-import { FaMedal, FaStar, FaTrophy, FaCrown, FaGem, FaAward } from 'react-icons/fa';
+import { 
+  FaMedal, 
+  FaStar, 
+  FaTrophy, 
+  FaCrown, 
+  FaGem, 
+  FaAward 
+} from 'react-icons/fa';
 
-// Definisikan ikon untuk setiap jenis badge
 const badgeIcons = {
     bronze: <FaMedal className="text-5xl shine-animation bronze-glow" color="#cd7f32" />,
     silver: <FaStar className="text-5xl shine-animation silver-glow" color="#c0c0c0" />,
@@ -13,10 +24,9 @@ const badgeIcons = {
     platinum: <FaCrown className="text-5xl shine-animation platinum-glow" color="#2fcde4" />,
     diamond: <FaGem className="text-5xl shine-animation diamond-glow" color="#2f72e4" />,
     grandmaster: <FaAward className="text-5xl shine-animation grandmaster-glow" color="#e42f72" />,
-    celestial: <FaCrown className="text-5xl shine-animation celestial-glow" color="#b0179c" />,
+    celestial: <FaCrown className="text-5xl shine-animation celestial-glow" color="#ffb3e6" />,
 };
 
-// CSS untuk efek animasi mengkilap
 const styles = `
     @keyframes shine {
         0% { opacity: 0.8; transform: scale(1); }
@@ -24,35 +34,37 @@ const styles = `
         100% { opacity: 0.8; transform: scale(1); }
     }
     .shine-animation {
-            animation: shine 2s infinite;
-        }
-        .bronze-glow {
-            filter: drop-shadow(0 0 8px #cd7f32);
-        }
-        .silver-glow {
-            filter: drop-shadow(0 0 8px #c0c0c0);
-        }
-        .gold-glow {
-            filter: drop-shadow(0 0 8px #ffd700);
-        }
-        .platinum-glow {
-            filter: drop-shadow(0 0 8px #2fcde4);
-        }
-        .diamond-glow {
-            filter: drop-shadow(0 0 8px #2f72e4);
-        }
-        .grandmaster-glow {
-            filter: drop-shadow(0 0 8px #e42f72);
-        }
-        .celestial-glow {
-            filter: drop-shadow(0 0 8px #b0179c);
-        }
+        animation: shine 2s infinite;
+    }
+    .bronze-glow {
+        filter: drop-shadow(0 0 8px #cd7f32);
+    }
+    .silver-glow {
+        filter: drop-shadow(0 0 8px #c0c0c0);
+    }
+    .gold-glow {
+        filter: drop-shadow(0 0 8px #ffd700);
+    }
+    .platinum-glow {
+        filter: drop-shadow(0 0 8px #2fcde4);
+    }
+    .diamond-glow {
+        filter: drop-shadow(0 0 8px #2f72e4);
+    }
+    .grandmaster-glow {
+        filter: drop-shadow(0 0 8px #e42f72);
+    }
+    .celestial-glow {
+        filter: drop-shadow(0 0 8px #b0179c);
+    }
 `;
 
 export const TrainingDetailModal = ({ selectedTraining, onClose }) => {
     const [kode, setKode] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [countdown, setCountdown] = useState(5);
 
     const handleSelesaikanPelatihan = async () => {
         if (!kode) {
@@ -79,10 +91,28 @@ export const TrainingDetailModal = ({ selectedTraining, onClose }) => {
             if (!response.ok) {
                 throw new Error(data.message || 'Gagal menyelesaikan pelatihan');
             }
-    
-            alert(data.message); // Tampilkan pesan sukses
-            onClose(); // Tutup modal
-            window.location.reload(); // Refresh halaman setelah berhasil
+
+            setShowSuccess(true);
+            
+            // Mulai hitung mundur
+            const countdownInterval = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(countdownInterval);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+
+            // Refresh setelah 5 detik
+            setTimeout(() => {
+                onClose();
+                window.location.reload();
+            }, 5000);
+
+            return () => clearInterval(countdownInterval);
+
         } catch (err) {
             setError(err.message);
         } finally {
@@ -92,15 +122,51 @@ export const TrainingDetailModal = ({ selectedTraining, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            {/* Tambahkan style untuk animasi */}
             <style>{styles}</style>
 
+            {/* Success Overlay */}
+            {showSuccess && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+                >
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 text-center max-w-md">
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.2, duration: 0.5 }}
+                        >
+                            <FaCheckCircle className="text-green-500 text-6xl mx-auto mb-4" />
+                        </motion.div>
+                        <h2 className="text-2xl font-bold mb-4">Selamat!</h2>
+                        <p className="text-gray-600 dark:text-gray-300 mb-4">
+                            Anda telah menyelesaikan pelatihan{" "}
+                            <span className="font-semibold">{selectedTraining.judul_pelatihan}</span> dan mendapatkan:
+                        </p>
+                        <div className="flex items-center justify-center mb-4">
+                            <div className="mr-2">
+                                {badgeIcons[selectedTraining.badge.toLowerCase()] || badgeIcons.bronze}
+                            </div>
+                            <span className="text-lg font-semibold">
+                                {selectedTraining.badge}
+                            </span>
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-300">
+                            Halaman akan refresh dalam{" "}
+                            <span className="font-semibold">{countdown} detik</span>.
+                        </p>
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Main Modal */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-3xl"
             >
-                {/* Header Modal */}
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold">{selectedTraining.judul_pelatihan}</h2>
                     <button
@@ -111,20 +177,18 @@ export const TrainingDetailModal = ({ selectedTraining, onClose }) => {
                     </button>
                 </div>
 
-                {/* Banner Image */}
                 {selectedTraining.upload_banner && (
                     <div className="mb-6">
                         <img
                             src={`http://localhost:5050${selectedTraining.upload_banner}`}
                             alt="Banner Pelatihan"
-                            className="w-full max-h-96 object-contain rounded-lg" // Menyesuaikan ukuran asli gambar
+                            className="w-full max-h-96 object-contain rounded-lg"
                         />
                     </div>
                 )}
 
-                {/* Form Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Kolom Kiri: Detail Pelatihan */}
+                    {/* Kolom Kiri */}
                     <div>
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -167,7 +231,6 @@ export const TrainingDetailModal = ({ selectedTraining, onClose }) => {
                                 Badge
                             </label>
                             <div className="flex items-center">
-                                {/* Tampilkan ikon badge di sebelah kiri teks */}
                                 <div className="mr-2">
                                     {badgeIcons[selectedTraining.badge.toLowerCase()] || badgeIcons.bronze}
                                 </div>
@@ -181,7 +244,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose }) => {
                         </div>
                     </div>
 
-                    {/* Kolom Kanan: Deskripsi, Link, dan Kode */}
+                    {/* Kolom Kanan */}
                     <div>
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -202,7 +265,6 @@ export const TrainingDetailModal = ({ selectedTraining, onClose }) => {
                                 </label>
                                 <a
                                     href={selectedTraining.link}
-                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center block"
                                 >
@@ -211,7 +273,6 @@ export const TrainingDetailModal = ({ selectedTraining, onClose }) => {
                             </div>
                         )}
 
-                        {/* Input Kode Pelatihan */}
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Kode Pelatihan
@@ -228,11 +289,10 @@ export const TrainingDetailModal = ({ selectedTraining, onClose }) => {
                     </div>
                 </div>
 
-                {/* Tombol Selesaikan Pelatihan */}
                 <div className="mt-6 flex justify-end">
                     <button
                         onClick={handleSelesaikanPelatihan}
-                        disabled={loading}
+                        disabled={loading || showSuccess}
                         className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         {loading ? 'Memproses...' : 'Selesaikan Pelatihan'}
