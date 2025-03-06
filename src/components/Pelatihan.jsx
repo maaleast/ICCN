@@ -221,15 +221,15 @@ export default function Pelatihan() {
     const displayedPelatihan = filteredPelatihan.slice(startIndex, startIndex + itemsPerPage);
     const totalPages = Math.ceil(filteredPelatihan.length / itemsPerPage);
 
-    const badgeIcons = {
-        bronze: <FaMedal className="text-5xl shine-animation bronze-glow" color="#cd7f32" />,
-        silver: <FaStar className="text-5xl shine-animation silver-glow" color="#c0c0c0" />,
-        gold: <FaTrophy className="text-5xl shine-animation gold-glow" color="#ffd700" />,
-        platinum: <FaCrown className="text-5xl shine-animation platinum-glow" color="#2fcde4" />,
-        diamond: <FaGem className="text-5xl shine-animation diamond-glow" color="#2f72e4" />,
-        grandmaster: <FaAward className="text-5xl shine-animation grandmaster-glow" color="#e42f72" />,
-        celestial: <FaCrown className="text-5xl shine-animation celestial-glow" color="#b0179c" />,
-    };
+    const badgeOptions = [
+        { name: "Bronze", icon: <FaMedal color="#cd7f32" />, value: "bronze" },
+        { name: "Silver", icon: <FaStar color="#c0c0c0" />, value: "silver" },
+        { name: "Gold", icon: <FaTrophy color="#ffd700" />, value: "gold" },
+        { name: "Platinum", icon: <FaCrown color="#2fcde4" />, value: "platinum" },
+        { name: "Diamond", icon: <FaGem color="#2f72e4" />, value: "diamond" },
+        { name: "Grandmaster", icon: <FaAward color="#e42f72" />, value: "grandmaster" },
+        { name: "Celestial", icon: <FaCrown color="#b0179c" />, value: "celestial" },
+    ];
 
     // CSS untuk efek animasi mengkilap
     const styles = `
@@ -268,6 +268,8 @@ export default function Pelatihan() {
         const randomString = Math.random().toString(36).substring(2, 8).toUpperCase(); // Generate random string
         setNewPelatihan({ ...newPelatihan, kode: randomString });
     };
+
+
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -460,7 +462,7 @@ export default function Pelatihan() {
                                     className={`cursor-pointer p-2 rounded-lg flex flex-col items-center ${newPelatihan.badge === badge.value ? 'border-2 border-blue-500' : ''}`}
                                     onClick={() => setNewPelatihan({ ...newPelatihan, badge: badge.value })}
                                 >
-                                    {badgeIcons[badge.value]}
+                                    {badge.icon} {/* Gunakan badge.icon untuk menampilkan ikon */}
                                     <span className="text-sm">{badge.name}</span>
                                 </div>
                             ))}
@@ -590,7 +592,7 @@ export default function Pelatihan() {
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Badge:</label>
                                     <div className="flex items-center gap-3">
                                         <div className="animate-pulse">
-                                            {badgeIcons[selectedPelatihan.badge]}
+                                            {badgeOptions.find((badge) => badge.value === selectedPelatihan.badge)?.icon}
                                         </div>
                                         <input
                                             type="text"
@@ -685,7 +687,7 @@ export default function Pelatihan() {
                             onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, narasumber: e.target.value })}
                         />
 
-                        {/* Input Kode (Nonaktif jika pelatihan belum berakhir) */}
+                        {/* Input Kode (Nonaktif jika pelatihan belum berakhir atau kode sudah ada) */}
                         <div className="flex gap-2 mb-4">
                             <input
                                 type="text"
@@ -693,7 +695,7 @@ export default function Pelatihan() {
                                 className="w-full p-2 border rounded-lg dark:bg-gray-600"
                                 value={selectedPelatihan.kode}
                                 onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, kode: e.target.value })}
-                                disabled={new Date(selectedPelatihan.tanggal_berakhir) > new Date()} // Nonaktif jika pelatihan belum berakhir
+                                disabled={new Date(selectedPelatihan.tanggal_berakhir) > new Date() || selectedPelatihan.kode} // Nonaktif jika pelatihan belum berakhir atau kode sudah ada
                             />
                             <button
                                 className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:bg-gray-400"
@@ -701,12 +703,11 @@ export default function Pelatihan() {
                                     const randomString = Math.random().toString(36).substring(2, 8).toUpperCase();
                                     setSelectedPelatihan({ ...selectedPelatihan, kode: randomString });
                                 }}
-                                disabled={new Date(selectedPelatihan.tanggal_berakhir) > new Date()} // Nonaktif jika pelatihan belum berakhir
+                                disabled={new Date(selectedPelatihan.tanggal_berakhir) > new Date() || selectedPelatihan.kode} // Nonaktif jika pelatihan belum berakhir atau kode sudah ada
                             >
                                 Generate Kode
                             </button>
                         </div>
-
                         {/* Pesan Informasi */}
                         {new Date(selectedPelatihan.tanggal_berakhir) > new Date() && (
                             <p className="text-sm text-gray-500 mb-4">
