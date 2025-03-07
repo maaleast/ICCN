@@ -5,7 +5,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import Pagination from '../Pagination';
 import FiturSearchKeuangan from '../FiturSearchKeuangan';
 import DailyBalanceChart from '../DailyBalanceChart';
-import moment from 'moment-timezone';
 import { utils, writeFile } from 'xlsx';
 import { FaFileExcel } from 'react-icons/fa'; // Ikon Excel
 
@@ -80,6 +79,13 @@ const formatCurrency = (amount) => {
     }).format(amount);
 };
 
+// Fungsi untuk mendapatkan format tanggal dalam format 'YYYY-MM'
+const getFormattedDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+};
+
 export default function FinanceReport() {
     const [transactions, setTransactions] = useState([]);
     const [filteredTransactions, setFilteredTransactions] = useState([]);
@@ -101,7 +107,7 @@ export default function FinanceReport() {
     useEffect(() => {
         updateTransactions();
         const months = [...new Set(filteredTransactions.map(t =>
-            moment.utc(t.tanggal_waktu).tz('Asia/Jakarta').format('YYYY-MM')
+            getFormattedDate(new Date(t.tanggal_waktu))
         ))].sort().reverse();
 
         setAvailableMonths(months);
@@ -131,9 +137,9 @@ export default function FinanceReport() {
             );
 
             // Filter awal untuk bulan berjalan
-            const currentMonth = moment().tz('Asia/Jakarta').format('YYYY-MM');
+            const currentMonth = getFormattedDate(new Date());
             const initialFiltered = sortedTransactions.filter(t =>
-                moment.utc(t.tanggal_waktu).tz('Asia/Jakarta').format('YYYY-MM') === currentMonth
+                getFormattedDate(new Date(t.tanggal_waktu)) === currentMonth
             );
 
             setTransactions(sortedTransactions);
@@ -165,7 +171,7 @@ export default function FinanceReport() {
         // Filter by month
         if (month) {
             filtered = filtered.filter(t =>
-                moment.utc(t.tanggal_waktu).tz('Asia/Jakarta').format('YYYY-MM') === month
+                getFormattedDate(new Date(t.tanggal_waktu)) === month
             );
         }
 
@@ -390,7 +396,7 @@ export default function FinanceReport() {
                 {/* Grafik Saldo Harian */}
                 <DailyBalanceChart
                     transactions={filteredTransactions.filter(t =>
-                        moment.utc(t.tanggal_waktu).tz('Asia/Jakarta').format('YYYY-MM') === selectedChartMonth
+                        getFormattedDate(new Date(t.tanggal_waktu)) === selectedChartMonth
                     )}
                     availableMonths={availableMonths}
                     selectedChartMonth={selectedChartMonth}

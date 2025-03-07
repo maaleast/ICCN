@@ -19,10 +19,10 @@ const MembershipRegistration = () => {
         transferAmountRaw: "",
         whatsappGroupNumber: "",
         receiptName: "",
-        additionalRegistrations: "",
+        additionalRegistrations: "", // Opsional
         documentFile: null,
         pembayaranBukti: null,
-        logoFile: null,
+        logoFile: null, // Tambahkan state untuk logo
     });
 
     const [errors, setErrors] = useState({});
@@ -135,253 +135,315 @@ const MembershipRegistration = () => {
         }
 
         try {
-            // Kirim data pendaftaran membership
-            const response = await fetch(`${API_BASE_URL}/members/register-member`, {
+            const response = await fetch(${ API_BASE_URL } / members / register - member, {
                 method: "POST",
                 body: formDataToSend,
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    Authorization: Bearer ${ localStorage.getItem("token") },
                 },
-            });
+    });
 
-            const data = await response.json();
+    const data = await response.json();
 
-            if (!response.ok) {
-                throw new Error(data.message || "Gagal mendaftar member");
-            }
+    if (!response.ok) {
+        throw new Error(data.message || "Gagal mendaftar member");
+    }
 
-            // Kirim data pemasukan ke endpoint keuangan
-            const pemasukanResponse = await fetch(`${API_BASE_URL}/admin/keuangan/tambah`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({
-                    status: 'MASUK',
-                    jumlah: parseFloat(formData.transferAmountRaw),
-                    deskripsi: `Pendaftaran Membership dari ${formData.institutionName}`,
-                }),
-            });
+    // Simpan token baru ke localStorage
+    if (data.token) {
+        localStorage.setItem("token", data.token); // Perbarui token
+    }
 
-            if (!pemasukanResponse.ok) {
-                throw new Error("Gagal menyimpan pemasukan");
-            }
+    await Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Pendaftaran member berhasil, menunggu verifikasi",
+    });
 
-            await Swal.fire({
-                icon: "success",
-                title: "Berhasil!",
-                text: "Pendaftaran member berhasil, menunggu verifikasi",
-            });
-
-            navigate("/member", { state: { membershipData: data } });
-        } catch (error) {
-            Swal.fire({
-                icon: "error",
-                title: "Gagal",
-                text: error.message || "Terjadi kesalahan saat mendaftar",
-            });
-        } finally {
-            setIsSubmitting(false);
-        }
+    console.log("Redirecting to /member");
+    navigate("/member", { state: { membershipData: data } });
+} catch (error) {
+    Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: error.message || "Terjadi kesalahan saat mendaftar",
+    });
+} finally {
+    setIsSubmitting(false);
+}
     };
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-800 to-blue-500">
-            <Navbar />
-            <div className="flex items-center justify-center min-h-screen p-20 pt-28">
-                <motion.div
-                    initial={{ opacity: 0, y: -50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="w-full max-w-7xl bg-white shadow-lg rounded-xl flex overflow-hidden"
-                >
-                    {/* Bagian Kiri */}
-                    <div className="w-2/5 p-8 bg-blue-700 text-white flex flex-col justify-center relative">
-                        <button
-                            onClick={() => navigate("/home")}
-                            className="absolute top-4 left-4 flex items-center text-white hover:text-blue-300 transition-all"
-                        >
-                            <FaArrowLeft size={20} className="mr-2" />
-                        </button>
+return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-800 to-blue-500">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-screen p-20 pt-28">
+            <motion.div
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="w-full max-w-7xl bg-white shadow-lg rounded-xl flex overflow-hidden"
+            >
+                {/* Bagian Kiri */}
+                <div className="w-2/5 p-8 bg-blue-700 text-white flex flex-col justify-center relative">
+                    <button
+                        onClick={() => navigate("/home")}
+                        className="absolute top-4 left-4 flex items-center text-white hover:text-blue-300 transition-all"
+                    >
+                        <FaArrowLeft size={20} className="mr-2" />
+                    </button>
 
-                        <div className="mb-24">
-                            <h2 className="text-3xl font-extrabold mb-4">Bergabung Sekarang!</h2>
-                            <p className="text-lg leading-relaxed mb-4">
-                                Daftarkan institusi atau perusahaan Anda dan dapatkan akses eksklusif ke komunitas kami!
-                            </p>
-                            <div className="px-28 py-3 bg-white text-blue-700 font-semibold rounded-lg shadow-md hover:bg-gray-100 transition inline-block">
-                                Isi Formulir di samping ya!
-                            </div>
-                        </div>
-
-                        <div className="mt-24">
-                            <h3 className="text-xl font-bold mb-4">Transfer ke Rekening ICCN:</h3>
-                            <div className="bg-white/10 p-4 rounded-lg">
-                                <p className="font-mono text-lg mb-2">BCA: 123 456 7890</p>
-                                <p className="font-mono text-lg">Mandiri: 098 765 4321</p>
-                            </div>
-                            <p className="mt-4 text-sm">
-                                Pastikan transfer sesuai nominal yang tertera di formulir
-                            </p>
+                    <div className="mb-24">
+                        <h2 className="text-3xl font-extrabold mb-4">Bergabung Sekarang!</h2>
+                        <p className="text-lg leading-relaxed mb-4">
+                            Daftarkan institusi atau perusahaan Anda dan dapatkan akses eksklusif ke komunitas kami!
+                        </p>
+                        <div className="px-28 py-3 bg-white text-blue-700 font-semibold rounded-lg shadow-md hover:bg-gray-100 transition inline-block">
+                            Isi Formulir di samping ya!
                         </div>
                     </div>
 
-                    {/* Bagian Kanan */}
-                    <div className="w-3/5 p-8">
-                        <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
-                            Formulir Pendaftaran Membership
-                        </h2>
-                        <form className="space-y-5">
-                            <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600">Tipe Keanggotaan</label>
-                                    <select
-                                        name="userType"
-                                        value={formData.userType}
-                                        onChange={handleChange}
-                                        className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
-                                    >
-                                        <option value="">Pilih...</option>
-                                        <option value="Universitas">Universitas</option>
-                                        <option value="Perusahaan">Perusahaan</option>
-                                        <option value="Individu">Individu/Pribadi</option>
-                                    </select>
-                                </div>
+                    <div className="mt-24">
+                        <h3 className="text-xl font-bold mb-4">Transfer ke Rekening ICCN:</h3>
+                        <div className="bg-white/10 p-4 rounded-lg">
+                            <p className="font-mono text-lg mb-2">BCA: 123 456 7890</p>
+                            <p className="font-mono text-lg">Mandiri: 098 765 4321</p>
+                        </div>
+                        <p className="mt-4 text-sm">
+                            Pastikan transfer sesuai nominal yang tertera di formulir
+                        </p>
+                    </div>
+                </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600">Nama Institusi / Perusahaan / Individu</label>
-                                    <input type="text" name="institutionName" value={formData.institutionName} onChange={handleChange} className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300" placeholder="Masukkan nama institusi, perusahaan, atau individu" />
-                                </div>
+                {/* Bagian Kanan */}
+                <div className="w-3/5 p-8">
+                    <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
+                        Formulir Pendaftaran Membership
+                    </h2>
+                    <form className="space-y-5">
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">Tipe Keanggotaan</label>
+                                <select
+                                    name="userType"
+                                    value={formData.userType}
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
+                                >
+                                    <option value="">Pilih...</option>
+                                    <option value="Universitas">Universitas</option>
+                                    <option value="Perusahaan">Perusahaan</option>
+                                    <option value="Individu">Individu/Pribadi</option>
+                                </select>
+                                {errors.userType && <p className="text-red-500 text-sm mt-1">{errors.userType}</p>}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600">Link Website</label>
-                                    <input type="text" name="websiteLink" value={formData.websiteLink} onChange={handleChange} className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300" placeholder="https://example.com" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600">Email</label>
-                                    <input type="email" name="email" value={formData.email} onChange={handleChange} className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300" placeholder="contoh@email.com" />
-                                </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">Nama Institusi / Perusahaan / Individu</label>
+                                <input
+                                    type="text"
+                                    name="institutionName"
+                                    value={formData.institutionName}
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                    placeholder="Masukkan nama institusi, perusahaan, atau individu"
+                                />
+                                {errors.institutionName && <p className="text-red-500 text-sm mt-1">{errors.institutionName}</p>}
                             </div>
+                        </div>
 
-                            <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600">Alamat</label>
-                                    <input type="text" name="address" value={formData.address} onChange={handleChange} className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300" placeholder="Alamat lengkap institusi/perusahaan" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600">Wilayah</label>
-                                    <input type="text" name="region" value={formData.region} onChange={handleChange} className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300" placeholder="Provinsi/Kota" />
-                                </div>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">Link Website</label>
+                                <input
+                                    type="text"
+                                    name="websiteLink"
+                                    value={formData.websiteLink}
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                    placeholder="https://example.com"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                    placeholder="contoh@email.com"
+                                />
+                                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">Alamat</label>
+                                <input
+                                    type="text"
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                    placeholder="Alamat lengkap institusi/perusahaan"
+                                />
+                                {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">Wilayah</label>
+                                <input
+                                    type="text"
+                                    name="region"
+                                    value={formData.region}
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                    placeholder="Provinsi/Kota"
+                                />
+                                {errors.region && <p className="text-red-500 text-sm mt-1">{errors.region}</p>}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">
+                                Nama Personal <span className="text-red-500">*</span>
+                            </label>
+                            <p className="text-xs text-gray-500 mb-2">
+                                Nama Personal yang dibayarkan iuran keanggotaan ICCN
+                            </p>
+                            <input
+                                type="text"
+                                name="personalName"
+                                value={formData.personalName}
+                                onChange={handleChange}
+                                className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                placeholder="Masukkan nama Anda"
+                            />
+                            {errors.personalName && <p className="text-red-500 text-sm mt-1">{errors.personalName}</p>}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">Nama pada Kuitansi</label>
+                                <input
+                                    type="text"
+                                    name="receiptName"
+                                    value={formData.receiptName}
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                    placeholder="Nama yang muncul di kuitansi"
+                                />
+                                {errors.receiptName && <p className="text-red-500 text-sm mt-1">{errors.receiptName}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">Jumlah Transfer</label>
+                                <input
+                                    type="text"
+                                    name="transferAmount"
+                                    value={formData.transferAmount}
+                                    onChange={handleMoneyChange}
+                                    className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                    placeholder="Rp 0"
+                                />
+                                {errors.transferAmount && <p className="text-red-500 text-sm mt-1">{errors.transferAmount}</p>}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">
+                                    Nomor Whatsapp <span className="text-red-500">*</span>
+                                </label>
+                                <p className="text-xs text-gray-500 mb-2">
+                                    yang akan dimasukkan kedalam group WA
+                                </p>
+                                <input
+                                    type="text"
+                                    name="whatsappGroupNumber"
+                                    value={formData.whatsappGroupNumber}
+                                    onChange={handleChange}
+                                    className="mt-6 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                    placeholder="Contoh: 081234567890"
+                                />
+                                {errors.whatsappGroupNumber && <p className="text-red-500 text-sm mt-1">{errors.whatsappGroupNumber}</p>}
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-600">
-                                    Nama Personal <span className="text-red-500">*</span>
+                                    Pendaftaran Tambahan (Opsional) <span className="text-red-500">*</span>
                                 </label>
                                 <p className="text-xs text-gray-500 mb-2">
-                                    Nama Personal yang dibayarkan iuran keanggotaan ICCN
+                                    Silahkan diisi jika mendaftar lebih dari satu. Nama yang ditulis pada kuitansi atas nama siapa?
                                 </p>
-                                <input type="text" name="personalName" value={formData.personalName} onChange={handleChange} className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300" placeholder="Masukkan nama Anda" />
+                                <input
+                                    type="text"
+                                    name="additionalRegistrations"
+                                    value={formData.additionalRegistrations}
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                    placeholder="Nama tambahan jika ada"
+                                />
                             </div>
+                        </div>
 
-                            <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600">Nama pada Kuitansi</label>
-                                    <input type="text" name="receiptName" value={formData.receiptName} onChange={handleChange} className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300" placeholder="Nama yang muncul di kuitansi" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600">Jumlah Transfer</label>
-                                    <input
-                                        type="text"
-                                        name="transferAmount"
-                                        value={formData.transferAmount}
-                                        onChange={handleMoneyChange}
-                                        className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
-                                        placeholder="Rp 0"
-                                    />
-                                </div>
-                            </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Upload Dokumen</label>
+                            <p className="text-xs text-gray-500 mb-2">
+                                Upload SK Pengelola Pusat Karir / Surat Tugas / Surat Pernyataan / SK Delegasi dari Perusahaan
+                            </p>
+                            <input
+                                type="file"
+                                name="documentFile"
+                                onChange={handleFileChange}
+                                className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
+                            />
+                            {errors.documentFile && <p className="text-red-500 text-sm mt-1">{errors.documentFile}</p>}
+                        </div>
 
-                            <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600">
-                                        Nomor Whatsapp <span className="text-red-500">*</span>
-                                    </label>
-                                    <p className="text-xs text-gray-500 mb-2">
-                                        yang akan dimasukkan kedalam group WA
-                                    </p>
-                                    <input type="text" name="whatsappGroupNumber" value={formData.whatsappGroupNumber} onChange={handleChange} className="mt-6 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300" placeholder="Contoh: 081234567890" />
-                                </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Upload Bukti Pembayaran</label>
+                            <p className="text-xs text-gray-500 mb-2">
+                                Silahkan Upload Bukti Pembayaran Yang Sudah Anda Lakukan!
+                            </p>
+                            <input
+                                type="file"
+                                name="pembayaranBukti"
+                                onChange={handleBuktiBayar}
+                                className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
+                            />
+                            {errors.pembayaranBukti && <p className="text-red-500 text-sm mt-1">{errors.pembayaranBukti}</p>}
+                        </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600">
-                                        Pendaftaran Tambahan (Opsional) <span className="text-red-500">*</span>
-                                    </label>
-                                    <p className="text-xs text-gray-500 mb-2">
-                                        Silahkan diisi jika mendaftar lebih dari satu. Nama yang ditulis pada kuitansi atas nama siapa?
-                                    </p>
-                                    <input type="text" name="additionalRegistrations" value={formData.additionalRegistrations} onChange={handleChange} className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300" placeholder="Nama tambahan jika ada" />
-                                </div>
-                            </div>
-
+                        {/* Conditional Rendering untuk Upload Logo */}
+                        {["Universitas", "Perusahaan"].includes(formData.userType) && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-600">Upload Dokumen</label>
+                                <label className="block text-sm font-medium text-gray-600">Upload Logo</label>
                                 <p className="text-xs text-gray-500 mb-2">
-                                    Upload SK Pengelola Pusat Karir / Surat Tugas / Surat Pernyataan / SK Delegasi dari Perusahaan
+                                    Silahkan Upload Logo Institusi/Perusahaan Anda (Format: PNG/JPG)
                                 </p>
                                 <input
                                     type="file"
-                                    name="documentFile"
-                                    onChange={handleFileChange}
+                                    name="logoFile"
+                                    onChange={handleLogoChange}
                                     className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
                                 />
+                                {errors.logoFile && <p className="text-red-500 text-sm mt-1">{errors.logoFile}</p>}
                             </div>
+                        )}
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-600">Upload Bukti Pembayaran</label>
-                                <p className="text-xs text-gray-500 mb-2">
-                                    Silahkan Upload Bukti Pembayaran Yang Sudah Anda Lakukan!
-                                </p>
-                                <input
-                                    type="file"
-                                    name="pembayaranBukti"
-                                    onChange={handleBuktiBayar}
-                                    className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
-                                />
-                            </div>
-
-                            {/* Conditional Rendering untuk Upload Logo */}
-                            {["Universitas", "Perusahaan"].includes(formData.userType) && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600">Upload Logo</label>
-                                    <p className="text-xs text-gray-500 mb-2">
-                                        Silahkan Upload Logo Institusi/Perusahaan Anda (Format: PNG/JPG)
-                                    </p>
-                                    <input
-                                        type="file"
-                                        name="logoFile"
-                                        onChange={handleLogoChange}
-                                        className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
-                                    />
-                                </div>
-                            )}
-
-                            <button
-                                onClick={handleSubmit}
-                                disabled={isSubmitting}
-                                className="w-full py-3 mt-6 text-white bg-blue-700 rounded-md hover:bg-sky-800 hover:scale-105 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-                            >
-                                {isSubmitting ? "Mengirim..." : "Daftar Sekarang"}
-                            </button>
-                        </form>
-                    </div>
-                </motion.div>
-            </div>
+                        <button
+                            onClick={handleSubmit}
+                            disabled={isSubmitting}
+                            className="w-full py-3 mt-6 text-white bg-blue-700 rounded-md hover:bg-sky-800 hover:scale-105 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        >
+                            {isSubmitting ? "Mengirim..." : "Daftar Sekarang"}
+                        </button>
+                    </form>
+                </div>
+            </motion.div>
         </div>
-    );
+    </div>
+);
 };
 
 export default MembershipRegistration;

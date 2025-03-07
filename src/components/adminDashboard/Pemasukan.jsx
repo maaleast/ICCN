@@ -6,7 +6,6 @@ import Pagination from '../Pagination';
 import FiturSearchKeuangan from '../FiturSearchKeuangan';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import moment from 'moment-timezone'; // Import moment-timezone
 
 export default function Pemasukan() {
     const [transactions, setTransactions] = useState([]);
@@ -32,10 +31,10 @@ export default function Pemasukan() {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan`);
             const data = await response.json();
 
-            // Konversi tanggal_waktu ke WIB sebelum menyimpan di state
+            // Pastikan tanggal_waktu dalam format yang valid
             const convertedData = data.map(t => ({
                 ...t,
-                tanggal_waktu: moment.utc(t.tanggal_waktu).tz('Asia/Jakarta').toDate(), // Konversi ke WIB
+                tanggal_waktu: new Date(t.tanggal_waktu), // Konversi ke Date object
             }));
 
             // Filter hanya transaksi dengan status MASUK
@@ -47,27 +46,30 @@ export default function Pemasukan() {
         }
     };
 
-    const handleSearch = ({ date, description, amount }) => {
+    const handleSearch = ({ month, description, amount }) => {
         let filtered = transactions;
 
-        if (date) {
+        // Filter by month
+        if (month) {
             filtered = filtered.filter(t => {
-                const transactionDate = moment(t.tanggal_waktu).format('YYYY-MM-DD');
-                return transactionDate === date;
+                const transactionMonth = `${new Date(t.tanggal_waktu).getFullYear()}-${String(new Date(t.tanggal_waktu).getMonth() + 1).padStart(2, '0')}`;
+                return transactionMonth === month;
             });
         }
 
+        // Filter by description
         if (description) {
             filtered = filtered.filter(t => t.deskripsi.toLowerCase().includes(description.toLowerCase()));
         }
 
+        // Filter by amount
         if (amount !== null && amount !== '') {
             filtered = filtered.filter(t => t.jumlah.toString().includes(amount));
         }
 
         setFilteredTransactions(filtered);
 
-        // Hanya reset halaman jika hasil pencarian berubah secara signifikan
+        // Reset halaman jika hasil pencarian berubah
         if (currentPage > Math.ceil(filtered.length / itemsPerPage)) {
             setCurrentPage(1);
         }
@@ -81,7 +83,6 @@ export default function Pemasukan() {
     const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const goToPage = (page) => setCurrentPage(page);
 
-    // Handle form submit (tambah/edit)
     const handleSubmit = async (e) => {
         e.preventDefault();
         const url = editingId
@@ -90,8 +91,8 @@ export default function Pemasukan() {
 
         const method = editingId ? 'PUT' : 'POST';
 
-        // Format tanggal_waktu ke format yang diinginkan (YYYY-MM-DD HH:mm:ss) dalam WIB
-        const formattedDate = moment(formData.tanggal_waktu).tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
+        // Format tanggal_waktu ke format ISO 8601
+        const formattedDate = new Date(formData.tanggal_waktu).toISOString();
 
         try {
             const response = await fetch(url, {
@@ -101,7 +102,7 @@ export default function Pemasukan() {
                     status: 'MASUK',
                     jumlah: parseFloat(formData.jumlah.replace(/[^0-9]/g, '')), // Hilangkan "Rp." dan format ribuan
                     deskripsi: formData.deskripsi,
-                    tanggal_waktu: formattedDate, // Kirim tanggal dan waktu dalam WIB
+                    tanggal_waktu: formattedDate, // Kirim tanggal dan waktu dalam format ISO 8601
                 }),
             });
 
@@ -233,7 +234,15 @@ export default function Pemasukan() {
                                 <tr key={t.id} className="border-t dark:border-gray-700">
                                     <td className="py-3 px-4 dark:text-gray-300">{t.deskripsi}</td>
                                     <td className="py-3 px-4 dark:text-gray-300">
-                                        {moment(t.tanggal_waktu).format('DD MMM YYYY HH:mm')} {/* Tampilkan dalam WIB */}
+                                        {new Date(t.tanggal_waktu).toLocaleString('id-ID', {
+                                            timeZone: 'Asia/Jakarta',
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit',
+                                        })}
                                     </td>
                                     <td className="py-3 px-4 dark:text-gray-300">
                                         {new Intl.NumberFormat('id-ID', {
@@ -253,7 +262,7 @@ export default function Pemasukan() {
                                                         minimumFractionDigits: 0,
                                                     }).format(t.jumlah),
                                                     deskripsi: t.deskripsi,
-                                                    tanggal_waktu: moment(t.tanggal_waktu).toDate(), // Konversi ke Date
+                                                    tanggal_waktu: new Date(t.tanggal_waktu), // Konversi ke Date object
                                                 });
                                                 setIsModalOpen(true);
                                             }}
