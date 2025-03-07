@@ -17,6 +17,7 @@ const LoggedInPage = () => {
     const [selectedPhoto, setSelectedPhoto] = useState(null);
     const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
     const [partners, setPartners] = useState([]); // State untuk menyimpan data partner
+    const [userRole, setUserRole] = useState(null); // State untuk menyimpan role pengguna
     const navigate = useNavigate();
     const user_id = localStorage.getItem("user_id");
 
@@ -80,14 +81,25 @@ const LoggedInPage = () => {
             }
         };
 
+        const checkUserRole = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/members/checkUserRole?user_id=${user_id}`);
+                const data = await response.json();
+                setUserRole(data.role);
+            } catch (error) {
+                console.error("Error checking user role:", error);
+            }
+        };
+
         checkLoginStatus();
         fetchGallery();
         fetchBerita();
         fetchPartners(); // Ambil data partner
+        checkUserRole(); // Cek role pengguna
         window.addEventListener("storage", checkLoginStatus);
 
         return () => window.removeEventListener("storage", checkLoginStatus);
-    }, []);
+    }, [user_id]);
 
     // Fungsi untuk logout
     const handleLogout = () => {
@@ -97,36 +109,14 @@ const LoggedInPage = () => {
         navigate('/login');
     };
 
-    // Fungsi untuk memeriksa status pendaftaran member berdasarkan role
-    const handleGetStarted = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/members/checkUserRole`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ user_id }),
-            });
-
-            const data = await response.json();
-
-            if (data.role === "member") {
-                navigate("/member");
-            }
-            if (data.role === "admin") {
-                navigate("/admin");
-            }
-            else {
-                navigate("/membership-registration");
-            }
-        } catch (error) {
-            console.error("Error checking user role:", error);
-            Swal.fire({
-                title: "Error",
-                text: "Terjadi kesalahan saat memeriksa status pendaftaran.",
-                icon: "error",
-                confirmButtonText: "OK",
-            });
+    // Fungsi untuk navigasi berdasarkan role
+    const handleNavigation = () => {
+        if (userRole === "member") {
+            navigate("/member");
+        } else if (userRole === "admin") {
+            navigate("/admin");
+        } else {
+            navigate("/membership-registration");
         }
     };
 
@@ -210,7 +200,9 @@ const LoggedInPage = () => {
                 <section className="flex flex-col items-center justify-center h-screen text-gray-800">
                     <motion.h1 initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-5xl text-white font-bold text-center">Selamat Datang di Indonesia Career Center ( ICCN )</motion.h1>
                     <motion.p initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mt-4 text-lg text-center text-gray-100">Langkah awal menuju karier impian Anda dimulai di sini! Temukan peluang, jelajahi layanan terbaik kami, dan raih masa depan yang lebih cerah mulai hari ini!</motion.p>
-                    <button onClick={handleGetStarted} className="mt-6 bg-sky-500 text-white px-6 py-2 rounded-lg shadow-md hover:scale-105 duration-200">Jadi Member</button>
+                    <button onClick={handleNavigation} className="mt-6 bg-sky-500 text-white px-6 py-2 rounded-lg shadow-md hover:scale-105 duration-200">
+                        {userRole === "member" || userRole === "admin" ? "Dashboard" : "Jadi Member"}
+                    </button>
 
                     {/* Tombol Scroll ke Tentang ICCN */}
                     <motion.div
