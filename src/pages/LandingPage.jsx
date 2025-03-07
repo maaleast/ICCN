@@ -101,31 +101,7 @@ const LandingPage = () => {
 
     // Fungsi untuk memeriksa status pendaftaran member berdasarkan role
     const handleGetStarted = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/members/checkUserRole`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ user_id }),
-            });
-
-            const data = await response.json();
-
-            if (data.role === "member") {
-                navigate("/member");
-            } else {
-                navigate("/membership-registration");
-            }
-        } catch (error) {
-            console.error("Error checking user role:", error);
-            Swal.fire({
-                title: "Error",
-                text: "Terjadi kesalahan saat memeriksa status pendaftaran.",
-                icon: "error",
-                confirmButtonText: "OK",
-            });
-        }
+                navigate("/login");
     };
 
     // Fungsi untuk navigasi ke dashboard member
