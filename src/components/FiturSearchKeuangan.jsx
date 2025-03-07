@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import moment from 'moment-timezone';
 
 export default function FiturSearchKeuangan({ onSearch }) {
     const [selectedMonth, setSelectedMonth] = useState(null);
@@ -10,7 +9,7 @@ export default function FiturSearchKeuangan({ onSearch }) {
 
     useEffect(() => {
         const month = selectedMonth
-            ? moment(selectedMonth).format('YYYY-MM')
+            ? `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`
             : '';
 
         onSearch({

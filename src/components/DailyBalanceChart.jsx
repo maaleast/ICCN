@@ -1,15 +1,17 @@
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import moment from 'moment-timezone';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function DailyBalanceChart({ transactions }) {
     // Hitung transaksi harian
     const dailyData = transactions.reduce((acc, transaction) => {
-        const date = moment.utc(transaction.tanggal_waktu)
-            .tz('Asia/Jakarta')
-            .format('YYYY-MM-DD');
+        const date = new Date(transaction.tanggal_waktu).toLocaleDateString('id-ID', {
+            timeZone: 'Asia/Jakarta',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
 
         if (!acc[date]) {
             acc[date] = { income: 0, expense: 0 };
@@ -17,7 +19,7 @@ export default function DailyBalanceChart({ transactions }) {
 
         if (transaction.status === 'MASUK') {
             acc[date].income += transaction.jumlah;
-        } else {
+        } else if (transaction.status === 'KELUAR') {
             acc[date].expense += transaction.jumlah;
         }
 
@@ -27,7 +29,7 @@ export default function DailyBalanceChart({ transactions }) {
     // Format data chart
     const sortedDates = Object.keys(dailyData).sort();
     const chartData = {
-        labels: sortedDates.map(date => moment(date).format('DD MMM')),
+        labels: sortedDates.map(date => new Date(date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })),
         datasets: [
             {
                 label: 'Pemasukan',
@@ -48,7 +50,7 @@ export default function DailyBalanceChart({ transactions }) {
             title: {
                 display: true,
                 text: transactions.length > 0
-                    ? `Grafik Transaksi - ${moment(transactions[0].tanggal_waktu).format('MMMM YYYY')}`
+                    ? `Grafik Transaksi - ${new Date(transactions[0].tanggal_waktu).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}`
                     : 'Grafik Transaksi'
             },
         },
