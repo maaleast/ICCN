@@ -1,117 +1,79 @@
-import { Line } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import moment from 'moment-timezone';
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function DailyBalanceChart({ transactions }) {
-    // Fungsi untuk menghitung saldo harian
-    const calculateDailyBalance = () => {
-        const dailyBalance = {};
-        let lastKnownBalance = 0;
+    // Hitung transaksi harian
+    const dailyData = transactions.reduce((acc, transaction) => {
+        const date = moment.utc(transaction.tanggal_waktu)
+            .tz('Asia/Jakarta')
+            .format('YYYY-MM-DD');
 
-        // Ambil bulan dan tahun saat ini
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth();
-        const currentYear = currentDate.getFullYear();
-
-        // Urutkan transaksi berdasarkan tanggal
-        const sortedTransactions = transactions.sort((a, b) => new Date(a.tanggal_waktu) - new Date(b.tanggal_waktu));
-
-        // Iterasi setiap hari dalam bulan
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-        for (let day = 1; day <= daysInMonth; day++) {
-            // Cari transaksi pada hari ini
-            const transactionsOnDay = sortedTransactions.filter(t => {
-                const date = new Date(t.tanggal_waktu);
-                return (
-                    date.getDate() === day &&
-                    date.getMonth() === currentMonth &&
-                    date.getFullYear() === currentYear
-                );
-            });
-
-            // Update saldo berdasarkan transaksi pada hari ini
-            if (transactionsOnDay.length > 0) {
-                lastKnownBalance = transactionsOnDay[transactionsOnDay.length - 1].saldo_akhir;
-            }
-            dailyBalance[day] = lastKnownBalance;
+        if (!acc[date]) {
+            acc[date] = { income: 0, expense: 0 };
         }
 
-        return dailyBalance;
-    };
+        if (transaction.status === 'MASUK') {
+            acc[date].income += transaction.jumlah;
+        } else {
+            acc[date].expense += transaction.jumlah;
+        }
 
-    // Format data untuk grafik
-    const dailyBalance = calculateDailyBalance();
-    const currentDate = new Date();
-    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-    const labels = Array.from({ length: daysInMonth }, (_, i) => `Hari ${i + 1}`);
-    const data = {
-        labels,
+        return acc;
+    }, {});
+
+    // Format data chart
+    const sortedDates = Object.keys(dailyData).sort();
+    const chartData = {
+        labels: sortedDates.map(date => moment(date).format('DD MMM')),
         datasets: [
             {
-                label: 'Saldo Harian',
-                data: labels.map((_, index) => dailyBalance[index + 1]),
-                borderColor: '#3B82F6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.4,
-                fill: true,
+                label: 'Pemasukan',
+                data: sortedDates.map(date => dailyData[date].income),
+                backgroundColor: '#10B981',
             },
-        ],
+            {
+                label: 'Pengeluaran',
+                data: sortedDates.map(date => dailyData[date].expense),
+                backgroundColor: '#EF4444',
+            }
+        ]
     };
 
     const options = {
         responsive: true,
         plugins: {
-            legend: {
-                position: 'top',
-                labels: {
-                    color: '#6B7280',
-                },
-            },
             title: {
                 display: true,
-                text: 'Grafik Saldo Harian',
-                color: '#6B7280',
+                text: transactions.length > 0
+                    ? `Grafik Transaksi - ${moment(transactions[0].tanggal_waktu).format('MMMM YYYY')}`
+                    : 'Grafik Transaksi'
             },
         },
         scales: {
             y: {
-                beginAtZero: false,
+                beginAtZero: true,
                 ticks: {
-                    color: '#6B7280',
-                    stepSize: 1000000,
-                    callback: (value) => `Rp ${(value / 1000000).toFixed(1)} Jt`,
+                    callback: (value) => `Rp ${value.toLocaleString()}`,
                 },
+                grid: { color: '#e5e7eb' },
             },
             x: {
-                ticks: {
-                    color: '#6B7280',
-                },
-            },
-        },
+                grid: { display: false }
+            }
+        }
     };
 
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm mb-6">
-            <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Grafik Saldo Harian</h3>
-            <Line options={options} data={data} />
+            <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Grafik Transaksi Harian</h3>
+            {sortedDates.length > 0 ? (
+                <Bar data={chartData} options={options} />
+            ) : (
+                <p className="dark:text-gray-300">Tidak ada transaksi pada bulan ini</p>
+            )}
         </div>
     );
 }

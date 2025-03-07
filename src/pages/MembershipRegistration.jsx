@@ -19,10 +19,10 @@ const MembershipRegistration = () => {
         transferAmountRaw: "",
         whatsappGroupNumber: "",
         receiptName: "",
-        additionalRegistrations: "", // Opsional
+        additionalRegistrations: "",
         documentFile: null,
         pembayaranBukti: null,
-        logoFile: null, // Tambahkan state untuk logo
+        logoFile: null,
     });
 
     const [errors, setErrors] = useState({});
@@ -135,6 +135,7 @@ const MembershipRegistration = () => {
         }
 
         try {
+            // Kirim data pendaftaran membership
             const response = await fetch(`${API_BASE_URL}/members/register-member`, {
                 method: "POST",
                 body: formDataToSend,
@@ -147,6 +148,24 @@ const MembershipRegistration = () => {
 
             if (!response.ok) {
                 throw new Error(data.message || "Gagal mendaftar member");
+            }
+
+            // Kirim data pemasukan ke endpoint keuangan
+            const pemasukanResponse = await fetch(`${API_BASE_URL}/admin/keuangan/tambah`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                    status: 'MASUK',
+                    jumlah: parseFloat(formData.transferAmountRaw),
+                    deskripsi: `Pendaftaran Membership dari ${formData.institutionName}`,
+                }),
+            });
+
+            if (!pemasukanResponse.ok) {
+                throw new Error("Gagal menyimpan pemasukan");
             }
 
             await Swal.fire({
@@ -365,4 +384,4 @@ const MembershipRegistration = () => {
     );
 };
 
-export default MembershipRegistration
+export default MembershipRegistration;

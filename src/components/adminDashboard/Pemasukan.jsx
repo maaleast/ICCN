@@ -4,13 +4,20 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Pagination from '../Pagination';
 import FiturSearchKeuangan from '../FiturSearchKeuangan';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import moment from 'moment-timezone'; // Import moment-timezone
 
 export default function Pemasukan() {
     const [transactions, setTransactions] = useState([]);
     const [filteredTransactions, setFilteredTransactions] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ jumlah: '', deskripsi: '' });
+    const [formData, setFormData] = useState({
+        jumlah: '',
+        deskripsi: '',
+        tanggal_waktu: new Date(), // Default: tanggal dan waktu sekarang
+    });
     const [editingId, setEditingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -25,8 +32,14 @@ export default function Pemasukan() {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan`);
             const data = await response.json();
 
+            // Konversi tanggal_waktu ke WIB sebelum menyimpan di state
+            const convertedData = data.map(t => ({
+                ...t,
+                tanggal_waktu: moment.utc(t.tanggal_waktu).tz('Asia/Jakarta').toDate(), // Konversi ke WIB
+            }));
+
             // Filter hanya transaksi dengan status MASUK
-            const pemasukan = data.filter(t => t.status === 'MASUK');
+            const pemasukan = convertedData.filter(t => t.status === 'MASUK');
             setTransactions(pemasukan);
             setFilteredTransactions(pemasukan); // Set filteredTransactions dengan data awal
         } catch (error) {
@@ -39,7 +52,7 @@ export default function Pemasukan() {
 
         if (date) {
             filtered = filtered.filter(t => {
-                const transactionDate = new Date(t.tanggal_waktu).toLocaleDateString('en-CA');
+                const transactionDate = moment(t.tanggal_waktu).format('YYYY-MM-DD');
                 return transactionDate === date;
             });
         }
@@ -77,6 +90,9 @@ export default function Pemasukan() {
 
         const method = editingId ? 'PUT' : 'POST';
 
+        // Format tanggal_waktu ke format yang diinginkan (YYYY-MM-DD HH:mm:ss) dalam WIB
+        const formattedDate = moment(formData.tanggal_waktu).tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
+
         try {
             const response = await fetch(url, {
                 method,
@@ -84,8 +100,9 @@ export default function Pemasukan() {
                 body: JSON.stringify({
                     status: 'MASUK',
                     jumlah: parseFloat(formData.jumlah.replace(/[^0-9]/g, '')), // Hilangkan "Rp." dan format ribuan
-                    deskripsi: formData.deskripsi
-                })
+                    deskripsi: formData.deskripsi,
+                    tanggal_waktu: formattedDate, // Kirim tanggal dan waktu dalam WIB
+                }),
             });
 
             if (!response.ok) throw new Error('Gagal menyimpan');
@@ -102,7 +119,7 @@ export default function Pemasukan() {
 
             // Reset form
             setIsModalOpen(false);
-            setFormData({ jumlah: '', deskripsi: '' });
+            setFormData({ jumlah: '', deskripsi: '', tanggal_waktu: new Date() });
             setEditingId(null);
         } catch (error) {
             console.error('Error:', error);
@@ -216,7 +233,7 @@ export default function Pemasukan() {
                                 <tr key={t.id} className="border-t dark:border-gray-700">
                                     <td className="py-3 px-4 dark:text-gray-300">{t.deskripsi}</td>
                                     <td className="py-3 px-4 dark:text-gray-300">
-                                        {new Date(t.tanggal_waktu).toLocaleDateString('id-ID')}
+                                        {moment(t.tanggal_waktu).format('DD MMM YYYY HH:mm')} {/* Tampilkan dalam WIB */}
                                     </td>
                                     <td className="py-3 px-4 dark:text-gray-300">
                                         {new Intl.NumberFormat('id-ID', {
@@ -235,7 +252,8 @@ export default function Pemasukan() {
                                                         currency: 'IDR',
                                                         minimumFractionDigits: 0,
                                                     }).format(t.jumlah),
-                                                    deskripsi: t.deskripsi
+                                                    deskripsi: t.deskripsi,
+                                                    tanggal_waktu: moment(t.tanggal_waktu).toDate(), // Konversi ke Date
                                                 });
                                                 setIsModalOpen(true);
                                             }}
@@ -276,6 +294,22 @@ export default function Pemasukan() {
                             {editingId ? 'Edit Pemasukan' : 'Tambah Pemasukan'}
                         </h3>
                         <form onSubmit={handleSubmit}>
+                            {/* Input Tanggal dan Waktu */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2 dark:text-gray-300">
+                                    Tanggal dan Waktu
+                                </label>
+                                <DatePicker
+                                    selected={formData.tanggal_waktu}
+                                    onChange={(date) => setFormData({ ...formData, tanggal_waktu: date })}
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    dateFormat="yyyy-MM-dd HH:mm"
+                                    className="w-full p-2 border rounded dark:text-gray-800"
+                                />
+                            </div>
+
                             {/* Input Jumlah */}
                             <div className="mb-4">
                                 <label className="block text-sm font-medium mb-2 dark:text-gray-300">
