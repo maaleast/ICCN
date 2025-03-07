@@ -18,7 +18,7 @@ export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMen
         { name: 'Pelatihan', icon: FiUsers },
         { name: 'Penghargaan', icon: FiAward },
         { name: 'Pengaturan', icon: FiSettings },
-        { name: 'Profil', icon: FiSettings },
+        // { name: 'Profil', icon: FiSettings },
     ];
 
     const menus = isAdmin ? adminMenus : memberMenus;

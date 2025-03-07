@@ -21,6 +21,7 @@ export default function MemberDashboard() {
     const [badges, setBadges] = useState([]);
     const [selectedTraining, setSelectedTraining] = useState(null);
     const [verificationStatus, setVerificationStatus] = useState(null);
+    const [userId, setUserId] = useState(localStorage.getItem("user_id"));
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -226,9 +227,9 @@ export default function MemberDashboard() {
                             />
                         )}
                         {activeMenu === 'Penghargaan' && <Penghargaan badges={badges} trainings={trainings} />}
-                        {activeMenu === 'Profil' && <Profile />}
+                        {/* {activeMenu === 'Profil' && <Profile />} */}
                         {activeMenu === 'Notifikasi' && <Notifications />}
-                        {activeMenu === 'Pengaturan' && <Settings />}
+                        {activeMenu === 'Pengaturan' && <Settings userId={userId}/>}
                     </AnimatePresence>
                 </main>
             </div>
