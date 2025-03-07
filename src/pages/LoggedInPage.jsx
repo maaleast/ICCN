@@ -187,7 +187,7 @@ const LoggedInPage = () => {
 
                         <div className="z-20 relative flex items-center space-x-6">
                             <button onClick={handleLogout} className="bg-gradient-to-b from-blue-600 to-blue-500 text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:from-blue-700 hover:to-blue-600 duration-200">
-                                Logoutttt
+                                Logout
                             </button>
                         </div>
                     </nav>
