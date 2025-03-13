@@ -289,15 +289,17 @@ const LandingPage = () => {
                                 </motion.div>
                             ))}
                             {/* Tombol + untuk menuju PageBerita */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.5 }}
-                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
-                                onClick={() => navigate("/page-berita")}
-                            >
-                                <div className="p-6 text-4xl font-bold text-white">+{berita.length - 4}</div>
-                            </motion.div>
+                            {berita.length > 4 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.5 }}
+                                    className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+                                    onClick={() => navigate("/page-berita")}
+                                >
+                                    <div className="p-6 text-4xl font-bold text-white">+{berita.length - 4}</div>
+                                </motion.div>
+                            )}
                         </div>
                     </div>
                 </section>

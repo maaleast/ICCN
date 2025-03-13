@@ -4,13 +4,19 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Pagination from '../Pagination';
 import FiturSearchKeuangan from '../FiturSearchKeuangan';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 export default function Pemasukan() {
     const [transactions, setTransactions] = useState([]);
     const [filteredTransactions, setFilteredTransactions] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ jumlah: '', deskripsi: '' });
+    const [formData, setFormData] = useState({
+        jumlah: '',
+        deskripsi: '',
+        tanggal_waktu: new Date(), // Default: tanggal dan waktu sekarang
+    });
     const [editingId, setEditingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -25,8 +31,14 @@ export default function Pemasukan() {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan`);
             const data = await response.json();
 
+            // Pastikan tanggal_waktu dalam format yang valid
+            const convertedData = data.map(t => ({
+                ...t,
+                tanggal_waktu: new Date(t.tanggal_waktu), // Konversi ke Date object
+            }));
+
             // Filter hanya transaksi dengan status MASUK
-            const pemasukan = data.filter(t => t.status === 'MASUK');
+            const pemasukan = convertedData.filter(t => t.status === 'MASUK');
             setTransactions(pemasukan);
             setFilteredTransactions(pemasukan); // Set filteredTransactions dengan data awal
         } catch (error) {
@@ -34,27 +46,30 @@ export default function Pemasukan() {
         }
     };
 
-    const handleSearch = ({ date, description, amount }) => {
+    const handleSearch = ({ month, description, amount }) => {
         let filtered = transactions;
 
-        if (date) {
+        // Filter by month
+        if (month) {
             filtered = filtered.filter(t => {
-                const transactionDate = new Date(t.tanggal_waktu).toLocaleDateString('en-CA');
-                return transactionDate === date;
+                const transactionMonth = `${new Date(t.tanggal_waktu).getFullYear()}-${String(new Date(t.tanggal_waktu).getMonth() + 1).padStart(2, '0')}`;
+                return transactionMonth === month;
             });
         }
 
+        // Filter by description
         if (description) {
             filtered = filtered.filter(t => t.deskripsi.toLowerCase().includes(description.toLowerCase()));
         }
 
+        // Filter by amount
         if (amount !== null && amount !== '') {
             filtered = filtered.filter(t => t.jumlah.toString().includes(amount));
         }
 
         setFilteredTransactions(filtered);
 
-        // Hanya reset halaman jika hasil pencarian berubah secara signifikan
+        // Reset halaman jika hasil pencarian berubah
         if (currentPage > Math.ceil(filtered.length / itemsPerPage)) {
             setCurrentPage(1);
         }
@@ -68,7 +83,6 @@ export default function Pemasukan() {
     const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
     const goToPage = (page) => setCurrentPage(page);
 
-    // Handle form submit (tambah/edit)
     const handleSubmit = async (e) => {
         e.preventDefault();
         const url = editingId
@@ -77,6 +91,9 @@ export default function Pemasukan() {
 
         const method = editingId ? 'PUT' : 'POST';
 
+        // Format tanggal_waktu ke format ISO 8601
+        const formattedDate = new Date(formData.tanggal_waktu).toISOString();
+
         try {
             const response = await fetch(url, {
                 method,
@@ -84,8 +101,9 @@ export default function Pemasukan() {
                 body: JSON.stringify({
                     status: 'MASUK',
                     jumlah: parseFloat(formData.jumlah.replace(/[^0-9]/g, '')), // Hilangkan "Rp." dan format ribuan
-                    deskripsi: formData.deskripsi
-                })
+                    deskripsi: formData.deskripsi,
+                    tanggal_waktu: formattedDate, // Kirim tanggal dan waktu dalam format ISO 8601
+                }),
             });
 
             if (!response.ok) throw new Error('Gagal menyimpan');
@@ -102,7 +120,7 @@ export default function Pemasukan() {
 
             // Reset form
             setIsModalOpen(false);
-            setFormData({ jumlah: '', deskripsi: '' });
+            setFormData({ jumlah: '', deskripsi: '', tanggal_waktu: new Date() });
             setEditingId(null);
         } catch (error) {
             console.error('Error:', error);
@@ -216,7 +234,15 @@ export default function Pemasukan() {
                                 <tr key={t.id} className="border-t dark:border-gray-700">
                                     <td className="py-3 px-4 dark:text-gray-300">{t.deskripsi}</td>
                                     <td className="py-3 px-4 dark:text-gray-300">
-                                        {new Date(t.tanggal_waktu).toLocaleDateString('id-ID')}
+                                        {new Date(t.tanggal_waktu).toLocaleString('id-ID', {
+                                            timeZone: 'Asia/Jakarta',
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit',
+                                        })}
                                     </td>
                                     <td className="py-3 px-4 dark:text-gray-300">
                                         {new Intl.NumberFormat('id-ID', {
@@ -235,7 +261,8 @@ export default function Pemasukan() {
                                                         currency: 'IDR',
                                                         minimumFractionDigits: 0,
                                                     }).format(t.jumlah),
-                                                    deskripsi: t.deskripsi
+                                                    deskripsi: t.deskripsi,
+                                                    tanggal_waktu: new Date(t.tanggal_waktu), // Konversi ke Date object
                                                 });
                                                 setIsModalOpen(true);
                                             }}
@@ -276,6 +303,22 @@ export default function Pemasukan() {
                             {editingId ? 'Edit Pemasukan' : 'Tambah Pemasukan'}
                         </h3>
                         <form onSubmit={handleSubmit}>
+                            {/* Input Tanggal dan Waktu */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2 dark:text-gray-300">
+                                    Tanggal dan Waktu
+                                </label>
+                                <DatePicker
+                                    selected={formData.tanggal_waktu}
+                                    onChange={(date) => setFormData({ ...formData, tanggal_waktu: date })}
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    dateFormat="yyyy-MM-dd HH:mm"
+                                    className="w-full p-2 border rounded dark:text-gray-800"
+                                />
+                            </div>
+
                             {/* Input Jumlah */}
                             <div className="mb-4">
                                 <label className="block text-sm font-medium mb-2 dark:text-gray-300">

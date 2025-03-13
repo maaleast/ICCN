@@ -163,6 +163,7 @@ const MembershipRegistration = () => {
             });
 
             console.log("Redirecting to /member");
+            console.log("Redirecting to /member");
             navigate("/member", { state: { membershipData: data } });
         } catch (error) {
             Swal.fire({
@@ -237,10 +238,20 @@ const MembershipRegistration = () => {
                                         <option value="Individu">Individu/Pribadi</option>
                                     </select>
                                     {errors.userType && <p className="text-red-500 text-sm mt-1">{errors.userType}</p>}
+                                    {errors.userType && <p className="text-red-500 text-sm mt-1">{errors.userType}</p>}
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Nama Institusi / Perusahaan / Individu</label>
+                                    <input
+                                        type="text"
+                                        name="institutionName"
+                                        value={formData.institutionName}
+                                        onChange={handleChange}
+                                        className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                        placeholder="Masukkan nama institusi, perusahaan, atau individu"
+                                    />
+                                    {errors.institutionName && <p className="text-red-500 text-sm mt-1">{errors.institutionName}</p>}
                                     <input
                                         type="text"
                                         name="institutionName"
@@ -264,9 +275,26 @@ const MembershipRegistration = () => {
                                         className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
                                         placeholder="https://example.com"
                                     />
+                                    <input
+                                        type="text"
+                                        name="websiteLink"
+                                        value={formData.websiteLink}
+                                        onChange={handleChange}
+                                        className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                        placeholder="https://example.com"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Email</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                        placeholder="contoh@email.com"
+                                    />
+                                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                                     <input
                                         type="email"
                                         name="email"
@@ -291,9 +319,27 @@ const MembershipRegistration = () => {
                                         placeholder="Alamat lengkap institusi/perusahaan"
                                     />
                                     {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleChange}
+                                        className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                        placeholder="Alamat lengkap institusi/perusahaan"
+                                    />
+                                    {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Wilayah</label>
+                                    <input
+                                        type="text"
+                                        name="region"
+                                        value={formData.region}
+                                        onChange={handleChange}
+                                        className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                        placeholder="Provinsi/Kota"
+                                    />
+                                    {errors.region && <p className="text-red-500 text-sm mt-1">{errors.region}</p>}
                                     <input
                                         type="text"
                                         name="region"
@@ -322,11 +368,29 @@ const MembershipRegistration = () => {
                                     placeholder="Masukkan nama Anda"
                                 />
                                 {errors.personalName && <p className="text-red-500 text-sm mt-1">{errors.personalName}</p>}
+                                <input
+                                    type="text"
+                                    name="personalName"
+                                    value={formData.personalName}
+                                    onChange={handleChange}
+                                    className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                    placeholder="Masukkan nama Anda"
+                                />
+                                {errors.personalName && <p className="text-red-500 text-sm mt-1">{errors.personalName}</p>}
                             </div>
 
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600">Nama pada Kuitansi</label>
+                                    <input
+                                        type="text"
+                                        name="receiptName"
+                                        value={formData.receiptName}
+                                        onChange={handleChange}
+                                        className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                        placeholder="Nama yang muncul di kuitansi"
+                                    />
+                                    {errors.receiptName && <p className="text-red-500 text-sm mt-1">{errors.receiptName}</p>}
                                     <input
                                         type="text"
                                         name="receiptName"
@@ -348,6 +412,7 @@ const MembershipRegistration = () => {
                                         placeholder="Rp 0"
                                     />
                                     {errors.transferAmount && <p className="text-red-500 text-sm mt-1">{errors.transferAmount}</p>}
+                                    {errors.transferAmount && <p className="text-red-500 text-sm mt-1">{errors.transferAmount}</p>}
                                 </div>
                             </div>
 
@@ -359,6 +424,15 @@ const MembershipRegistration = () => {
                                     <p className="text-xs text-gray-500 mb-2">
                                         yang akan dimasukkan kedalam group WA
                                     </p>
+                                    <input
+                                        type="text"
+                                        name="whatsappGroupNumber"
+                                        value={formData.whatsappGroupNumber}
+                                        onChange={handleChange}
+                                        className="mt-6 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                        placeholder="Contoh: 081234567890"
+                                    />
+                                    {errors.whatsappGroupNumber && <p className="text-red-500 text-sm mt-1">{errors.whatsappGroupNumber}</p>}
                                     <input
                                         type="text"
                                         name="whatsappGroupNumber"
@@ -385,6 +459,14 @@ const MembershipRegistration = () => {
                                         className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
                                         placeholder="Nama tambahan jika ada"
                                     />
+                                    <input
+                                        type="text"
+                                        name="additionalRegistrations"
+                                        value={formData.additionalRegistrations}
+                                        onChange={handleChange}
+                                        className="mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300"
+                                        placeholder="Nama tambahan jika ada"
+                                    />
                                 </div>
                             </div>
 
@@ -400,6 +482,7 @@ const MembershipRegistration = () => {
                                     className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
                                 />
                                 {errors.documentFile && <p className="text-red-500 text-sm mt-1">{errors.documentFile}</p>}
+                                {errors.documentFile && <p className="text-red-500 text-sm mt-1">{errors.documentFile}</p>}
                             </div>
 
                             <div>
@@ -413,6 +496,7 @@ const MembershipRegistration = () => {
                                     onChange={handleBuktiBayar}
                                     className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
                                 />
+                                {errors.pembayaranBukti && <p className="text-red-500 text-sm mt-1">{errors.pembayaranBukti}</p>}
                                 {errors.pembayaranBukti && <p className="text-red-500 text-sm mt-1">{errors.pembayaranBukti}</p>}
                             </div>
 
@@ -429,6 +513,7 @@ const MembershipRegistration = () => {
                                         onChange={handleLogoChange}
                                         className="mt-1 block w-full p-3 text-gray-400 border rounded-md focus:ring focus:ring-blue-300"
                                     />
+                                    {errors.logoFile && <p className="text-red-500 text-sm mt-1">{errors.logoFile}</p>}
                                     {errors.logoFile && <p className="text-red-500 text-sm mt-1">{errors.logoFile}</p>}
                                 </div>
                             )}
@@ -448,4 +533,5 @@ const MembershipRegistration = () => {
     );
 };
 
+export default MembershipRegistration;
 export default MembershipRegistration;
