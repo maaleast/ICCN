@@ -145,7 +145,9 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
                     }`}
                 >
                     {finalStatusWithOverdue === 'active'
-                        ? 'Selesaikan Pelatihan'
+                        ? 'Daftar'
+                        : finalStatusWithOverdue === 'ongoing'
+                        ? 'Sedang Berlangsung'
                         : finalStatusWithOverdue === 'upcoming'
                         ? 'Segera Hadir'
                         : finalStatusWithOverdue === 'completed'

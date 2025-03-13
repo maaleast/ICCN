@@ -152,6 +152,8 @@ const MembershipRegistration = () => {
             // Simpan token baru ke localStorage
             if (data.token) {
                 localStorage.setItem("token", data.token); // Perbarui token
+                const decoded = JSON.parse(atob(data.token.split(".")[1])); // Decode token
+                localStorage.setItem("role", decoded.role); // Simpan role baru
             }
 
             await Swal.fire({
