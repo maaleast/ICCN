@@ -11,7 +11,7 @@ export default function Register() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
-    const [countdown, setCountdown] = useState(10);
+    const [countdown, setCountdown] = useState(5);
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
@@ -42,7 +42,7 @@ export default function Register() {
             const data = await response.json();
             if (response.ok) {
                 setSuccess(true);
-                setTimeout(() => navigate("/login"), 10000);
+                setTimeout(() => navigate("/membership-registration"), 5000);
             } else {
                 setError(data.message || "Registrasi gagal!");
             }
@@ -72,10 +72,10 @@ export default function Register() {
                     >
                         <h2 className="text-2xl font-bold mb-4">Daftar Berhasil</h2>
                         <p className="text-sm text-gray-300">
-                            Silakan verifikasi email Anda untuk melanjutkan ke login.
+                            Silakan Anda untuk melanjutkan ke kelengkapan berkas.
                         </p>
                         <p className="text-sm text-gray-300 mt-4">
-                            Anda akan dialihkan ke halaman login dalam{" "}
+                            Anda akan dialihkan ke halaman kelengkapan berkas dalam{" "}
                             <span className="font-bold text-blue-300">{countdown}</span> detik...
                         </p>
                     </motion.div>
@@ -141,13 +141,21 @@ export default function Register() {
                                 </button>
                             </div>
 
-                            <motion.button
+                            {/* <motion.button
                                 type="submit"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 className="w-full py-2 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg hover:shadow-lg transition-transform"
                             >
                                 Daftar
+                            </motion.button> */}
+                            <motion.button
+                                type="submit"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="w-full py-2 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg hover:shadow-lg transition-transform"
+                            >
+                                Next
                             </motion.button>
                         </form>
 
