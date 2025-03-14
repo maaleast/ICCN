@@ -86,6 +86,7 @@ export default function AdminPanel() {
 
             const aktivitas = [];
 
+            // Aktivitas Member Baru
             const memberBaruHariIni = members.filter(member => {
                 const tanggalDaftar = new Date(member.tanggal_submit).toDateString();
                 const hariIni = new Date().toDateString();
@@ -95,32 +96,30 @@ export default function AdminPanel() {
                 aktivitas.push({
                     type: 'member',
                     description: `${memberBaruHariIni.length} member telah mendaftar hari ini`,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toLocaleString('id-ID') // Tanggal input real-time
                 });
             }
 
-            const transaksiHariIni = keuangan.filter(t => {
-                const tanggalTransaksi = new Date(t.tanggal_waktu).toDateString();
-                const hariIni = new Date().toDateString();
-                return tanggalTransaksi === hariIni;
-            });
+            // Aktivitas Keuangan (Pemasukan dan Pengeluaran)
+            keuangan.forEach(t => {
+                const tanggalTransaksi = new Date(t.tanggal_waktu).toLocaleDateString('id-ID'); // Tanggal transaksi dari database
 
-            transaksiHariIni.forEach(t => {
                 if (t.status === 'MASUK') {
                     aktivitas.push({
                         type: 'uang',
-                        description: `Pemasukan sebesar Rp ${parseFloat(t.jumlah).toLocaleString('id-ID')} dari ${t.deskripsi}`,
-                        timestamp: t.tanggal_waktu
+                        description: `Data pemasukan (${tanggalTransaksi}) sebesar Rp ${parseFloat(t.jumlah).toLocaleString('id-ID')} dari ${t.deskripsi}`,
+                        timestamp: new Date().toLocaleString('id-ID') // Tanggal input real-time
                     });
                 } else if (t.status === 'KELUAR') {
                     aktivitas.push({
                         type: 'uang',
-                        description: `Pengeluaran sebesar Rp ${parseFloat(t.jumlah).toLocaleString('id-ID')} untuk ${t.deskripsi}`,
-                        timestamp: t.tanggal_waktu
+                        description: `Data pengeluaran (${tanggalTransaksi}) sebesar Rp ${parseFloat(t.jumlah).toLocaleString('id-ID')} untuk ${t.deskripsi}`,
+                        timestamp: new Date().toLocaleString('id-ID') // Tanggal input real-time
                     });
                 }
             });
 
+            // Aktivitas Foto Baru
             const fotoHariIni = photos.filter(photo => {
                 const tanggalUpload = new Date(photo.created_at).toDateString();
                 const hariIni = new Date().toDateString();
@@ -131,12 +130,14 @@ export default function AdminPanel() {
                 aktivitas.push({
                     type: 'foto',
                     description: `Sebanyak ${fotoHariIni.length} foto telah ditambahkan hari ini`,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toLocaleString('id-ID') // Tanggal input real-time
                 });
             }
 
+            // Urutkan berdasarkan timestamp terbaru
             aktivitas.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
+            // Batasi hanya 6 aktivitas terbaru
             setAktivitasTerbaru(aktivitas.slice(0, 6));
         } catch (error) {
             console.error("Error fetching recent activities:", error);
@@ -241,26 +242,48 @@ export default function AdminPanel() {
                                         Aktivitas Terkini
                                     </h3>
                                     <div className="space-y-4">
-                                        {aktivitasTerbaru.map((aktivitas, index) => (
-                                            <div
-                                                key={index}
-                                                className={`p-4 rounded-lg ${aktivitas.type === 'member' ? 'bg-blue-100 dark:bg-blue-800' :
-                                                    aktivitas.type === 'uang' && aktivitas.description.includes('Pemasukan') ? 'bg-green-100 dark:bg-green-800' :
-                                                        aktivitas.type === 'uang' && aktivitas.description.includes('Pengeluaran') ? 'bg-red-100 dark:bg-red-800' :
-                                                            'bg-gray-50 dark:bg-gray-700'
-                                                    }`}
-                                            >
-                                                <p className="text-sm dark:text-gray-200">
-                                                    {aktivitas.type === 'uang' && '💵 '}
-                                                    {aktivitas.type === 'foto' && '📷 '}
-                                                    {aktivitas.type === 'member' && '👤 '}
-                                                    {aktivitas.description}
-                                                </p>
-                                                <p className="text-xs text-gray-400 dark:text-gray-300 mt-1">
-                                                    {new Date(aktivitas.timestamp).toLocaleString()}
-                                                </p>
-                                            </div>
-                                        ))}
+                                        {aktivitasTerbaru.length > 0 ? (
+                                            aktivitasTerbaru.map((aktivitas, index) => {
+                                                let bgColor = '';
+                                                let icon = '';
+
+                                                // Tentukan warna dan ikon berdasarkan jenis aktivitas (DENGAN FIX CASE-INSENSITIVE)
+                                                if (aktivitas.type === 'uang') {
+                                                    if (aktivitas.description.toLowerCase().includes('pemasukan')) {
+                                                        bgColor = 'bg-green-200 dark:bg-green-800';
+                                                        icon = '💵';
+                                                    } else if (aktivitas.description.toLowerCase().includes('pengeluaran')) {
+                                                        bgColor = 'bg-red-200 dark:bg-red-800';
+                                                        icon = '💸';
+                                                    }
+                                                } else if (aktivitas.type === 'member') {
+                                                    bgColor = 'bg-blue-200 dark:bg-blue-800';
+                                                    icon = '👤';
+                                                } else if (aktivitas.type === 'foto') {
+                                                    bgColor = 'bg-purple-200 dark:bg-purple-800';
+                                                    icon = '📷';
+                                                } else {
+                                                    bgColor = 'bg-gray-200 dark:bg-gray-800';
+                                                    icon = 'ℹ️';
+                                                }
+
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className={`p-4 rounded-lg ${bgColor}`}
+                                                    >
+                                                        <p className="text-sm dark:text-gray-200">
+                                                            {icon} {aktivitas.description}
+                                                        </p>
+                                                        <p className="text-xs text-gray-400 dark:text-gray-300 mt-1">
+                                                            Ditambahkan pada: {aktivitas.timestamp}
+                                                        </p>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <p className="text-gray-500 dark:text-gray-400 text-sm">Tidak ada aktivitas terkini.</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>

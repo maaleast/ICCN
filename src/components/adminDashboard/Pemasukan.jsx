@@ -10,7 +10,7 @@ export default function Pemasukan() {
     const [filteredTransactions, setFilteredTransactions] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ jumlah: '', deskripsi: '' });
+    const [formData, setFormData] = useState({ jumlah: '', deskripsi: '', tanggal_waktu: '' });
     const [editingId, setEditingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -20,6 +20,7 @@ export default function Pemasukan() {
         fetchData();
     }, []);
 
+    // Ambil data dari backend
     const fetchData = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan`);
@@ -28,12 +29,14 @@ export default function Pemasukan() {
             // Filter hanya transaksi dengan status MASUK
             const pemasukan = data.filter(t => t.status === 'MASUK');
             setTransactions(pemasukan);
-            setFilteredTransactions(pemasukan); // Set filteredTransactions dengan data awal
+            setFilteredTransactions(pemasukan);
         } catch (error) {
             console.error('Gagal mengambil data:', error);
+            toast.error('Gagal mengambil data');
         }
     };
 
+    // Handle pencarian
     const handleSearch = ({ date, description, amount }) => {
         let filtered = transactions;
 
@@ -53,13 +56,10 @@ export default function Pemasukan() {
         }
 
         setFilteredTransactions(filtered);
-
-        // Hanya reset halaman jika hasil pencarian berubah secara signifikan
-        if (currentPage > Math.ceil(filtered.length / itemsPerPage)) {
-            setCurrentPage(1);
-        }
+        setCurrentPage(1); // Reset ke halaman pertama setelah pencarian
     };
 
+    // Pagination
     const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const currentTransactions = filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
@@ -71,6 +71,13 @@ export default function Pemasukan() {
     // Handle form submit (tambah/edit)
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validasi di frontend
+        if (!formData.tanggal_waktu || !formData.jumlah || !formData.deskripsi) {
+            toast.error('Semua data harus diisi!');
+            return;
+        }
+
         const url = editingId
             ? `${API_BASE_URL}/admin/keuangan/edit/${editingId}`
             : `${API_BASE_URL}/admin/keuangan/tambah`;
@@ -82,31 +89,36 @@ export default function Pemasukan() {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    status: 'MASUK',
+                    status: 'MASUK', // Status pemasukan
                     jumlah: parseFloat(formData.jumlah.replace(/[^0-9]/g, '')), // Hilangkan "Rp." dan format ribuan
-                    deskripsi: formData.deskripsi
-                })
+                    deskripsi: formData.deskripsi,
+                    tanggal: formData.tanggal_waktu, // Tanggal transaksi dari input
+                }),
             });
 
-            if (!response.ok) throw new Error('Gagal menyimpan');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menyimpan');
+            }
 
             // Refresh data
-            fetchData();
+            await fetchData();
+
+            // Perbarui aktivitas terbaru
+            if (typeof fetchAktivitasTerbaru === 'function') {
+                await fetchAktivitasTerbaru();
+            }
 
             // Tampilkan notifikasi
-            if (editingId) {
-                toast.success('Pemasukan berhasil diupdate!');
-            } else {
-                toast.success('Pemasukan berhasil ditambahkan!');
-            }
+            toast.success(editingId ? 'Pemasukan berhasil diupdate!' : 'Pemasukan berhasil ditambahkan!');
 
             // Reset form
             setIsModalOpen(false);
-            setFormData({ jumlah: '', deskripsi: '' });
+            setFormData({ jumlah: '', deskripsi: '', tanggal_waktu: '' });
             setEditingId(null);
         } catch (error) {
             console.error('Error:', error);
-            toast.error('Gagal menyimpan pemasukan');
+            toast.error(error.message || 'Gagal menyimpan pemasukan');
         }
     };
 
@@ -122,12 +134,16 @@ export default function Pemasukan() {
 
         try {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan/delete/${deletingId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
             });
-            if (!response.ok) throw new Error('Gagal menghapus');
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menghapus');
+            }
 
             // Refresh data
-            fetchData();
+            await fetchData();
 
             // Tampilkan notifikasi
             toast.success('Pemasukan berhasil dihapus!');
@@ -136,7 +152,7 @@ export default function Pemasukan() {
             setIsDeleteModalOpen(false);
         } catch (error) {
             console.error('Gagal menghapus:', error);
-            toast.error('Gagal menghapus pemasukan');
+            toast.error(error.message || 'Gagal menghapus pemasukan');
         }
     };
 
@@ -184,7 +200,7 @@ export default function Pemasukan() {
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold dark:text-gray-100">Daftar Pemasukan</h3>
                 <div className="flex items-center gap-4">
-                    <FiturSearchKeuangan onSearch={handleSearch} /> {/* Ganti SearchByDate dengan FiturSearchKeuangan */}
+                    <FiturSearchKeuangan onSearch={handleSearch} />
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
@@ -235,7 +251,8 @@ export default function Pemasukan() {
                                                         currency: 'IDR',
                                                         minimumFractionDigits: 0,
                                                     }).format(t.jumlah),
-                                                    deskripsi: t.deskripsi
+                                                    deskripsi: t.deskripsi,
+                                                    tanggal_waktu: new Date(t.tanggal_waktu).toISOString().split('T')[0], // Format tanggal ke YYYY-MM-DD
                                                 });
                                                 setIsModalOpen(true);
                                             }}
@@ -276,6 +293,22 @@ export default function Pemasukan() {
                             {editingId ? 'Edit Pemasukan' : 'Tambah Pemasukan'}
                         </h3>
                         <form onSubmit={handleSubmit}>
+                            {/* Input Tanggal */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2 dark:text-gray-300">
+                                    Tanggal
+                                </label>
+                                <input
+                                    type="date"
+                                    className="w-full dark:text-gray-800 p-2 border rounded"
+                                    value={formData.tanggal_waktu || ''}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, tanggal_waktu: e.target.value })
+                                    }
+                                    required
+                                />
+                            </div>
+
                             {/* Input Jumlah */}
                             <div className="mb-4">
                                 <label className="block text-sm font-medium mb-2 dark:text-gray-300">

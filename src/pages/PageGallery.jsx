@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaArrowLeft, FaTimes, FaChevronDown } from "react-icons/fa";
 import { API_BASE_URL } from "../config";
+import Navbar from "../components/Navbar";
 
 const PageGallery = () => {
     const [gallery, setGallery] = useState([]);
@@ -60,42 +61,7 @@ const PageGallery = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-600 to-blue-400">
-            {/* Header */}
-            <header className="fixed top-0 left-0 right-0 z-10 shadow-lg">
-                <div className="relative bg-white opacity-80 h-full">
-                    <div className="absolute right-0 top-0 h-full w-64 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-900 clip-path-trapezoid-reverse"></div>
-
-                    <nav className="w-full px-10 flex justify-between items-center p-4 relative">
-                        <div className="text-4xl font-bold text-blue-700 z-20">
-                            <button onClick={() => navigate("/home")}>ICCN</button>
-                        </div>
-
-                        <ul className="flex space-x-8 font-semibold text-gray-700 z-20">
-                            <li>
-                                <button onClick={() => navigate("/home")} className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200">
-                                    Home
-                                </button>
-                            </li>
-                            <li>
-                                <button onClick={() => navigate("/page-gallery")} className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200">
-                                    Gallery
-                                </button>
-                            </li>
-                            <li>
-                                <button onClick={() => navigate("/page-berita")} className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200">
-                                    Berita
-                                </button>
-                            </li>
-                        </ul>
-
-                        <div className="z-20 relative flex items-center space-x-6">
-                            <button onClick={handleLogout} className="bg-gradient-to-b from-blue-600 to-blue-500 text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:from-blue-700 hover:to-blue-600 duration-200">
-                                Logout
-                            </button>
-                        </div>
-                    </nav>
-                </div>
-            </header>
+            <Navbar />
 
             {/* Main Content */}
             <main className="pt-24 pb-12 px-4 md:px-8">

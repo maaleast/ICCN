@@ -10,7 +10,7 @@ export default function Pengeluaran() {
     const [filteredTransactions, setFilteredTransactions] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ jumlah: '', deskripsi: '' });
+    const [formData, setFormData] = useState({ jumlah: '', deskripsi: '', tanggal_waktu: '' });
     const [editingId, setEditingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -20,18 +20,23 @@ export default function Pengeluaran() {
         fetchData();
     }, []);
 
+    // Ambil data dari backend
     const fetchData = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan`);
             const data = await response.json();
+
+            // Filter hanya transaksi dengan status KELUAR
             const pengeluaran = data.filter(t => t.status === 'KELUAR');
             setTransactions(pengeluaran);
-            setFilteredTransactions(pengeluaran); // Set filteredTransactions dengan data awal
+            setFilteredTransactions(pengeluaran);
         } catch (error) {
             console.error('Gagal mengambil data:', error);
+            toast.error('Gagal mengambil data');
         }
     };
 
+    // Handle pencarian
     const handleSearch = ({ date, description, amount }) => {
         let filtered = transactions;
 
@@ -51,13 +56,10 @@ export default function Pengeluaran() {
         }
 
         setFilteredTransactions(filtered);
-
-        // Hanya reset halaman jika hasil pencarian berubah secara signifikan
-        if (currentPage > Math.ceil(filtered.length / itemsPerPage)) {
-            setCurrentPage(1);
-        }
+        setCurrentPage(1); // Reset ke halaman pertama setelah pencarian
     };
 
+    // Pagination
     const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const currentTransactions = filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
@@ -69,6 +71,13 @@ export default function Pengeluaran() {
     // Handle form submit (tambah/edit)
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validasi di frontend
+        if (!formData.tanggal_waktu || !formData.jumlah || !formData.deskripsi) {
+            toast.error('Semua data harus diisi!');
+            return;
+        }
+
         const url = editingId
             ? `${API_BASE_URL}/admin/keuangan/edit/${editingId}`
             : `${API_BASE_URL}/admin/keuangan/tambah`;
@@ -82,29 +91,29 @@ export default function Pengeluaran() {
                 body: JSON.stringify({
                     status: 'KELUAR', // Status pengeluaran
                     jumlah: parseFloat(formData.jumlah.replace(/[^0-9]/g, '')), // Hilangkan "Rp." dan format ribuan
-                    deskripsi: formData.deskripsi
-                })
+                    deskripsi: formData.deskripsi,
+                    tanggal: formData.tanggal_waktu, // Pastikan format tanggal sesuai dengan backend
+                }),
             });
 
-            if (!response.ok) throw new Error('Gagal menyimpan');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menyimpan');
+            }
 
             // Refresh data
-            fetchData();
+            await fetchData();
 
             // Tampilkan notifikasi
-            if (editingId) {
-                toast.success('Pengeluaran berhasil diupdate!');
-            } else {
-                toast.success('Pengeluaran berhasil ditambahkan!');
-            }
+            toast.success(editingId ? 'Pengeluaran berhasil diupdate!' : 'Pengeluaran berhasil ditambahkan!');
 
             // Reset form
             setIsModalOpen(false);
-            setFormData({ jumlah: '', deskripsi: '' });
+            setFormData({ jumlah: '', deskripsi: '', tanggal_waktu: '' });
             setEditingId(null);
         } catch (error) {
             console.error('Error:', error);
-            toast.error('Gagal menyimpan pengeluaran');
+            toast.error(error.message || 'Gagal menyimpan pengeluaran');
         }
     };
 
@@ -120,12 +129,16 @@ export default function Pengeluaran() {
 
         try {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan/delete/${deletingId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
             });
-            if (!response.ok) throw new Error('Gagal menghapus');
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menghapus');
+            }
 
             // Refresh data
-            fetchData();
+            await fetchData();
 
             // Tampilkan notifikasi
             toast.success('Pengeluaran berhasil dihapus!');
@@ -134,7 +147,7 @@ export default function Pengeluaran() {
             setIsDeleteModalOpen(false);
         } catch (error) {
             console.error('Gagal menghapus:', error);
-            toast.error('Gagal menghapus pengeluaran');
+            toast.error(error.message || 'Gagal menghapus pengeluaran');
         }
     };
 
@@ -203,46 +216,55 @@ export default function Pengeluaran() {
                         </tr>
                     </thead>
                     <tbody>
-                        {currentTransactions.map((t) => (
-                            <tr key={t.id} className="border-t dark:border-gray-700">
-                                <td className="py-3 px-4 dark:text-gray-300">{t.deskripsi}</td>
-                                <td className="py-3 px-4 dark:text-gray-300">
-                                    {new Date(t.tanggal_waktu).toLocaleDateString('id-ID')}
-                                </td>
-                                <td className="py-3 px-4 dark:text-gray-300">
-                                    {new Intl.NumberFormat('id-ID', {
-                                        style: 'currency',
-                                        currency: 'IDR',
-                                        minimumFractionDigits: 0,
-                                    }).format(t.jumlah)}
-                                </td>
-                                <td className="py-3 px-4">
-                                    <button
-                                        onClick={() => {
-                                            setEditingId(t.id);
-                                            setFormData({
-                                                jumlah: new Intl.NumberFormat('id-ID', {
-                                                    style: 'currency',
-                                                    currency: 'IDR',
-                                                    minimumFractionDigits: 0,
-                                                }).format(t.jumlah),
-                                                deskripsi: t.deskripsi
-                                            });
-                                            setIsModalOpen(true);
-                                        }}
-                                        className="text-blue-600 hover:underline mr-3"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteConfirmation(t.id)}
-                                        className="text-red-600 hover:underline"
-                                    >
-                                        Hapus
-                                    </button>
+                        {currentTransactions.length === 0 ? (
+                            <tr>
+                                <td colSpan="4" className="py-4 text-center text-gray-500 dark:text-gray-400">
+                                    Tidak ada data yang ditemukan
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            currentTransactions.map((t) => (
+                                <tr key={t.id} className="border-t dark:border-gray-700">
+                                    <td className="py-3 px-4 dark:text-gray-300">{t.deskripsi}</td>
+                                    <td className="py-3 px-4 dark:text-gray-300">
+                                        {new Date(t.tanggal_waktu).toLocaleDateString('id-ID')}
+                                    </td>
+                                    <td className="py-3 px-4 dark:text-gray-300">
+                                        {new Intl.NumberFormat('id-ID', {
+                                            style: 'currency',
+                                            currency: 'IDR',
+                                            minimumFractionDigits: 0,
+                                        }).format(t.jumlah)}
+                                    </td>
+                                    <td className="py-3 px-4">
+                                        <button
+                                            onClick={() => {
+                                                setEditingId(t.id);
+                                                setFormData({
+                                                    jumlah: new Intl.NumberFormat('id-ID', {
+                                                        style: 'currency',
+                                                        currency: 'IDR',
+                                                        minimumFractionDigits: 0,
+                                                    }).format(t.jumlah),
+                                                    deskripsi: t.deskripsi,
+                                                    tanggal_waktu: new Date(t.tanggal_waktu).toISOString().split('T')[0], // Format tanggal ke YYYY-MM-DD
+                                                });
+                                                setIsModalOpen(true);
+                                            }}
+                                            className="text-blue-600 hover:underline mr-3"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteConfirmation(t.id)}
+                                            className="text-red-600 hover:underline"
+                                        >
+                                            Hapus
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -266,6 +288,22 @@ export default function Pengeluaran() {
                             {editingId ? 'Edit Pengeluaran' : 'Tambah Pengeluaran'}
                         </h3>
                         <form onSubmit={handleSubmit}>
+                            {/* Input Tanggal */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2 dark:text-gray-300">
+                                    Tanggal
+                                </label>
+                                <input
+                                    type="date"
+                                    className="w-full dark:text-gray-800 p-2 border rounded"
+                                    value={formData.tanggal_waktu || ''}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, tanggal_waktu: e.target.value })
+                                    }
+                                    required
+                                />
+                            </div>
+
                             {/* Input Jumlah */}
                             <div className="mb-4">
                                 <label className="block text-sm font-medium mb-2 dark:text-gray-300">
