@@ -22,6 +22,7 @@ export default function MemberDashboard() {
     const [selectedTraining, setSelectedTraining] = useState(null);
     const [verificationStatus, setVerificationStatus] = useState(null);
     const [userId, setUserId] = useState(localStorage.getItem("user_id"));
+    const [status, setStatus] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -43,16 +44,30 @@ export default function MemberDashboard() {
             try {
                 const response = await fetch(`${API_BASE_URL}/members/pelatihan`);
                 const data = await response.json();
-                const updatedTrainings = data.map(training => ({
-                    ...training,
-                    status: getTrainingStatus(training.tanggal_pelatihan, training.tanggal_berakhir)
-                }));
+                console.log('Fetched trainings:', data); // Debugging
+    
+                const updatedTrainings = await Promise.all(
+                    data.map(async (training) => {
+                        const status = await getTrainingStatus(
+                            training.tanggal_pelatihan,
+                            training.tanggal_berakhir,
+                            localStorage.getItem('user_id'),
+                            training.id
+                        );
+                        console.log(`Training ${training.id} status:`, status); // Debugging
+                        return {
+                            ...training,
+                            status: status,
+                        };
+                    })
+                );
+    
                 setTrainings(updatedTrainings);
             } catch (error) {
                 console.error('Error fetching trainings:', error);
             }
         };
-
+    
         fetchTrainings();
     }, []);
 
@@ -66,21 +81,50 @@ export default function MemberDashboard() {
                 console.error('Error fetching badges:', error);
             }
         };
-
+    
         fetchBadges();
-    }, [trainings]);
+    }, []); // Hapus `trainings` dari dependency array
 
-    const getTrainingStatus = (startDate, endDate) => {
+    const checkIfMemberIsRegistered = async (memberId, pelatihanId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/members/checkRegistrationStatus`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ member_id: memberId, pelatihan_id: pelatihanId }),
+            });
+    
+            const data = await response.json();
+            return data.isRegistered; // Pastikan API mengembalikan { isRegistered: true/false }
+        } catch (error) {
+            console.error('Error checking registration status:', error);
+            return false; // Default ke false jika terjadi error
+        }
+    };
+
+    const getTrainingStatus = async (startDate, endDate, memberId, pelatihanId) => {
         const currentDate = new Date();
         const trainingStartDate = new Date(startDate);
         const trainingEndDate = new Date(endDate);
+    
+        // Cek apakah member sudah terdaftar di pelatihan ini
+        const isRegistered = await checkIfMemberIsRegistered(memberId, pelatihanId);
 
+        if (isRegistered) {
+            setStatus(true);
+            console.log('status', status);
+        } else {
+            setStatus(false);
+            console.log('status', status);
+        }
+    
         if (currentDate < trainingStartDate) {
             return 'upcoming';
-        } else if (currentDate >= trainingStartDate && currentDate <= trainingEndDate) {
+        } else if (currentDate >= trainingStartDate && currentDate <= trainingEndDate && !isRegistered) {
             return 'active';
-        } else {
+        } else if (currentDate > trainingEndDate) {
             return 'completed';
+        } else if (currentDate >= trainingStartDate && currentDate <= trainingEndDate && isRegistered) {
+            return 'ongoing';
         }
     };
 
@@ -238,6 +282,7 @@ export default function MemberDashboard() {
                 <TrainingDetailModal
                     selectedTraining={selectedTraining}
                     badges={getBadgesForTraining(selectedTraining.id)}
+                    statusModal={status}
                     onClose={handleCloseModal}
                 />
             )}

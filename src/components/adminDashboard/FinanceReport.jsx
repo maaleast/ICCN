@@ -1,12 +1,47 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from "../../config";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Pagination from '../Pagination';
 import FiturSearchKeuangan from '../FiturSearchKeuangan';
 import DailyBalanceChart from '../DailyBalanceChart';
-import { exportToExcel } from '../../utils/exportToExcel';
-import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { utils, writeFile } from 'xlsx';
+import { FaFileExcel } from 'react-icons/fa'; // Ikon Excel
+
+// Komponen Dropdown Manual
+const CustomDropdown = ({ options, onSelect }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleSelect = (option) => {
+        onSelect(option);
+        setIsOpen(false);
+    };
+
+    return (
+        <div className="relative">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 flex items-center gap-2"
+            >
+                <FaFileExcel /> Unduh Excel
+            </button>
+
+            {isOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-10">
+                    {options.map((option) => (
+                        <div
+                            key={option.value}
+                            onClick={() => handleSelect(option)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
+                        >
+                            {option.label}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
 
 export const getPendapatanBulanan = async () => {
     try {
@@ -36,6 +71,22 @@ export const getSaldoAkhir = async () => {
     }
 };
 
+// Format mata uang
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+    }).format(amount);
+};
+
+// Fungsi untuk mendapatkan format tanggal dalam format 'YYYY-MM'
+const getFormattedDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+};
+
 export default function FinanceReport() {
     const [transactions, setTransactions] = useState([]);
     const [filteredTransactions, setFilteredTransactions] = useState([]);
@@ -44,21 +95,27 @@ export default function FinanceReport() {
     const [saldoAkhir, setSaldoAkhir] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentTransactions, setCurrentTransactions] = useState([]);
-    const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
-    const [downloadType, setDownloadType] = useState('bulanan');
-    const [selectedDownloadMonth, setSelectedDownloadMonth] = useState(new Date().getMonth() + 1);
-    const [selectedDownloadYear, setSelectedDownloadYear] = useState(new Date().getFullYear());
+    const [availableMonths, setAvailableMonths] = useState([]);
+    const [selectedChartMonth, setSelectedChartMonth] = useState('');
     const itemsPerPage = 10;
 
-    // Ambil data keuangan
+    // Ambil data awal
     useEffect(() => {
         fetchData();
     }, []);
 
+    // Update transaksi yang ditampilkan dan bulan yang tersedia
     useEffect(() => {
         updateTransactions();
-    }, [currentPage, filteredTransactions]);
+        const months = [...new Set(filteredTransactions.map(t =>
+            getFormattedDate(new Date(t.tanggal_waktu))
+        ))].sort().reverse();
 
+        setAvailableMonths(months);
+        setSelectedChartMonth(months[0] || '');
+    }, [filteredTransactions, currentPage]);
+
+    // Fungsi untuk mengambil data dari API
     const fetchData = async () => {
         try {
             const [responseBulanIni, responseAll, responseSaldo] = await Promise.all([
@@ -80,8 +137,14 @@ export default function FinanceReport() {
                 new Date(b.tanggal_waktu) - new Date(a.tanggal_waktu)
             );
 
+            // Filter awal untuk bulan berjalan
+            const currentMonth = getFormattedDate(new Date());
+            const initialFiltered = sortedTransactions.filter(t =>
+                getFormattedDate(new Date(t.tanggal_waktu)) === currentMonth
+            );
+
             setTransactions(sortedTransactions);
-            setFilteredTransactions(sortedTransactions);
+            setFilteredTransactions(initialFiltered);
             setSaldoAkhir(Number(dataSaldo.saldo_akhir || 0));
 
         } catch (error) {
@@ -90,6 +153,7 @@ export default function FinanceReport() {
         }
     };
 
+    // Update transaksi yang ditampilkan di tabel
     const updateTransactions = () => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
@@ -100,21 +164,25 @@ export default function FinanceReport() {
         }
     };
 
-    const handleSearch = ({ date, description, amount }) => {
+    // Fungsi pencarian
+    const handleSearch = ({ month, description, amount }) => {
         let filtered = transactions;
 
-        if (date) {
+        // Filter by month
+        if (month) {
             filtered = filtered.filter(t =>
-                new Date(t.tanggal_waktu).toLocaleDateString('en-CA') === date
+                getFormattedDate(new Date(t.tanggal_waktu)) === month
             );
         }
 
+        // Filter by description
         if (description) {
             filtered = filtered.filter(t =>
                 t.deskripsi.toLowerCase().includes(description.toLowerCase())
             );
         }
 
+        // Filter by amount
         if (amount) {
             filtered = filtered.filter(t =>
                 t.jumlah.toString().includes(amount)
@@ -125,137 +193,120 @@ export default function FinanceReport() {
         setCurrentPage(1);
     };
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-        }).format(amount);
-    };
-
     const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage) || 1;
 
-    // Fungsi untuk filter transaksi berdasarkan bulan/tahun
-    const filterTransactionsByDate = (transactions, type, month, year) => {
-        return transactions.filter(t => {
-            const date = new Date(t.tanggal_waktu);
-            if (type === 'bulanan') {
-                return date.getMonth() + 1 === month && date.getFullYear() === year;
-            }
-            return date.getFullYear() === year;
-        });
-    };
+    // Fungsi untuk memfilter data berdasarkan periode
+    const filterDataByPeriod = (data, period) => {
+        if (!data || data.length === 0) return [];
 
-    // Fungsi untuk handle download Excel
-    const handleConfirmDownload = async () => {
-        try {
-            // Filter transaksi sesuai periode
-            const filteredData = filterTransactionsByDate(
-                filteredTransactions,
-                downloadType,
-                selectedDownloadMonth,
-                selectedDownloadYear
-            );
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1; // Bulan dimulai dari 0 (Januari = 0)
 
-            // Hitung saldo dengan benar
-            let saldo = Number(saldoAkhir); // Pastikan saldo awal adalah number
-            const dataWithSaldo = filteredData.map(t => {
-                const jumlah = parseFloat(t.jumlah) || 0; // Pastikan jumlah adalah number
-                saldo = t.status === 'MASUK' ? saldo + jumlah : saldo - jumlah;
-                return {
-                    deskripsi: t.deskripsi,
-                    status: t.status,
-                    tanggal: new Date(t.tanggal_waktu).toLocaleDateString('id-ID'),
-                    jumlah: jumlah,
-                    saldo: parseFloat(saldo.toFixed(2)) // toFixed() hanya bisa diakses oleh number
-                };
-            });
-
-            // Export ke Excel
-            exportToExcel(
-                dataWithSaldo,
-                'Laporan Keuangan',
-                `Laporan-${downloadType === 'bulanan' ? 'Bulanan' : 'Tahunan'}`,
-                {
-                    month: selectedDownloadMonth,
-                    year: selectedDownloadYear,
-                    type: downloadType
-                }
-            );
-
-            setIsDownloadModalOpen(false);
-            toast.success('Laporan berhasil diunduh!');
-        } catch (error) {
-            console.error('Gagal unduh:', error);
-            toast.error('Gagal mengunduh laporan');
+        switch (period) {
+            case 'monthly':
+                return data.filter(t => {
+                    const transactionDate = new Date(t.tanggal_waktu);
+                    return (
+                        transactionDate.getFullYear() === currentYear &&
+                        transactionDate.getMonth() + 1 === currentMonth
+                    );
+                });
+            case 'yearly':
+                return data.filter(t => {
+                    const transactionDate = new Date(t.tanggal_waktu);
+                    return transactionDate.getFullYear() === currentYear;
+                });
+            case 'all':
+                return data;
+            default:
+                return [];
         }
     };
 
-    // Modal untuk pengaturan unduhan
-    const renderDownloadModal = () => (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white dark:bg-gray-700 p-6 rounded-lg w-96">
-                <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Unduh Laporan</h3>
+    // Fungsi untuk download Excel
+    const handleDownloadExcel = (period) => {
+        try {
+            if (filteredTransactions.length === 0) {
+                toast.error('Tidak ada data untuk di-download');
+                return;
+            }
 
-                <div className="mb-4">
-                    <label className="block mb-2 dark:text-gray-300">Jenis Laporan</label>
-                    <select
-                        value={downloadType}
-                        onChange={(e) => setDownloadType(e.target.value)}
-                        className="w-full p-2 border rounded dark:bg-gray-600 dark:text-white"
-                    >
-                        <option value="bulanan">Bulanan</option>
-                        <option value="tahunan">Tahunan</option>
-                    </select>
-                </div>
+            // Filter data berdasarkan periode
+            const filteredData = filterDataByPeriod(filteredTransactions, period);
 
-                {downloadType === 'bulanan' && (
-                    <div className="mb-4">
-                        <label className="block mb-2 dark:text-gray-300">Pilih Bulan</label>
-                        <input
-                            type="month"
-                            value={`${selectedDownloadYear}-${String(selectedDownloadMonth).padStart(2, '0')}`}
-                            onChange={(e) => {
-                                const [year, month] = e.target.value.split('-');
-                                setSelectedDownloadMonth(parseInt(month));
-                                setSelectedDownloadYear(parseInt(year));
-                            }}
-                            className="w-full p-2 border rounded dark:bg-gray-600 dark:text-white"
-                        />
-                    </div>
-                )}
+            if (filteredData.length === 0) {
+                toast.error('Tidak ada data untuk di-download');
+                return;
+            }
 
-                <div className="mb-4">
-                    <label className="block mb-2 dark:text-gray-300">
-                        {downloadType === 'bulanan' ? 'Tahun' : 'Pilih Tahun'}
-                    </label>
-                    <input
-                        type="number"
-                        value={selectedDownloadYear}
-                        onChange={(e) => setSelectedDownloadYear(parseInt(e.target.value))}
-                        className="w-full p-2 border rounded dark:bg-gray-600 dark:text-white"
-                        min="2000"
-                        max="2100"
-                    />
-                </div>
+            // Format data untuk Excel
+            const excelData = filteredData.map(t => ({
+                Deskripsi: t.deskripsi,
+                Status: t.status,
+                Tanggal: new Date(t.tanggal_waktu).toLocaleDateString('id-ID'),
+                Jumlah: formatCurrency(t.jumlah)
+            }));
 
-                <div className="flex justify-end gap-2">
-                    <button
-                        onClick={() => setIsDownloadModalOpen(false)}
-                        className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
-                    >
-                        Batal
-                    </button>
-                    <button
-                        onClick={handleConfirmDownload}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >
-                        Unduh
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
+            // Buat worksheet
+            const worksheet = utils.json_to_sheet(excelData);
+
+            // Tambahkan judul laporan
+            const title = period === 'monthly'
+                ? 'Laporan Bulanan Keuangan'
+                : period === 'yearly'
+                    ? 'Laporan Tahunan Keuangan'
+                    : 'Laporan Seluruh Keuangan';
+
+            utils.sheet_add_aoa(worksheet, [[title]], { origin: 'A1' });
+            utils.sheet_add_aoa(worksheet, [['Deskripsi', 'Status', 'Tanggal', 'Jumlah']], { origin: 'A2' });
+
+            // Atur lebar kolom
+            worksheet['!cols'] = [
+                { width: 40 }, // Deskripsi
+                { width: 20 }, // Status
+                { width: 20 }, // Tanggal
+                { width: 20 }, // Jumlah
+            ];
+
+            // Buat workbook
+            const workbook = utils.book_new();
+            utils.book_append_sheet(workbook, worksheet, 'Laporan Keuangan');
+
+            // Tentukan nama file berdasarkan periode
+            let fileName = 'laporan-keuangan.xlsx';
+            if (period === 'monthly') {
+                fileName = 'laporan-bulanan.xlsx';
+            } else if (period === 'yearly') {
+                fileName = 'laporan-tahunan.xlsx';
+            } else if (period === 'all') {
+                fileName = 'laporan-seluruhnya.xlsx';
+            }
+
+            // Simpan file Excel
+            writeFile(workbook, fileName);
+            toast.success('File Excel berhasil di-download');
+        } catch (error) {
+            console.error('Gagal membuat Excel:', error);
+            toast.error('Gagal membuat Excel');
+        }
+    };
+
+    // Opsi dropdown
+    const dropdownOptions = [
+        { value: 'excel-monthly', label: 'Unduh Excel Bulanan' },
+        { value: 'excel-yearly', label: 'Unduh Excel Tahunan' },
+        { value: 'excel-all', label: 'Unduh Excel Seluruhnya' },
+    ];
+
+    // Handle pilihan dropdown
+    const handleDropdownSelect = (option) => {
+        if (option.value.startsWith('excel-')) {
+            // Handle download Excel
+            const period = option.value.replace('excel-', '');
+            handleDownloadExcel(period);
+        }
+    };
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -264,16 +315,10 @@ export default function FinanceReport() {
             {/* Header dan Filter */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <h3 className="text-lg font-semibold dark:text-gray-100">Laporan Keuangan</h3>
-                <div className="flex gap-4">
-                    <button
-                        onClick={() => setIsDownloadModalOpen(true)}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 flex items-center gap-2"
-                    >
-                        <ArrowDownTrayIcon className="w-5 h-5" />
-                        <span>Unduh Laporan</span>
-                    </button>
-                    <FiturSearchKeuangan onSearch={handleSearch} />
-                </div>
+                <FiturSearchKeuangan onSearch={handleSearch} />
+
+                {/* Tombol dengan dropdown */}
+                <CustomDropdown options={dropdownOptions} onSelect={handleDropdownSelect} />
             </div>
 
             {/* Statistik Keuangan */}
@@ -302,6 +347,7 @@ export default function FinanceReport() {
 
             {/* Tabel Transaksi */}
             <div className="mt-8">
+                {/* Tabel */}
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50 dark:bg-gray-700">
@@ -348,7 +394,14 @@ export default function FinanceReport() {
                 </div>
 
                 {/* Grafik Saldo Harian */}
-                <DailyBalanceChart transactions={filteredTransactions} />
+                <DailyBalanceChart
+                    transactions={filteredTransactions.filter(t =>
+                        getFormattedDate(new Date(t.tanggal_waktu)) === selectedChartMonth
+                    )}
+                    availableMonths={availableMonths}
+                    selectedChartMonth={selectedChartMonth}
+                    onMonthChange={(month) => setSelectedChartMonth(month)}
+                />
             </div>
 
             {/* Modal Unduh Laporan */}
