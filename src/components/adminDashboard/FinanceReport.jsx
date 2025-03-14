@@ -43,29 +43,30 @@ const CustomDropdown = ({ options, onSelect }) => {
     );
 };
 
-// Fungsi untuk mengambil data pendapatan bulanan
 export const getPendapatanBulanan = async () => {
     try {
         const response = await fetch(`${API_BASE_URL}/admin/keuangan/bulan-ini`);
         const data = await response.json();
         return {
-            pendapatanBulanan: parseFloat(data.total_pendapatan || "0"),
-            pengeluaranBulanIni: parseFloat(data.total_pengeluaran || "0"),
+            pendapatanBulanan: parseFloat(data.total_pendapatan || "0")
         };
     } catch (error) {
         console.error('Gagal mengambil data pendapatan bulanan:', error);
-        return { pendapatanBulanan: 0, pengeluaranBulanIni: 0 };
+        toast.error('Gagal mengambil data pendapatan bulanan');
+        return {
+            pendapatanBulanan: 0
+        };
     }
 };
 
-// Fungsi untuk mengambil saldo akhir
 export const getSaldoAkhir = async () => {
     try {
         const response = await fetch(`${API_BASE_URL}/admin/keuangan/saldo-akhir`);
         const data = await response.json();
-        return parseFloat(data.saldo_akhir || 0);
+        return Number(data.saldo_akhir || 0);
     } catch (error) {
-        console.error('Gagal mengambil saldo akhir:', error);
+        console.error('Gagal mengambil data saldo akhir:', error);
+        toast.error('Gagal mengambil data saldo akhir');
         return 0;
     }
 };
@@ -158,7 +159,6 @@ export default function FinanceReport() {
         const endIndex = startIndex + itemsPerPage;
         setCurrentTransactions(filteredTransactions.slice(startIndex, endIndex));
 
-        // Reset halaman jika perlu
         if (currentPage > Math.ceil(filteredTransactions.length / itemsPerPage)) {
             setCurrentPage(1);
         }
@@ -403,6 +403,9 @@ export default function FinanceReport() {
                     onMonthChange={(month) => setSelectedChartMonth(month)}
                 />
             </div>
+
+            {/* Modal Unduh Laporan */}
+            {isDownloadModalOpen && renderDownloadModal()}
         </div>
     );
 }

@@ -26,6 +26,7 @@ export default function Pemasukan() {
         fetchData();
     }, []);
 
+    // Ambil data dari backend
     const fetchData = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan`);
@@ -40,9 +41,10 @@ export default function Pemasukan() {
             // Filter hanya transaksi dengan status MASUK
             const pemasukan = convertedData.filter(t => t.status === 'MASUK');
             setTransactions(pemasukan);
-            setFilteredTransactions(pemasukan); // Set filteredTransactions dengan data awal
+            setFilteredTransactions(pemasukan);
         } catch (error) {
             console.error('Gagal mengambil data:', error);
+            toast.error('Gagal mengambil data');
         }
     };
 
@@ -85,6 +87,13 @@ export default function Pemasukan() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validasi di frontend
+        if (!formData.tanggal_waktu || !formData.jumlah || !formData.deskripsi) {
+            toast.error('Semua data harus diisi!');
+            return;
+        }
+
         const url = editingId
             ? `${API_BASE_URL}/admin/keuangan/edit/${editingId}`
             : `${API_BASE_URL}/admin/keuangan/tambah`;
@@ -99,24 +108,28 @@ export default function Pemasukan() {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    status: 'MASUK',
+                    status: 'MASUK', // Status pemasukan
                     jumlah: parseFloat(formData.jumlah.replace(/[^0-9]/g, '')), // Hilangkan "Rp." dan format ribuan
                     deskripsi: formData.deskripsi,
                     tanggal_waktu: formattedDate, // Kirim tanggal dan waktu dalam format ISO 8601
                 }),
             });
 
-            if (!response.ok) throw new Error('Gagal menyimpan');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menyimpan');
+            }
 
             // Refresh data
-            fetchData();
+            await fetchData();
+
+            // Perbarui aktivitas terbaru
+            if (typeof fetchAktivitasTerbaru === 'function') {
+                await fetchAktivitasTerbaru();
+            }
 
             // Tampilkan notifikasi
-            if (editingId) {
-                toast.success('Pemasukan berhasil diupdate!');
-            } else {
-                toast.success('Pemasukan berhasil ditambahkan!');
-            }
+            toast.success(editingId ? 'Pemasukan berhasil diupdate!' : 'Pemasukan berhasil ditambahkan!');
 
             // Reset form
             setIsModalOpen(false);
@@ -124,7 +137,7 @@ export default function Pemasukan() {
             setEditingId(null);
         } catch (error) {
             console.error('Error:', error);
-            toast.error('Gagal menyimpan pemasukan');
+            toast.error(error.message || 'Gagal menyimpan pemasukan');
         }
     };
 
@@ -140,12 +153,16 @@ export default function Pemasukan() {
 
         try {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan/delete/${deletingId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
             });
-            if (!response.ok) throw new Error('Gagal menghapus');
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menghapus');
+            }
 
             // Refresh data
-            fetchData();
+            await fetchData();
 
             // Tampilkan notifikasi
             toast.success('Pemasukan berhasil dihapus!');
@@ -154,7 +171,7 @@ export default function Pemasukan() {
             setIsDeleteModalOpen(false);
         } catch (error) {
             console.error('Gagal menghapus:', error);
-            toast.error('Gagal menghapus pemasukan');
+            toast.error(error.message || 'Gagal menghapus pemasukan');
         }
     };
 
@@ -202,7 +219,7 @@ export default function Pemasukan() {
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold dark:text-gray-100">Daftar Pemasukan</h3>
                 <div className="flex items-center gap-4">
-                    <FiturSearchKeuangan onSearch={handleSearch} /> {/* Ganti SearchByDate dengan FiturSearchKeuangan */}
+                    <FiturSearchKeuangan onSearch={handleSearch} />
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
