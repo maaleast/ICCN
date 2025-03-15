@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import { FaUser, FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaEnvelope } from "react-icons/fa";
-import Navbar from "../components/Navbar";
 import { motion } from "framer-motion";
+import Logo from "../assets/iccn.png"
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -39,7 +39,7 @@ export default function Login() {
             localStorage.setItem("token", token);
 
             try {
-                const decoded = JSON.parse(atob(token.split(".")[1]));
+                const decoded = JSON.parse(atob(token.split(".")[1])); // Decode token JWT
                 const { id, role, is_verified } = decoded;
 
                 console.log("Decoded token:", decoded); // Debugging
@@ -116,6 +116,20 @@ export default function Login() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500">
+            {/* Header */}
+            <header className="fixed top-0 left-0 right-0 z-10 shadow-lg">
+                <div className="relative bg-gray-800 opacity-80 h-full">
+                    <div className="absolute right-0 top-0 h-full w-64 bg-gradient-to-tr from-gray-950 via-gray-800 to-gray-600 clip-path-trapezoid-reverse"></div>
+
+                    <nav className="w-full px-10 flex justify-between items-center p-4 relative">
+                        <div className="z-20 flex items-center">
+                            <button onClick={() => navigate("/home")}>
+                                <img src={Logo} alt="ICCN Logo" className="h-20 w-auto max-w-none" />
+                            </button>
+                        </div>
+                    </nav>
+                </div>
+            </header>
 
             <motion.div
                 initial={{ opacity: 0, y: -50 }}

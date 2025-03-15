@@ -9,6 +9,84 @@ import aboutImage from "../assets/images.jpg";
 import LandingBg from "../assets/LandingBg.jpg";
 import { AnimatePresence } from "framer-motion";
 import Logo from "../assets/iccn.png";
+import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope } from "react-icons/fa";
+
+// Dummy data untuk semua section
+const dummyServices = [
+    {
+        _id: 1,
+        title: "Career Counseling",
+        shortDescription: "Layanan konsultasi karir profesional untuk membantu pengambilan keputusan",
+        image: "https://maukuliah.ap-south-1.linodeobjects.com/job/1701409908-ii2tk3e4w9.jpeg"
+    },
+    {
+        _id: 2,
+        title: "Workshop Development",
+        shortDescription: "Pelatihan pengembangan keterampilan profesional",
+        image: "https://executivevc.unl.edu/sites/unl.edu.executive-vice-chancellor/files/media/image/development-workshops-header.jpg"
+    },
+    {
+        _id: 3,
+        title: "Workshop Development",
+        shortDescription: "Pelatihan pengembangan keterampilan profesional",
+        image: "https://executivevc.unl.edu/sites/unl.edu.executive-vice-chancellor/files/media/image/development-workshops-header.jpg"
+    }
+];
+
+const dummyEvents = [
+    {
+        _id: 1,
+        title: "Job Fair Nasional 2024",
+        date: "2024-03-15",
+        description: "Pameran pekerjaan terbesar tahun ini",
+        image: "https://sleekr.co/wp-content/uploads/2019/08/shutterstock_1072495955-1.jpg"
+    },
+    {
+        _id: 1,
+        title: "Pelatihan CCOP 5 2025",
+        date: "2024-03-15",
+        description: "Pelatihan CCOP Yang Ke 5 ",
+        image: "https://www.mditack.co.id/wp-content/uploads/2020/09/Employee_Training_and_Development.jpg"
+    },
+    {
+        _id: 1,
+        title: "Job Fair Nasional 2024",
+        date: "2024-03-15",
+        description: "Pameran pekerjaan terbesar tahun ini",
+        image: "src/assets/events-1.jpg"
+    }
+];
+
+const dummyPartners = [
+    { _id: 1, name: "Google", type: "Local", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnSA1zygA3rubv-VK0DrVcQ02Po79kJhXo_A&s" },
+    { _id: 2, name: "Microsoft", type: "Abroad", logo: "/assets/img/clients/client-2.png" }
+];
+
+const dummyTeam = [
+    {
+        _id: 1,
+        name: "John Doe",
+        position: "CEO",
+        department: "Management",
+        photo: "/assets/img/team/team-1.jpg"
+    }
+];
+
+const dummyBerita = [
+    {
+        id: 1,
+        judul: "Peluncuran Program Baru",
+        deskripsi: "ICCN meluncurkan program mentoring karir...",
+        gambar: "/assets/img/news-1.jpg",
+        waktu_tayang: "2024-02-20",
+        status: "branding"
+    }
+];
+
+const dummyGallery = [
+    { image_url: "/assets/img/gallery-1.jpg", created_at: "2024-02-01" },
+    { image_url: "/assets/img/gallery-2.jpg", created_at: "2024-02-02" }
+];
 
 const LandingPage = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -438,23 +516,21 @@ const LandingPage = () => {
                     </div>
                 </section>
 
-
                 {/* Services Section */}
                 <section id="services" className="py-12 bg-gray-100">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Our Services</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {services.slice(0, 2).map((service, index) => (
+                            {dummyServices.slice(0, 2).map((service, index) => (
                                 <motion.div
                                     key={service._id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
                                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => setSelectedService(service)}
                                 >
                                     <img
-                                        src={`${API_BASE_URL}${service.image}`}
+                                        src={service.image} // Menggunakan path dari dummy data
                                         alt={service.title}
                                         className="w-full h-48 object-cover"
                                     />
@@ -464,7 +540,6 @@ const LandingPage = () => {
                                     </div>
                                 </motion.div>
                             ))}
-                            {/* Tombol + untuk menuju PageServices */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -472,7 +547,7 @@ const LandingPage = () => {
                                 className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
                                 onClick={() => navigate("/services")}
                             >
-                                <div className="p-6 text-4xl font-bold text-white">+{services.length - 2}</div>
+                                <div className="p-6 text-4xl font-bold text-white">+{dummyServices.length - 2}</div>
                             </motion.div>
                         </div>
                     </div>
@@ -483,17 +558,16 @@ const LandingPage = () => {
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Upcoming Events</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {events.slice(0, 2).map((event, index) => (
+                            {dummyEvents.slice(0, 2).map((event, index) => (
                                 <motion.div
                                     key={event._id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
                                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => setSelectedEvent(event)}
                                 >
                                     <img
-                                        src={`${API_BASE_URL}${event.image}`}
+                                        src={event.image}
                                         alt={event.title}
                                         className="w-full h-48 object-cover"
                                     />
@@ -506,7 +580,6 @@ const LandingPage = () => {
                                     </div>
                                 </motion.div>
                             ))}
-                            {/* Tombol + untuk menuju PageEvents */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -514,7 +587,7 @@ const LandingPage = () => {
                                 className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
                                 onClick={() => navigate("/events")}
                             >
-                                <div className="p-6 text-4xl font-bold text-white">+{events.length - 2}</div>
+                                <div className="p-6 text-4xl font-bold text-white">+{dummyEvents.length - 2}</div>
                             </motion.div>
                         </div>
                     </div>
@@ -525,48 +598,31 @@ const LandingPage = () => {
                     <section id="partnership" className="py-12 bg-gray-100">
                         <div className="container mx-auto px-4">
                             <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Our Partners</h2>
-
-                            {/* Filter Navigation */}
-                            <motion.div
-                                className="flex justify-center mb-8 gap-4"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.5 }}
-                            >
-                                {['All', 'Local', 'Abroad', 'University'].map((type) => (
-                                    <motion.button
-                                        key={type}
-                                        onClick={() => setSelectedPartnerType(type)}
-                                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-300 ${selectedPartnerType === type
-                                            ? 'bg-gradient-to-b from-orange-600 to-orange-400 text-white'
-                                            : 'bg-white text-blue-900 hover:bg-orange-100'
-                                            }`}
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        {type}
-                                    </motion.button>
-                                ))}
-                            </motion.div>
-
-                            {/* Partner Logos Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                                {filteredPartners.map((partner, index) => (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                                {dummyPartners.slice(0, 3).map((partner, index) => (
                                     <motion.div
                                         key={partner._id}
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.8 }}
-                                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                                        transition={{ duration: 0.3, delay: index * 0.1 }}
                                         className="bg-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
                                     >
                                         <img
-                                            src={`${API_BASE_URL}${partner.logo}`}
+                                            src={partner.logo}
                                             alt={partner.name}
                                             className="w-full h-24 object-contain object-center"
                                         />
                                     </motion.div>
                                 ))}
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.3, delay: 0.5 }}
+                                    className="bg-gray-400 p-4 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+                                    onClick={() => navigate("/partners")}
+                                >
+                                    <div className="text-4xl font-bold text-white">+{dummyPartners.length - 3}</div>
+                                </motion.div>
                             </div>
                         </div>
                     </section>
@@ -577,28 +633,25 @@ const LandingPage = () => {
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Our Team</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {team.slice(0, 3).map((member, index) => (
+                            {dummyTeam.slice(0, 2).map((member, index) => (
                                 <motion.div
                                     key={member._id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
                                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => setSelectedMember(member)}
                                 >
                                     <img
-                                        src={`${API_BASE_URL}${member.photo}`}
+                                        src={member.photo}
                                         alt={member.name}
                                         className="w-full h-48 object-cover"
                                     />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-blue-900 mb-2">{member.name}</h3>
                                         <p className="text-gray-700">{member.position}</p>
-                                        <p className="text-sm text-gray-500 mt-4">{member.department}</p>
                                     </div>
                                 </motion.div>
                             ))}
-                            {/* Tombol + untuk menuju PageTeam */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -606,7 +659,7 @@ const LandingPage = () => {
                                 className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
                                 onClick={() => navigate("/team")}
                             >
-                                <div className="p-6 text-4xl font-bold text-white">+{team.length - 3}</div>
+                                <div className="p-6 text-4xl font-bold text-white">+{dummyTeam.length - 2}</div>
                             </motion.div>
                         </div>
                     </div>
@@ -616,88 +669,69 @@ const LandingPage = () => {
                 <section id="berita" className="py-12 bg-gray-100">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Berita Terbaru</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                            {berita.slice(0, 4).map((item) => (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {dummyBerita.slice(0, 2).map((berita, index) => (
                                 <motion.div
-                                    key={item.id}
+                                    key={berita.id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5 }}
+                                    transition={{ duration: 0.5, delay: index * 0.1 }}
                                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => handleShowDetail(item)}
                                 >
-                                    {item.gambar && (
-                                        <img
-                                            src={`${API_BASE_URL}/uploads/berita/${item.gambar}`}
-                                            alt={item.judul}
-                                            className="w-full h-48 object-cover"
-                                        />
-                                    )}
+                                    <img
+                                        src={berita.gambar}
+                                        alt={berita.judul}
+                                        className="w-full h-48 object-cover"
+                                    />
                                     <div className="p-6">
-                                        <h3 className="text-xl font-semibold text-blue-900 mb-2">{item.judul}</h3>
-                                        <p className="text-gray-700 line-clamp-3">{item.deskripsi}</p>
-                                        <p className="text-sm text-gray-500 mt-4">
-                                            {new Date(item.waktu_tayang).toLocaleDateString()}
-                                        </p>
-                                        {item.status === "branding" && (
-                                            <span className="inline-block bg-yellow-500 text-white px-2 py-1 rounded-full text-xs mt-2">
-                                                Hot!
-                                            </span>
-                                        )}
+                                        <h3 className="text-xl font-semibold text-blue-900 mb-2">{berita.judul}</h3>
+                                        <p className="text-gray-700 line-clamp-3">{berita.deskripsi}</p>
                                     </div>
                                 </motion.div>
                             ))}
-                            {/* Tombol + untuk menuju PageBerita */}
-                            {berita.length > 4 && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.5 }}
-                                    className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
-                                    onClick={() => navigate("/page-berita")}
-                                >
-                                    <div className="p-6 text-4xl font-bold text-white">+{berita.length - 4}</div>
-                                </motion.div>
-                            )}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.5 }}
+                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+                                onClick={() => navigate("/berita")}
+                            >
+                                <div className="p-6 text-4xl font-bold text-white">+{dummyBerita.length - 2}</div>
+                            </motion.div>
                         </div>
                     </div>
                 </section>
 
+
                 {/* Gallery Section */}
                 <section id="gallery" className="py-12 bg-white">
                     <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan ICCN</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {gallery.slice(0, 7).map((item, index) => (
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {dummyGallery.slice(0, 2).map((gallery, index) => (
                                 <motion.div
                                     key={index}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
                                     className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => openGalleryModal(item)} // Buka modal saat gambar diklik
                                 >
                                     <img
-                                        src={item.image_url}
+                                        src={gallery.image_url}
                                         alt={`Gallery ${index + 1}`}
                                         className="w-full h-48 object-cover"
                                     />
                                 </motion.div>
                             ))}
-                            {/* Tombol (+angka) untuk melihat lebih banyak */}
-                            {gallery.length > 7 && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.5 }}
-                                    className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-400 transition-shadow duration-300 flex items-center justify-center bg-gray-300 cursor-pointer"
-                                    onClick={() => navigate("/gallery")}
-                                >
-                                    <div className="text-white text-2xl font-bold">
-                                        +{gallery.length - 7}
-                                    </div>
-                                </motion.div>
-                            )}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.5 }}
+                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+                                onClick={() => navigate("/gallery")}
+                            >
+                                <div className="p-6 text-4xl font-bold text-white">+{dummyGallery.length - 2}</div>
+                            </motion.div>
                         </div>
                     </div>
                 </section>
@@ -845,6 +879,130 @@ const LandingPage = () => {
                         </div>
                     </div>
                 </section>
+
+                {/* Footer Section */}
+                <footer className="bg-gray-900 text-white py-12">
+                    <div className="container mx-auto px-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {/* About Section */}
+                            <div className="space-y-4">
+                                <h4 className="text-xl font-bold">About ICCN</h4>
+                                <p className="text-gray-400">
+                                    Indonesia Career Center Network (ICCN) adalah jejaring pusat karir yang bertujuan untuk meningkatkan kualitas SDM Indonesia.
+                                </p>
+                                <div className="flex space-x-4">
+                                    <a href="#" className="text-gray-400 hover:text-white">
+                                        <i className="bi bi-twitter-x"></i>
+                                    </a>
+                                    <a href="#" className="text-gray-400 hover:text-white">
+                                        <i className="bi bi-facebook"></i>
+                                    </a>
+                                    <a href="#" className="text-gray-400 hover:text-white">
+                                        <i className="bi bi-instagram"></i>
+                                    </a>
+                                    <a href="#" className="text-gray-400 hover:text-white">
+                                        <i className="bi bi-linkedin"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Useful Links Section */}
+                            <div className="space-y-4">
+                                <h4 className="text-xl font-bold">Useful Links</h4>
+                                <ul className="space-y-2">
+                                    <li>
+                                        <ScrollLink
+                                            to="home"
+                                            smooth={true}
+                                            duration={500}
+                                            className="flex items-center text-gray-400 hover:text-white cursor-pointer"
+                                        >
+                                            <FaArrowRight className="mr-2 text-orange-500" />
+                                            <span>Home</span>
+                                        </ScrollLink>
+                                    </li>
+                                    <li>
+                                        <ScrollLink
+                                            to="about"
+                                            smooth={true}
+                                            duration={500}
+                                            className="flex items-center text-gray-400 hover:text-white cursor-pointer"
+                                        >
+                                            <FaArrowRight className="mr-2 text-orange-500" />
+                                            <span>About</span>
+                                        </ScrollLink>
+                                    </li>
+                                    <li>
+                                        <ScrollLink
+                                            to="services"
+                                            smooth={true}
+                                            duration={500}
+                                            className="flex items-center text-gray-400 hover:text-white cursor-pointer"
+                                        >
+                                            <FaArrowRight className="mr-2 text-orange-500" />
+                                            <span>Services</span>
+                                        </ScrollLink>
+                                    </li>
+                                    <li>
+                                        <ScrollLink
+                                            to="event"
+                                            smooth={true}
+                                            duration={500}
+                                            className="flex items-center text-gray-400 hover:text-white cursor-pointer"
+                                        >
+                                            <FaArrowRight className="mr-2 text-orange-500" />
+                                            <span>Event</span>
+                                        </ScrollLink>
+                                    </li>
+                                    <li>
+                                        <ScrollLink
+                                            to="partnership"
+                                            smooth={true}
+                                            duration={500}
+                                            className="flex items-center text-gray-400 hover:text-white cursor-pointer"
+                                        >
+                                            <FaArrowRight className="mr-2 text-orange-500" />
+                                            <span>Partnership</span>
+                                        </ScrollLink>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            {/* Contact Info Section */}
+                            <div className="space-y-4">
+                                <h4 className="text-xl font-bold">Contact Info</h4>
+                                <div className="space-y-4">
+                                    <div className="flex items-center space-x-4">
+                                        <FaMapMarkerAlt className="text-orange-400 text-xl" />
+                                        <p className="text-gray-400">
+                                            Jl. Contoh Alamat No. 123<br />
+                                            Kota Bandung, Jawa Barat<br />
+                                            Indonesia 40123
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <FaPhone className="text-orange-400 text-xl" />
+                                        <p className="text-gray-400">+62 123 4567 890</p>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <FaEnvelope className="text-orange-400 text-xl" />
+                                        <p className="text-gray-400">info@iccn.id</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Copyright Section */}
+                        <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+                            <p className="text-gray-400">
+                                © Copyright <strong className="text-white">ICCN</strong>. All Rights Reserved
+                            </p>
+                            <p className="text-gray-400 text-sm mt-2">
+                                Designed by <a href="https://bootstrapmade.com/" className="text-orange-600 hover:text-orange-700">BootstrapMade</a>
+                            </p>
+                        </div>
+                    </div>
+                </footer>
             </main>
         </div>
     );
