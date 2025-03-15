@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaArrowLeft } from "react-icons/fa";
 import { motion } from "framer-motion";
-import Navbar from "../components/Navbar";
 import Swal from "sweetalert2";
 
 export default function Register() {
