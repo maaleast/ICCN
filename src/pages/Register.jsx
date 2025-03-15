@@ -28,22 +28,52 @@ export default function Register() {
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
-    const isNextDisabled = !formData.username || !formData.email || !formData.password;
+    const [showPassword, setShowPassword] = useState(false); // State untuk toggle visibility password
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State untuk toggle visibility konfirmasi password
+    const [confirmPassword, setConfirmPassword] = useState(""); // State untuk konfirmasi password
+    const [passwordError, setPasswordError] = useState(""); // State untuk pesan error konfirmasi password
     const navigate = useNavigate();
 
+    // Handler untuk toggle visibility password
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    // Handler untuk toggle visibility konfirmasi password
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
+    };
+
+    // Validasi password setiap kali ada perubahan pada password atau confirmPassword
+    useEffect(() => {
+        if (formData.password !== confirmPassword) {
+            setPasswordError("Password tidak sama");
+        } else {
+            setPasswordError("");
+        }
+    }, [formData.password, confirmPassword]);
+
+    // Handler untuk perubahan input
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Handler untuk perubahan file
     const handleFileChange = (e) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.files[0] }));
     };
 
+    // Handler untuk tombol "Next"
     const handleNext = () => {
+        if (formData.password !== confirmPassword) {
+            setPasswordError("Password tidak sama");
+            return; // Jangan lanjut jika validasi gagal
+        }
         setStep(2);
     };
 
+    // Handler untuk tombol "Register"
     const handleRegister = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -75,9 +105,11 @@ export default function Register() {
         }
     };
 
+    // Cek apakah tombol "Next" harus dinonaktifkan
+    const isNextDisabled = !formData.username || !formData.email || !formData.password || passwordError;
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500">
-
             <div className="flex items-center justify-center h-screen">
                 {step === 1 ? (
                     <motion.div
@@ -96,16 +128,86 @@ export default function Register() {
                         <h2 className="text-3xl font-bold text-center text-white mb-6">Daftar</h2>
 
                         <form className="space-y-4">
-                            <input type="text" name="username" placeholder="Username" className="input w-full pl-10 pr-4 py-2 rounded-lg bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300" onChange={handleChange} />
-                            <input type="email" name="email" placeholder="Email" className="input w-full pl-10 pr-4 py-2 rounded-lg bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300" onChange={handleChange} />
-                            <input type="password" name="password" placeholder="Password" className="input w-full pl-10 pr-4 py-2 rounded-lg bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300" onChange={handleChange} />
+                            {/* Input Username */}
+                            <div className="relative">
+                                <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white" />
+                                <input
+                                    type="text"
+                                    name="username"
+                                    placeholder="Username"
+                                    className="input w-full pl-10 pr-4 py-2 rounded-lg bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    onChange={handleChange}
+                                />
+                            </div>
+
+                            {/* Input Email */}
+                            <div className="relative">
+                                <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white" />
+                                <input
+                                    type="email"
+                                    name="email"
+                                    placeholder="Email"
+                                    className="input w-full pl-10 pr-4 py-2 rounded-lg bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    onChange={handleChange}
+                                />
+                            </div>
+
+                            {/* Input Password */}
+                            <div className="relative">
+                                <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white" />
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    name="password"
+                                    placeholder="Password"
+                                    className="input w-full pl-10 pr-10 py-2 rounded-lg bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    onChange={handleChange}
+                                />
+                                <div
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white cursor-pointer"
+                                    onClick={togglePasswordVisibility}
+                                >
+                                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                </div>
+                            </div>
+
+                            {/* Input Konfirmasi Password */}
+                            <div className="relative">
+                                <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white" />
+                                <input
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    name="confirmPassword"
+                                    placeholder="Konfirmasi Password"
+                                    className="input w-full pl-10 pr-10 py-2 rounded-lg bg-white/20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                                <div
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white cursor-pointer"
+                                    onClick={toggleConfirmPasswordVisibility}
+                                >
+                                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                                </div>
+                            </div>
+
+                            {/* Pesan Error Konfirmasi Password */}
+                            {passwordError && (
+                                <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                            )}
+
+                            {/* Tombol Register */}
+                            <p className="text-center text-white mt-4">
+                                Sudah punya akun?{" "}
+                                <a href="/login" className="text-orange-300 font-bold hover:underline">Login</a>
+                            </p>
                             <motion.button
                                 whileHover={!isNextDisabled ? { scale: 1.05 } : {}}
                                 whileTap={!isNextDisabled ? { scale: 0.95 } : {}}
-                                className={`w-full py-2 text-white font-semibold rounded-lg transition-transform ${isNextDisabled ? "bg-gradient-to-b from-orange-600 to-orange-400  cursor-not-allowed" : "bg-gradient-to-b from-orange-600 to-orange-400 hover:shadow-lg hover:scale-105"
-                                    }`}
+                                className={`w-full py-2 text-white font-semibold rounded-lg transition-transform ${
+                                    isNextDisabled
+                                        ? "bg-gradient-to-b from-orange-600 to-orange-400 cursor-not-allowed"
+                                        : "bg-gradient-to-b from-orange-600 to-orange-400 hover:shadow-lg hover:scale-105"
+                                }`}
                                 onClick={handleNext}
-                                disabled={isNextDisabled}
+                                disabled={isNextDisabled} // Nonaktifkan tombol jika ada error
                             >
                                 Register
                             </motion.button>
