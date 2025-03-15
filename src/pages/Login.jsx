@@ -115,8 +115,7 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-800 to-blue-500">
-            <Navbar />
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500">
 
             <motion.div
                 initial={{ opacity: 0, y: -50 }}
@@ -245,7 +244,7 @@ export default function Login() {
                                 type="submit"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="w-full py-2 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg hover:shadow-lg transition-transform"
+                                className="w-full py-2 text-white font-semibold bg-gradient-to-r from-orange-700 to-orange-400 rounded-lg hover:shadow-lg transition-transform"
                             >
                                 Login
                             </motion.button>
@@ -254,7 +253,7 @@ export default function Login() {
                                 Lupa password?{" "}
                                 <button
                                     onClick={() => setIsResettingPassword(true)}
-                                    className="text-blue-300 font-bold hover:underline"
+                                    className="text-orange-300 font-bold hover:underline"
                                 >
                                     Reset Password
                                 </button>
@@ -262,7 +261,7 @@ export default function Login() {
 
                             <p className="text-center text-white mt-4">
                                 Belum punya akun?{" "}
-                                <a href="/register" className="text-blue-300 font-bold hover:underline">Daftar</a>
+                                <a href="/register" className="text-orange-300 font-bold hover:underline">Daftar</a>
                             </p>
                         </form>
                     )}

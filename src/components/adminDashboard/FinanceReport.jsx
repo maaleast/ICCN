@@ -97,6 +97,7 @@ export default function FinanceReport() {
     const [currentTransactions, setCurrentTransactions] = useState([]);
     const [availableMonths, setAvailableMonths] = useState([]);
     const [selectedChartMonth, setSelectedChartMonth] = useState('');
+    const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false); // State untuk modal
     const itemsPerPage = 10;
 
     // Ambil data awal
@@ -306,6 +307,44 @@ export default function FinanceReport() {
             const period = option.value.replace('excel-', '');
             handleDownloadExcel(period);
         }
+    };
+
+    // Fungsi untuk merender modal unduh laporan
+    const renderDownloadModal = () => {
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h2 className="text-lg font-semibold mb-4">Unduh Laporan</h2>
+                    <p>Pilih periode untuk mengunduh laporan:</p>
+                    <div className="mt-4">
+                        <button
+                            onClick={() => handleDownloadExcel('monthly')}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg mr-2"
+                        >
+                            Bulanan
+                        </button>
+                        <button
+                            onClick={() => handleDownloadExcel('yearly')}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg mr-2"
+                        >
+                            Tahunan
+                        </button>
+                        <button
+                            onClick={() => handleDownloadExcel('all')}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                        >
+                            Seluruhnya
+                        </button>
+                    </div>
+                    <button
+                        onClick={() => setIsDownloadModalOpen(false)}
+                        className="mt-4 bg-gray-300 dark:bg-gray-700 px-4 py-2 rounded-lg"
+                    >
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        );
     };
 
     return (

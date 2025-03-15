@@ -8,17 +8,16 @@ import { API_BASE_URL } from "../config";
 
 const PerpanjangMember = () => {
     const [formData, setFormData] = useState({
-        receiptName: "", // Nama pada kuitansi
-        transferAmount: "", // Jumlah transfer
-        buktiPembayaran: null, // Bukti pembayaran
+        receiptName: "",
+        transferAmount: "",
+        buktiPembayaran: null,
     });
 
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isAllowed, setIsAllowed] = useState(false); // State untuk izin akses
+    const [isAllowed, setIsAllowed] = useState(false);
     const navigate = useNavigate();
 
-    // Cek status verifikasi sebelum mengizinkan akses
     useEffect(() => {
         const checkVerificationStatus = async () => {
             const user_id = localStorage.getItem("user_id");
@@ -28,7 +27,7 @@ const PerpanjangMember = () => {
                     title: "Akses Ditolak",
                     text: "Anda harus login terlebih dahulu.",
                 });
-                navigate("/login"); // Arahkan ke halaman login jika tidak ada user_id
+                navigate("/login");
                 return;
             }
 
@@ -37,14 +36,14 @@ const PerpanjangMember = () => {
                 const data = await response.json();
 
                 if (data.status === 'PERPANJANG') {
-                    setIsAllowed(true); // Izinkan akses jika status adalah 'PENDING PERPANJANG'
+                    setIsAllowed(true);
                 } else {
                     Swal.fire({
                         icon: "error",
                         title: "Akses Ditolak",
                         text: "Anda tidak diizinkan mengakses halaman ini.",
                     });
-                    navigate("/home"); // Arahkan ke halaman home jika status tidak sesuai
+                    navigate("/home");
                 }
             } catch (error) {
                 console.error("Error fetching verification status:", error);
@@ -53,30 +52,26 @@ const PerpanjangMember = () => {
                     title: "Terjadi Kesalahan",
                     text: "Gagal memeriksa status verifikasi.",
                 });
-                navigate("/home"); // Arahkan ke halaman home jika terjadi error
+                navigate("/home");
             }
         };
 
         checkVerificationStatus();
     }, [navigate]);
 
-    // Jika tidak diizinkan, tampilkan loading atau null
     if (!isAllowed) {
-        return null; // Atau tampilkan loading spinner
+        return null;
     }
 
-    // Handle perubahan input text
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    // Handle perubahan file upload
     const handleFileChange = (e) => {
         setFormData({ ...formData, buktiPembayaran: e.target.files[0] });
     };
 
-    // Validasi form
     const validateForm = () => {
         let newErrors = {};
         if (!formData.receiptName.trim()) newErrors.receiptName = "Nama pada Kuitansi wajib diisi!";
@@ -86,7 +81,6 @@ const PerpanjangMember = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    // Handle submit form
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validateForm()) {
@@ -112,7 +106,6 @@ const PerpanjangMember = () => {
         });
     };
 
-    // Fungsi submitForm() untuk mengirimkan data
     const submitForm = async () => {
         setIsSubmitting(true);
 
@@ -125,6 +118,7 @@ const PerpanjangMember = () => {
         formDataToSend.append("bukti_pembayaran_perpanjang", formData.buktiPembayaran);
 
         try {
+            // Kirim data perpanjangan member
             const response = await fetch(`${API_BASE_URL}/members/request-perpanjang`, {
                 method: "POST",
                 body: formDataToSend,
@@ -138,6 +132,20 @@ const PerpanjangMember = () => {
             if (!response.ok) {
                 throw new Error(data.message || "Gagal mengajukan perpanjangan");
             }
+
+            // Catat pendapatan dari perpanjangan
+            await fetch(`${API_BASE_URL}/keuangan/tambah`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    status: "MASUK",
+                    jumlah: parseInt(formData.transferAmount),
+                    deskripsi: `Perpanjangan Member - ${formData.receiptName}`,
+                    tanggal: new Date().toISOString().split('T')[0],
+                }),
+            });
 
             Swal.fire({
                 icon: "success",
