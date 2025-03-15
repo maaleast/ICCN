@@ -3,33 +3,52 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-export default function DailyBalanceChart({ transactions }) {
-    // Hitung transaksi harian
-    const dailyData = transactions.reduce((acc, transaction) => {
-        const date = new Date(transaction.tanggal_waktu).toLocaleDateString('id-ID', {
-            timeZone: 'Asia/Jakarta',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
+export default function DailyBalanceChart({ transactions, availableMonths, selectedChartMonth, onMonthChange }) {
+    const generateMonthDates = () => {
+        if (!selectedChartMonth) return [];
+        const [year, month] = selectedChartMonth.split('-').map(Number);
+        const daysInMonth = new Date(year, month, 0).getDate();
+
+        return Array.from({ length: daysInMonth }, (_, i) => {
+            const date = new Date(year, month - 1, i + 1);
+            return date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'short'
+            });
         });
+    };
 
-        if (!acc[date]) {
+    const initializeDailyData = () => {
+        const dates = generateMonthDates();
+        return dates.reduce((acc, date) => {
             acc[date] = { income: 0, expense: 0 };
-        }
+            return acc;
+        }, {});
+    };
 
-        if (transaction.status === 'MASUK') {
-            acc[date].income += transaction.jumlah;
-        } else if (transaction.status === 'KELUAR') {
-            acc[date].expense += transaction.jumlah;
-        }
+    const updateDailyData = (initialData) => {
+        transactions.forEach(transaction => {
+            const date = new Date(transaction.tanggal_waktu).toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'short'
+            });
 
-        return acc;
-    }, {});
+            if (initialData[date]) {
+                if (transaction.status === 'MASUK') {
+                    initialData[date].income += transaction.jumlah;
+                } else {
+                    initialData[date].expense += transaction.jumlah;
+                }
+            }
+        });
+        return initialData;
+    };
 
-    // Format data chart
-    const sortedDates = Object.keys(dailyData).sort();
+    const dailyData = updateDailyData(initializeDailyData());
+    const sortedDates = generateMonthDates();
+
     const chartData = {
-        labels: sortedDates.map(date => new Date(date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })),
+        labels: sortedDates,
         datasets: [
             {
                 label: 'Pemasukan',
@@ -49,8 +68,11 @@ export default function DailyBalanceChart({ transactions }) {
         plugins: {
             title: {
                 display: true,
-                text: transactions.length > 0
-                    ? `Grafik Transaksi - ${new Date(transactions[0].tanggal_waktu).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}`
+                text: selectedChartMonth
+                    ? `Grafik Transaksi - ${new Date(selectedChartMonth + '-01').toLocaleDateString('id-ID', {
+                        month: 'long',
+                        year: 'numeric'
+                    })}`
                     : 'Grafik Transaksi'
             },
         },
@@ -70,7 +92,24 @@ export default function DailyBalanceChart({ transactions }) {
 
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm mb-6">
-            <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Grafik Transaksi Harian</h3>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold dark:text-gray-100">Grafik Transaksi Harian</h3>
+                {/* <select
+                    value={selectedChartMonth}
+                    onChange={(e) => onMonthChange(e.target.value)}
+                    className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2 text-sm"
+                >
+                    {availableMonths.map(month => (
+                        <option key={month} value={month}>
+                            {new Date(month + '-01').toLocaleDateString('id-ID', {
+                                month: 'long',
+                                year: 'numeric'
+                            })}
+                        </option>
+                    ))}
+                </select> */}
+            </div>
+
             {sortedDates.length > 0 ? (
                 <Bar data={chartData} options={options} />
             ) : (

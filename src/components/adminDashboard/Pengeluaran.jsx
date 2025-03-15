@@ -15,7 +15,7 @@ export default function Pengeluaran() {
     const [formData, setFormData] = useState({
         jumlah: '',
         deskripsi: '',
-        tanggal_waktu: new Date(), // Default: tanggal dan waktu sekarang
+        tanggal: new Date(), // Hanya tanggal, tanpa waktu
     });
     const [editingId, setEditingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
@@ -26,23 +26,19 @@ export default function Pengeluaran() {
         fetchData();
     }, []);
 
+    // Ambil data dari backend
     const fetchData = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan`);
             const data = await response.json();
 
-            // Pastikan tanggal_waktu dalam format yang valid
-            const convertedData = data.map(t => ({
-                ...t,
-                tanggal_waktu: new Date(t.tanggal_waktu), // Konversi ke Date object
-            }));
-
             // Filter hanya transaksi dengan status KELUAR
-            const pengeluaran = convertedData.filter(t => t.status === 'KELUAR');
+            const pengeluaran = data.filter(t => t.status === 'KELUAR');
             setTransactions(pengeluaran);
-            setFilteredTransactions(pengeluaran); // Set filteredTransactions dengan data awal
+            setFilteredTransactions(pengeluaran);
         } catch (error) {
             console.error('Gagal mengambil data:', error);
+            toast.error('Gagal mengambil data');
         }
     };
 
@@ -85,46 +81,54 @@ export default function Pengeluaran() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validasi di frontend
+        if (!formData.tanggal || !formData.jumlah || !formData.deskripsi) {
+            toast.error('Semua data harus diisi!');
+            return;
+        }
+
         const url = editingId
             ? `${API_BASE_URL}/admin/keuangan/edit/${editingId}`
             : `${API_BASE_URL}/admin/keuangan/tambah`;
 
         const method = editingId ? 'PUT' : 'POST';
 
-        // Format tanggal_waktu ke format ISO 8601
-        const formattedDate = new Date(formData.tanggal_waktu).toISOString();
+        // Format tanggal ke YYYY-MM-DD tanpa pengaruh timezone
+        const formattedDate = new Date(
+            formData.tanggal.getTime() - formData.tanggal.getTimezoneOffset() * 60000
+        ).toISOString().split('T')[0];
 
         try {
             const response = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    status: 'KELUAR',
+                    status: 'KELUAR', // Status pengeluaran
                     jumlah: parseFloat(formData.jumlah.replace(/[^0-9]/g, '')), // Hilangkan "Rp." dan format ribuan
                     deskripsi: formData.deskripsi,
-                    tanggal_waktu: formattedDate, // Kirim tanggal dan waktu dalam format ISO 8601
+                    tanggal: formattedDate, // Hanya tanggal, tanpa waktu
                 }),
             });
 
-            if (!response.ok) throw new Error('Gagal menyimpan');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menyimpan');
+            }
 
             // Refresh data
-            fetchData();
+            await fetchData();
 
             // Tampilkan notifikasi
-            if (editingId) {
-                toast.success('Pengeluaran berhasil diupdate!');
-            } else {
-                toast.success('Pengeluaran berhasil ditambahkan!');
-            }
+            toast.success(editingId ? 'Pengeluaran berhasil diupdate!' : 'Pengeluaran berhasil ditambahkan!');
 
             // Reset form
             setIsModalOpen(false);
-            setFormData({ jumlah: '', deskripsi: '', tanggal_waktu: new Date() });
+            setFormData({ jumlah: '', deskripsi: '', tanggal: new Date() });
             setEditingId(null);
         } catch (error) {
             console.error('Error:', error);
-            toast.error('Gagal menyimpan pengeluaran');
+            toast.error(error.message || 'Gagal menyimpan pengeluaran');
         }
     };
 
@@ -140,12 +144,16 @@ export default function Pengeluaran() {
 
         try {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan/delete/${deletingId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
             });
-            if (!response.ok) throw new Error('Gagal menghapus');
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menghapus');
+            }
 
             // Refresh data
-            fetchData();
+            await fetchData();
 
             // Tampilkan notifikasi
             toast.success('Pengeluaran berhasil dihapus!');
@@ -154,7 +162,7 @@ export default function Pengeluaran() {
             setIsDeleteModalOpen(false);
         } catch (error) {
             console.error('Gagal menghapus:', error);
-            toast.error('Gagal menghapus pengeluaran');
+            toast.error(error.message || 'Gagal menghapus pengeluaran');
         }
     };
 
@@ -234,15 +242,7 @@ export default function Pengeluaran() {
                                 <tr key={t.id} className="border-t dark:border-gray-700">
                                     <td className="py-3 px-4 dark:text-gray-300">{t.deskripsi}</td>
                                     <td className="py-3 px-4 dark:text-gray-300">
-                                        {new Date(t.tanggal_waktu).toLocaleString('id-ID', {
-                                            timeZone: 'Asia/Jakarta',
-                                            year: 'numeric',
-                                            month: '2-digit',
-                                            day: '2-digit',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            second: '2-digit',
-                                        })}
+                                        {new Date(t.tanggal_waktu).toLocaleDateString('id-ID')} {/* Hanya tanggal */}
                                     </td>
                                     <td className="py-3 px-4 dark:text-gray-300">
                                         {new Intl.NumberFormat('id-ID', {
@@ -262,7 +262,7 @@ export default function Pengeluaran() {
                                                         minimumFractionDigits: 0,
                                                     }).format(t.jumlah),
                                                     deskripsi: t.deskripsi,
-                                                    tanggal_waktu: new Date(t.tanggal_waktu), // Konversi ke Date object
+                                                    tanggal: new Date(t.tanggal_waktu), // Konversi ke Date object
                                                 });
                                                 setIsModalOpen(true);
                                             }}
@@ -303,19 +303,17 @@ export default function Pengeluaran() {
                             {editingId ? 'Edit Pengeluaran' : 'Tambah Pengeluaran'}
                         </h3>
                         <form onSubmit={handleSubmit}>
-                            {/* Input Tanggal dan Waktu */}
+                            {/* Input Tanggal */}
                             <div className="mb-4">
                                 <label className="block text-sm font-medium mb-2 dark:text-gray-300">
-                                    Tanggal dan Waktu
+                                    Tanggal
                                 </label>
                                 <DatePicker
-                                    selected={formData.tanggal_waktu}
-                                    onChange={(date) => setFormData({ ...formData, tanggal_waktu: date })}
-                                    showTimeSelect
-                                    timeFormat="HH:mm"
-                                    timeIntervals={15}
-                                    dateFormat="yyyy-MM-dd HH:mm"
+                                    selected={formData.tanggal}
+                                    onChange={(date) => setFormData({ ...formData, tanggal: date })}
+                                    dateFormat="yyyy-MM-dd"
                                     className="w-full p-2 border rounded dark:text-gray-800"
+                                    showTimeSelect={false} // Pastikan waktu tidak dipilih
                                 />
                             </div>
 

@@ -43,29 +43,30 @@ const CustomDropdown = ({ options, onSelect }) => {
     );
 };
 
-// Fungsi untuk mengambil data pendapatan bulanan
 export const getPendapatanBulanan = async () => {
     try {
         const response = await fetch(`${API_BASE_URL}/admin/keuangan/bulan-ini`);
         const data = await response.json();
         return {
-            pendapatanBulanan: parseFloat(data.total_pendapatan || "0"),
-            pengeluaranBulanIni: parseFloat(data.total_pengeluaran || "0"),
+            pendapatanBulanan: parseFloat(data.total_pendapatan || "0")
         };
     } catch (error) {
         console.error('Gagal mengambil data pendapatan bulanan:', error);
-        return { pendapatanBulanan: 0, pengeluaranBulanIni: 0 };
+        toast.error('Gagal mengambil data pendapatan bulanan');
+        return {
+            pendapatanBulanan: 0
+        };
     }
 };
 
-// Fungsi untuk mengambil saldo akhir
 export const getSaldoAkhir = async () => {
     try {
         const response = await fetch(`${API_BASE_URL}/admin/keuangan/saldo-akhir`);
         const data = await response.json();
-        return parseFloat(data.saldo_akhir || 0);
+        return Number(data.saldo_akhir || 0);
     } catch (error) {
-        console.error('Gagal mengambil saldo akhir:', error);
+        console.error('Gagal mengambil data saldo akhir:', error);
+        toast.error('Gagal mengambil data saldo akhir');
         return 0;
     }
 };
@@ -96,6 +97,7 @@ export default function FinanceReport() {
     const [currentTransactions, setCurrentTransactions] = useState([]);
     const [availableMonths, setAvailableMonths] = useState([]);
     const [selectedChartMonth, setSelectedChartMonth] = useState('');
+    const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false); // State untuk modal
     const itemsPerPage = 10;
 
     // Ambil data awal
@@ -158,7 +160,6 @@ export default function FinanceReport() {
         const endIndex = startIndex + itemsPerPage;
         setCurrentTransactions(filteredTransactions.slice(startIndex, endIndex));
 
-        // Reset halaman jika perlu
         if (currentPage > Math.ceil(filteredTransactions.length / itemsPerPage)) {
             setCurrentPage(1);
         }
@@ -308,6 +309,44 @@ export default function FinanceReport() {
         }
     };
 
+    // Fungsi untuk merender modal unduh laporan
+    const renderDownloadModal = () => {
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h2 className="text-lg font-semibold mb-4">Unduh Laporan</h2>
+                    <p>Pilih periode untuk mengunduh laporan:</p>
+                    <div className="mt-4">
+                        <button
+                            onClick={() => handleDownloadExcel('monthly')}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg mr-2"
+                        >
+                            Bulanan
+                        </button>
+                        <button
+                            onClick={() => handleDownloadExcel('yearly')}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg mr-2"
+                        >
+                            Tahunan
+                        </button>
+                        <button
+                            onClick={() => handleDownloadExcel('all')}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                        >
+                            Seluruhnya
+                        </button>
+                    </div>
+                    <button
+                        onClick={() => setIsDownloadModalOpen(false)}
+                        className="mt-4 bg-gray-300 dark:bg-gray-700 px-4 py-2 rounded-lg"
+                    >
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <ToastContainer position="bottom-right" autoClose={3000} />
@@ -403,6 +442,9 @@ export default function FinanceReport() {
                     onMonthChange={(month) => setSelectedChartMonth(month)}
                 />
             </div>
+
+            {/* Modal Unduh Laporan */}
+            {isDownloadModalOpen && renderDownloadModal()}
         </div>
     );
 }

@@ -9,6 +9,9 @@ import LoggedInPage from "./pages/LoggedInPage";
 import PageGallery from "./pages/PageGallery";
 import PerpanjangMember from "./pages/PerpanjangMember";
 import PageBerita from "./pages/PageBerita";
+import PageServices from './pages/PageServices';
+import PageEvents from './pages/PageEvents';
+import PageTeam from './pages/PageTeam';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const token = localStorage.getItem("token");
@@ -29,8 +32,11 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/page-gallery" element={<PageGallery />} />
-        <Route path="/page-berita" element={<PageBerita />} />
+        <Route path="/gallery" element={<PageGallery />} />
+        <Route path="/berita" element={<PageBerita />} />
+        <Route path="/services" element={<PageServices />} />
+        <Route path="/events" element={<PageEvents />} />
+        <Route path="/team" element={<PageTeam />} />
 
         <Route path="/membership-registration" element={
           <ProtectedRoute>
