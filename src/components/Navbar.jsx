@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ScrollLink } from "react-scroll";
 import Logo from "../assets/iccn.png";
 
 const Navbar = () => {
@@ -16,39 +15,48 @@ const Navbar = () => {
         navigate('/login');
     };
 
+    // Fungsi untuk menangani navigasi berdasarkan status login
+    const handleNavigation = (path) => {
+        if (isLoggedIn) {
+            navigate(path);
+        } else {
+            navigate("/");
+        }
+    };
+
     return (
         <header className="fixed top-0 left-0 right-0 z-10 shadow-lg">
-            <div className="relative bg-white opacity-80 h-full">
-                <div className="absolute right-0 top-0 h-full w-64 bg-gradient-to-br from-blue-400 via-blue-600 to-blue-900 clip-path-trapezoid-reverse"></div>
+            <div className="relative bg-gray-800 opacity-80 h-full">
+                <div className="absolute right-0 top-0 h-full w-64 bg-gradient-to-tr from-gray-950 via-gray-800 to-gray-600 clip-path-trapezoid-reverse"></div>
 
                 <nav className="w-full px-10 flex justify-between items-center p-4 relative">
                     <div className="z-20 flex items-center">
-                        <button onClick={() => navigate("/home")}>
+                        <button onClick={() => handleNavigation("/home")}>
                             <img src={Logo} alt="ICCN Logo" className="h-20 w-auto max-w-none" />
                         </button>
                     </div>
 
-                    <ul className="flex space-x-8 font-semibold text-gray-700 z-20">
+                    <ul className="flex space-x-8 font-semibold text-white z-20">
                         <li>
-                            <Link
-                                to="/home"
-                                className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                            <button
+                                onClick={() => handleNavigation(isLoggedIn ? "/home" : "/")}
+                                className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                             >
                                 Home
-                            </Link>
+                            </button>
                         </li>
                         <li>
-                            <Link
-                                to="/about"
-                                className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                            <button
+                                onClick={() => handleNavigation(isLoggedIn ? "/home" : "/")}
+                                className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                             >
                                 About
-                            </Link>
+                            </button>
                         </li>
                         <li>
                             <Link
                                 to="/services"
-                                className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                             >
                                 Services
                             </Link>
@@ -56,23 +64,39 @@ const Navbar = () => {
                         <li>
                             <Link
                                 to="/events"
-                                className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                             >
                                 Events
                             </Link>
                         </li>
                         <li>
+                            <button
+                                onClick={() => handleNavigation(isLoggedIn ? "/home" : "/")}
+                                className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                            >
+                                Partnership
+                            </button>
+                        </li>
+                        <li>
                             <Link
                                 to="/team"
-                                className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                             >
                                 Our Team
                             </Link>
                         </li>
                         <li>
+                            <button
+                                onClick={() => handleNavigation(isLoggedIn ? "/home" : "/")}
+                                className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                            >
+                                Contact
+                            </button>
+                        </li>
+                        <li>
                             <Link
                                 to="/gallery"
-                                className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                             >
                                 Gallery
                             </Link>
@@ -80,7 +104,7 @@ const Navbar = () => {
                         <li>
                             <Link
                                 to="/berita"
-                                className="px-2 hover:text-white hover:bg-gradient-to-b from-blue-600 to-blue-500 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                             >
                                 Berita
                             </Link>
@@ -91,14 +115,14 @@ const Navbar = () => {
                         {isLoggedIn ? (
                             <button
                                 onClick={handleLogout}
-                                className="bg-gradient-to-b from-blue-600 to-blue-500 text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:from-blue-700 hover:to-blue-600 duration-200"
+                                className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-500 duration-200"
                             >
                                 Logout
                             </button>
                         ) : (
                             <button
                                 onClick={() => navigate("/login")}
-                                className="bg-gradient-to-b from-blue-600 to-blue-500 text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:from-blue-700 hover:to-blue-600 duration-200"
+                                className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-200"
                             >
                                 Sign In
                             </button>

@@ -60,7 +60,7 @@ const PageGallery = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-600 to-blue-400">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500">
             <Navbar />
 
             {/* Main Content */}

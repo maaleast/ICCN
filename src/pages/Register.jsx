@@ -77,8 +77,8 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-800 to-blue-500">
-            <Navbar />
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500">
+
             <div className="flex items-center justify-center h-screen">
                 {step === 1 ? (
                     <motion.div
@@ -103,9 +103,8 @@ export default function Register() {
                             <motion.button
                                 whileHover={!isNextDisabled ? { scale: 1.05 } : {}}
                                 whileTap={!isNextDisabled ? { scale: 0.95 } : {}}
-                                className={`w-full py-2 text-white font-semibold rounded-lg transition-transform ${
-                                    isNextDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-gradient-to-r from-blue-500 to-blue-700 hover:shadow-lg"
-                                }`}
+                                className={`w-full py-2 text-white font-semibold rounded-lg transition-transform ${isNextDisabled ? "bg-gradient-to-b from-orange-600 to-orange-400  cursor-not-allowed" : "bg-gradient-to-b from-orange-600 to-orange-400 hover:shadow-lg hover:scale-105"
+                                    }`}
                                 onClick={handleNext}
                                 disabled={isNextDisabled}
                             >
@@ -145,7 +144,7 @@ export default function Register() {
                         <div className="w-3/5 p-8">
                             <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">Formulir Pendaftaran Membership</h2>
                             <form className="space-y-5" onSubmit={handleRegister} encType="multipart/form-data">
-                            <div className="grid grid-cols-2 gap-6">
+                                <div className="grid grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-600">Tipe Keanggotaan</label>
                                         <select
