@@ -1,35 +1,184 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "../config";
-import { FaTimes } from "react-icons/fa"; // Import ikon Times
-import Swal from "sweetalert2"; // Import SweetAlert2
+import Swal from "sweetalert2";
 import { Link as ScrollLink } from "react-scroll";
 import aboutImage from "../assets/images.jpg";
 import LandingBg from "../assets/LandingBg.jpg";
-import { AnimatePresence } from "framer-motion";
 import Logo from "../assets/iccn.png";
+import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes, FaFlag } from "react-icons/fa";
+import usa from "../assets/usa.png";
+import ina from "../assets/ina.png";
+
+// Dummy data untuk semua section
+const dummyServices = [
+    {
+        _id: 1,
+        title: "Career Counseling",
+        shortDescription: "Layanan konsultasi karir profesional untuk membantu pengambilan keputusan",
+        image: "https://maukuliah.ap-south-1.linodeobjects.com/job/1701409908-ii2tk3e4w9.jpeg"
+    },
+    {
+        _id: 2,
+        title: "Workshop Development",
+        shortDescription: "Pelatihan pengembangan keterampilan profesional",
+        image: "https://executivevc.unl.edu/sites/unl.edu.executive-vice-chancellor/files/media/image/development-workshops-header.jpg"
+    },
+    {
+        _id: 3,
+        title: "Workshop Development",
+        shortDescription: "Pelatihan pengembangan keterampilan profesional",
+        image: "https://executivevc.unl.edu/sites/unl.edu.executive-vice-chancellor/files/media/image/development-workshops-header.jpg"
+    }
+];
+
+const dummyEvents = [
+    {
+        _id: 1,
+        title: "Job Fair Nasional 2024",
+        date: "2024-03-15",
+        description: "Pameran pekerjaan terbesar tahun ini",
+        image: "https://sleekr.co/wp-content/uploads/2019/08/shutterstock_1072495955-1.jpg"
+    },
+    {
+        _id: 1,
+        title: "Pelatihan CCOP 5 2025",
+        date: "2024-03-15",
+        description: "Pelatihan CCOP Yang Ke 5 ",
+        image: "https://www.mditack.co.id/wp-content/uploads/2020/09/Employee_Training_and_Development.jpg"
+    },
+    {
+        _id: 1,
+        title: "Job Fair Nasional 2024",
+        date: "2024-03-15",
+        description: "Pameran pekerjaan terbesar tahun ini",
+        image: "src/assets/events-1.jpg"
+    }
+];
+
+const partners = [
+    {
+        _id: 1,
+        name: "Google",
+        type: "Abroad",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg",
+    },
+    {
+        _id: 2,
+        name: "Microsoft",
+        type: "Abroad",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg",
+    },
+    {
+        _id: 3,
+        name: "Institut Teknologi Bandung",
+        type: "University",
+        logo: "https://upload.wikimedia.org/wikipedia/id/9/95/Logo_Institut_Teknologi_Bandung.png",
+    },
+    {
+        _id: 4,
+        name: "Apple",
+        type: "Abroad",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg",
+    },
+    {
+        _id: 5,
+        name: "Universitas Pancasila",
+        type: "University",
+        logo: "https://upload.wikimedia.org/wikipedia/id/4/46/Logo_Universitas_Pancasila.png",
+    },
+    {
+        _id: 6,
+        name: "Amazon",
+        type: "Abroad",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
+    },
+    {
+        _id: 7,
+        name: "Udinus",
+        type: "University",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Logo_udinus1.jpg/1200px-Logo_udinus1.jpg",
+    },
+    {
+        _id: 8,
+        name: "Telkom Indonesia",
+        type: "Local",
+        logo: "https://jobtrenurtika.wordpress.com/wp-content/uploads/2015/07/logo-telkom-indonesia-transparent-background.png",
+    },
+    {
+        _id: 9,
+        name: "Djarum",
+        type: "Local",
+        logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFjilzQnXXBYbl2Fx2B-lykZU4m_ZWfWwqqw&s",
+    },
+    {
+        _id: 10,
+        name: "Gojek",
+        type: "Local",
+        logo: "https://solusiprinting.com/wp-content/uploads/2020/08/Logo-Gojek-1280px-x-720px-1024x576.jpg",
+    },
+];
+
+const teamMembers = [
+    {
+        id: 1,
+        name: "Walter White",
+        position: "Chief Executive Officer",
+        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_vVBAvcz_VzzBC-8kmKTJ6j3B7t3LbYOhhg&s",
+    },
+    {
+        id: 2,
+        name: "Sarah Jhonson",
+        position: "Product Manager",
+        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMdBuvbsYu7WYAAUY2AqSQRGNESsYdkucDkQ&s",
+    },
+    {
+        id: 3,
+        name: "William Anderson",
+        position: "CTO",
+        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgiFdgv377GbHewlOp8pafN1iCpITSEyXr0A&s",
+    },
+];
+
+const dummyBerita = [
+    {
+        id: 1,
+        judul: "Peluncuran Program Baru",
+        deskripsi: "ICCN meluncurkan program mentoring karir...",
+        gambar: "https://komunikasi.untag-sby.ac.id/uploads/berita/WhatsApp_Image_2024-04-12_at_15_12_08.jpeg",
+        waktu_tayang: "2024-02-20",
+        status: "branding"
+    }
+];
+
+const dummyGallery = [
+    { image_url: "https://indonesiacareercenter.id/wp-content/uploads/2022/06/WhatsApp-Image-2021-03-20-at-10.32.25-1.jpeg", created_at: "2024-02-01" },
+    { image_url: "https://indonesiacareercenter.id/wp-content/uploads/2021/11/XiMCvhPwidiH1Vmw4WXJKc5wP8WVVcn4ZkV364hWF2f503mqLIV3MIxkngqRqRo1lOeWJdflfRp78EjTIgs1600.png", created_at: "2024-02-02" }
+];
 
 const LoggedInPage = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userData, setUserData] = useState(null);
     const [isVerified, setIsVerified] = useState(false);
-    const [gallery, setGallery] = useState([]);
-    const [berita, setBerita] = useState([]);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedBerita, setSelectedBerita] = useState(null);
     const [selectedPhoto, setSelectedPhoto] = useState(null);
     const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
-    const [partners, setPartners] = useState([]);
-    const [userRole, setUserRole] = useState(null); // State untuk menyimpan role pengguna
-    const [services, setServices] = useState([]);
-    const [events, setEvents] = useState([]);
+    // const [partners, setPartners] = useState([]);
+    const [userRole, setUserRole] = useState(null);
     const [selectedEvent, setSelectedEvent] = useState(null);
-    const [team, setTeam] = useState([]);
     const [selectedMember, setSelectedMember] = useState(null);
+    const [language, setLanguage] = useState("id");
     const navigate = useNavigate();
     const user_id = localStorage.getItem("user_id");
     const [selectedPartnerType, setSelectedPartnerType] = useState("All");
+    const [selectedService, setSelectedService] = useState(null); // Tambahkan state ini
+    const [services, setServices] = useState(dummyServices);
+    const [events, setEvents] = useState(dummyEvents);
+    const [team, setTeam] = useState(teamMembers);
+    const [berita, setBerita] = useState(dummyBerita);
+    const [gallery, setGallery] = useState(dummyGallery);
 
     // Cek status login dan ambil data gallery
     useEffect(() => {
@@ -95,7 +244,7 @@ const LoggedInPage = () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/services`);
                 const data = await response.json();
-                setServices(data); // Simpan data ke state
+                setServices(data);
             } catch (error) {
                 console.error("Error fetching services:", error);
             }
@@ -105,7 +254,7 @@ const LoggedInPage = () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/events`);
                 const data = await response.json();
-                setEvents(data); // Simpan data ke state
+                setEvents(data);
             } catch (error) {
                 console.error("Error fetching events:", error);
             }
@@ -115,7 +264,7 @@ const LoggedInPage = () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/team`);
                 const data = await response.json();
-                setTeam(data); // Simpan data ke state
+                setTeam(data);
             } catch (error) {
                 console.error("Error fetching team data:", error);
             }
@@ -134,11 +283,11 @@ const LoggedInPage = () => {
         checkLoginStatus();
         fetchGallery();
         fetchBerita();
-        fetchPartners(); // Ambil data partner
-        fetchServices(); // Ambil data services
-        fetchEvents(); // Ambil data events
-        fetchTeam(); // Ambil data team
-        checkUserRole(); // Cek role pengguna
+        fetchPartners();
+        fetchServices();
+        fetchEvents();
+        fetchTeam();
+        checkUserRole();
         window.addEventListener("storage", checkLoginStatus);
 
         return () => window.removeEventListener("storage", checkLoginStatus);
@@ -146,9 +295,9 @@ const LoggedInPage = () => {
 
     // Fungsi untuk logout
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user_id');
-        localStorage.removeItem('role');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem("userData");
+        localStorage.removeItem("isVerified");
         navigate('/login');
     };
 
@@ -195,6 +344,11 @@ const LoggedInPage = () => {
         if (selectedPartnerType === "All") return true;
         return partner.type.toLowerCase() === selectedPartnerType.toLowerCase();
     });
+
+    // Fungsi untuk mengganti bahasa (sementara hanya mengganti ikon)
+    const toggleLanguage = () => {
+        setLanguage((prevLang) => (prevLang === "id" ? "en" : "id"));
+    };
 
     return (
         <div>
@@ -304,6 +458,19 @@ const LoggedInPage = () => {
                         </ul>
 
                         <div className="z-20 relative flex items-center space-x-6">
+                            {/* Tombol Translate */}
+                            <button
+                                onClick={toggleLanguage}
+                                className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-200 flex items-center gap-2"
+                            >
+                                {language === "id" ? (
+                                    <img src={ina} alt="Indonesia Flag" className="w-6 h-6" />
+                                ) : (
+                                    <img src={usa} alt="USA Flag" className="w-6 h-6" />
+                                )}
+                            </button>
+
+                            {/* Tombol Logout */}
                             <button
                                 onClick={handleLogout}
                                 className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-500 duration-200"
@@ -466,7 +633,7 @@ const LoggedInPage = () => {
                                     onClick={() => setSelectedService(service)}
                                 >
                                     <img
-                                        src={`${API_BASE_URL}${service.image}`}
+                                        src={service.image} // Pastikan ini adalah URL yang valid
                                         alt={service.title}
                                         className="w-full h-48 object-cover"
                                     />
@@ -505,7 +672,7 @@ const LoggedInPage = () => {
                                     onClick={() => setSelectedEvent(event)}
                                 >
                                     <img
-                                        src={`${API_BASE_URL}${event.image}`}
+                                        src={event.image} // Pastikan ini adalah URL yang valid
                                         alt={event.title}
                                         className="w-full h-48 object-cover"
                                     />
@@ -572,7 +739,7 @@ const LoggedInPage = () => {
                                     className="bg-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
                                 >
                                     <img
-                                        src={`${API_BASE_URL}${partner.logo}`}
+                                        src={partner.logo} // Pastikan ini adalah URL yang valid
                                         alt={partner.name}
                                         className="w-full h-24 object-contain object-center"
                                     />
@@ -585,39 +752,37 @@ const LoggedInPage = () => {
                 {/* Team Section */}
                 <section id="team" className="py-12 bg-white">
                     <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Our Team</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {team.slice(0, 3).map((member, index) => (
-                                <motion.div
-                                    key={member._id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => setSelectedMember(member)}
+                        {/* Judul dan Subjudul */}
+                        <div className="text-center mb-12">
+                            <h2 className="text-4xl font-bold text-blue-900 uppercase">TEAM</h2>
+                            <p className="text-lg text-gray-600 mt-2">CHECK OUR TEAM</p>
+                        </div>
+
+                        {/* Grid untuk Card Team */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {teamMembers.map((member) => (
+                                <div
+                                    key={member.id}
+                                    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 text-center"
                                 >
-                                    <img
-                                        src={`${API_BASE_URL}${member.photo}`}
-                                        alt={member.name}
-                                        className="w-full h-48 object-cover"
-                                    />
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-semibold text-blue-900 mb-2">{member.name}</h3>
-                                        <p className="text-gray-700">{member.position}</p>
-                                        <p className="text-sm text-gray-500 mt-4">{member.department}</p>
+                                    {/* Foto Anggota Tim */}
+                                    <div className="w-32 h-32 mx-auto mb-4 overflow-hidden rounded-full">
+                                        <img
+                                            src={member.photo}
+                                            alt={member.name}
+                                            className="w-full h-full object-cover"
+                                        />
                                     </div>
-                                </motion.div>
+
+                                    {/* Nama Anggota Tim */}
+                                    <h3 className="text-xl font-semibold text-blue-900 mb-2">
+                                        {member.name}
+                                    </h3>
+
+                                    {/* Posisi/Jabatan */}
+                                    <p className="text-gray-700">{member.position}</p>
+                                </div>
                             ))}
-                            {/* Tombol + untuk menuju PageTeam */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.5 }}
-                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
-                                onClick={() => navigate("/team")}
-                            >
-                                <div className="p-6 text-4xl font-bold text-white">+{team.length - 3}</div>
-                            </motion.div>
                         </div>
                     </div>
                 </section>
@@ -626,29 +791,31 @@ const LoggedInPage = () => {
                 <section id="berita" className="py-12 bg-gray-100">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Berita Terbaru</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                            {berita.slice(0, 4).map((item) => (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Gunakan state berita jika ada, jika tidak, gunakan dummyBerita */}
+                            {(berita.length > 0 ? berita : dummyBerita).slice(0, 2).map((item, index) => (
                                 <motion.div
                                     key={item.id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5 }}
+                                    transition={{ duration: 0.5, delay: index * 0.1 }}
                                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
                                     onClick={() => handleShowDetail(item)}
                                 >
-                                    {item.gambar && (
-                                        <img
-                                            src={`${API_BASE_URL}/uploads/berita/${item.gambar}`}
-                                            alt={item.judul}
-                                            className="w-full h-48 object-cover"
-                                        />
-                                    )}
+                                    {/* Gambar Berita */}
+                                    <img
+                                        src={item.gambar.startsWith('http') ? item.gambar : `${API_BASE_URL}/uploads/berita/${item.gambar}`}
+                                        alt={item.judul}
+                                        className="w-full h-48 object-cover"
+                                    />
+                                    {/* Konten Berita */}
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-blue-900 mb-2">{item.judul}</h3>
                                         <p className="text-gray-700 line-clamp-3">{item.deskripsi}</p>
                                         <p className="text-sm text-gray-500 mt-4">
                                             {new Date(item.waktu_tayang).toLocaleDateString()}
                                         </p>
+                                        {/* Badge untuk berita branding */}
                                         {item.status === "branding" && (
                                             <span className="inline-block bg-yellow-500 text-white px-2 py-1 rounded-full text-xs mt-2">
                                                 Hot!
@@ -657,18 +824,18 @@ const LoggedInPage = () => {
                                     </div>
                                 </motion.div>
                             ))}
-                            {/* Tombol + untuk menuju PageBerita */}
-                            {berita.length > 4 && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.5 }}
-                                    className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
-                                    onClick={() => navigate("/page-berita")}
-                                >
-                                    <div className="p-6 text-4xl font-bold text-white">+{berita.length - 4}</div>
-                                </motion.div>
-                            )}
+                            {/* Tombol + untuk melihat lebih banyak berita */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.5 }}
+                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+                                onClick={() => navigate("/berita")}
+                            >
+                                <div className="p-6 text-4xl font-bold text-white">
+                                    +{(berita.length > 0 ? berita : dummyBerita).length - 2}
+                                </div>
+                            </motion.div>
                         </div>
                     </div>
                 </section>
@@ -676,38 +843,38 @@ const LoggedInPage = () => {
                 {/* Gallery Section */}
                 <section id="gallery" className="py-12 bg-white">
                     <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan ICCN</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {gallery.slice(0, 7).map((item, index) => (
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Gunakan state gallery jika ada, jika tidak, gunakan dummyGallery */}
+                            {(gallery.length > 0 ? gallery : dummyGallery).slice(0, 2).map((item, index) => (
                                 <motion.div
                                     key={index}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
                                     className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => openGalleryModal(item)} // Buka modal saat gambar diklik
+                                    onClick={() => openGalleryModal(item)}
                                 >
+                                    {/* Gambar Gallery */}
                                     <img
-                                        src={item.image_url}
+                                        src={item.image_url.startsWith('http') ? item.image_url : `${API_BASE_URL}${item.image_url}`}
                                         alt={`Gallery ${index + 1}`}
                                         className="w-full h-48 object-cover"
                                     />
                                 </motion.div>
                             ))}
-                            {/* Tombol (+angka) untuk melihat lebih banyak */}
-                            {gallery.length > 7 && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.5 }}
-                                    className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-400 transition-shadow duration-300 flex items-center justify-center bg-gray-300 cursor-pointer"
-                                    onClick={() => navigate("/gallery")}
-                                >
-                                    <div className="text-white text-2xl font-bold">
-                                        +{gallery.length - 7}
-                                    </div>
-                                </motion.div>
-                            )}
+                            {/* Tombol + untuk melihat lebih banyak gallery */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.5 }}
+                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+                                onClick={() => navigate("/gallery")}
+                            >
+                                <div className="p-6 text-4xl font-bold text-white">
+                                    +{(gallery.length > 0 ? gallery : dummyGallery).length - 2}
+                                </div>
+                            </motion.div>
                         </div>
                     </div>
                 </section>
@@ -741,7 +908,7 @@ const LoggedInPage = () => {
                             <h3 className="text-2xl font-bold mb-4">{selectedBerita.judul}</h3>
                             {selectedBerita.gambar && (
                                 <img
-                                    src={`${API_BASE_URL}/uploads/berita/${selectedBerita.gambar}`}
+                                    src={selectedBerita.gambar}
                                     alt={selectedBerita.judul}
                                     className="w-full h-64 object-cover rounded-lg mb-4"
                                 />
@@ -855,6 +1022,127 @@ const LoggedInPage = () => {
                         </div>
                     </div>
                 </section>
+
+                {/* Footer Section */}
+                <footer className="bg-gray-800 text-white py-12">
+                    <div className="container mx-auto px-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {/* About Section */}
+                            <div className="space-y-4">
+                                <h4 className="text-xl font-bold">About ICCN</h4>
+                                <p className="text-gray-400">
+                                    Indonesia Career Center Network (ICCN) adalah jejaring pusat karir yang bertujuan untuk meningkatkan kualitas SDM Indonesia.
+                                </p>
+                                <div className="flex space-x-4">
+                                    <a href="#" className="text-gray-400 hover:text-white">
+                                        <i className="bi bi-twitter-x"></i>
+                                    </a>
+                                    <a href="#" className="text-gray-400 hover:text-white">
+                                        <i className="bi bi-facebook"></i>
+                                    </a>
+                                    <a href="#" className="text-gray-400 hover:text-white">
+                                        <i className="bi bi-instagram"></i>
+                                    </a>
+                                    <a href="#" className="text-gray-400 hover:text-white">
+                                        <i className="bi bi-linkedin"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Useful Links Section */}
+                            <div className="space-y-4">
+                                <h4 className="text-xl font-bold">Useful Links</h4>
+                                <ul className="space-y-2">
+                                    <li>
+                                        <ScrollLink
+                                            to="home"
+                                            smooth={true}
+                                            duration={500}
+                                            className="flex items-center text-gray-400 hover:text-white cursor-pointer"
+                                        >
+                                            <FaArrowRight className="mr-2 text-orange-500" />
+                                            <span>Home</span>
+                                        </ScrollLink>
+                                    </li>
+                                    <li>
+                                        <ScrollLink
+                                            to="about"
+                                            smooth={true}
+                                            duration={500}
+                                            className="flex items-center text-gray-400 hover:text-white cursor-pointer"
+                                        >
+                                            <FaArrowRight className="mr-2 text-orange-500" />
+                                            <span>About</span>
+                                        </ScrollLink>
+                                    </li>
+                                    <li>
+                                        <ScrollLink
+                                            to="services"
+                                            smooth={true}
+                                            duration={500}
+                                            className="flex items-center text-gray-400 hover:text-white cursor-pointer"
+                                        >
+                                            <FaArrowRight className="mr-2 text-orange-500" />
+                                            <span>Services</span>
+                                        </ScrollLink>
+                                    </li>
+                                    <li>
+                                        <ScrollLink
+                                            to="event"
+                                            smooth={true}
+                                            duration={500}
+                                            className="flex items-center text-gray-400 hover:text-white cursor-pointer"
+                                        >
+                                            <FaArrowRight className="mr-2 text-orange-500" />
+                                            <span>Event</span>
+                                        </ScrollLink>
+                                    </li>
+                                    <li>
+                                        <ScrollLink
+                                            to="partnership"
+                                            smooth={true}
+                                            duration={500}
+                                            className="flex items-center text-gray-400 hover:text-white cursor-pointer"
+                                        >
+                                            <FaArrowRight className="mr-2 text-orange-500" />
+                                            <span>Partnership</span>
+                                        </ScrollLink>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            {/* Contact Info Section */}
+                            <div className="space-y-4">
+                                <h4 className="text-xl font-bold">Contact Info</h4>
+                                <div className="space-y-4">
+                                    <div className="flex items-center space-x-4">
+                                        <FaMapMarkerAlt className="text-orange-400 text-xl" />
+                                        <p className="text-gray-400">
+                                            Jl. Contoh Alamat No. 123<br />
+                                            Kota Bandung, Jawa Barat<br />
+                                            Indonesia 40123
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <FaPhone className="text-orange-400 text-xl" />
+                                        <p className="text-gray-400">+62 123 4567 890</p>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <FaEnvelope className="text-orange-400 text-xl" />
+                                        <p className="text-gray-400">info@iccn.id</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Copyright Section */}
+                        <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+                            <p className="text-gray-400">
+                                © Copyright <strong className="text-white">ICCN</strong>. All Rights Reserved
+                            </p>
+                        </div>
+                    </div>
+                </footer>
             </main>
         </div>
     );

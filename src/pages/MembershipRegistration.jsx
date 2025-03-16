@@ -31,23 +31,28 @@ const MembershipRegistration = () => {
     const [countdown, setCountdown] = useState(5);
     const navigate = useNavigate();
 
+    // Handle perubahan input text
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
+    // Handle perubahan file SK
     const handleFileChange = (e) => {
         setFormData({ ...formData, documentFile: e.target.files[0] });
     };
 
+    // Handle perubahan file bukti pembayaran
     const handleBuktiBayar = (e) => {
         setFormData({ ...formData, pembayaranBukti: e.target.files[0] });
     };
 
+    // Handle perubahan file logo
     const handleLogoChange = (e) => {
         setFormData({ ...formData, logoFile: e.target.files[0] });
     };
 
+    // Handle perubahan input jumlah transfer (dengan format mata uang)
     const handleMoneyChange = (e) => {
         let rawValue = e.target.value.replace(/[^\d]/g, "");
         if (!rawValue) {
@@ -66,6 +71,7 @@ const MembershipRegistration = () => {
         setFormData({ ...formData, transferAmount: formattedValue, transferAmountRaw: rawValue });
     };
 
+    // Validasi form sebelum submit
     const validateForm = () => {
         let newErrors = {};
         if (!formData.userType) newErrors.userType = "Tipe Keanggotaan wajib diisi!";
@@ -87,8 +93,11 @@ const MembershipRegistration = () => {
         return Object.keys(newErrors).length === 0;
     };
 
+    // Handle submit form
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validasi form
         if (!validateForm()) {
             Swal.fire({
                 icon: "warning",
@@ -98,9 +107,10 @@ const MembershipRegistration = () => {
             return;
         }
 
+        // Tampilkan konfirmasi SweetAlert2
         Swal.fire({
             title: "Apakah Anda Sudah Yakin?",
-            text: "Silahkan periksa kembali jika ada yang salah. Setelah dikirim anda akan diarahkan ke halaman login",
+            text: "Silahkan periksa kembali jika ada yang salah. Setelah dikirim, data tidak dapat diubah.",
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "Ya, Lanjutkan",
@@ -112,18 +122,18 @@ const MembershipRegistration = () => {
         });
     };
 
+    // Fungsi untuk mengirim data ke backend
     const submitForm = async () => {
         setIsSubmitting(true);
 
         const formDataToSend = new FormData();
-
         formDataToSend.append("tipe_keanggotaan", formData.userType);
         formDataToSend.append("institusi", formData.institutionName);
         formDataToSend.append("website", formData.websiteLink);
         formDataToSend.append("email", formData.email);
         formDataToSend.append("alamat", formData.address);
         formDataToSend.append("wilayah", formData.region);
-        formDataToSend.append("nama_pembayar", formData.personalName);
+        formDataToSend.append("name", formData.personalName);
         formDataToSend.append("nominal_transfer", formData.transferAmountRaw);
         formDataToSend.append("nomor_wa", formData.whatsappGroupNumber);
         formDataToSend.append("nama_kuitansi", formData.receiptName);
@@ -135,7 +145,7 @@ const MembershipRegistration = () => {
         }
 
         try {
-            // Kirim data registrasi member
+            // Kirim data ke backend
             const response = await fetch(`${API_BASE_URL}/members/register-member`, {
                 method: "POST",
                 body: formDataToSend,
@@ -147,36 +157,14 @@ const MembershipRegistration = () => {
                 throw new Error(data.message || "Gagal mendaftar member");
             }
 
-            // Catat pendapatan dari registrasi
-            const keuanganResponse = await fetch(`${API_BASE_URL}/admin/keuangan/tambah`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    status: "MASUK",
-                    jumlah: parseInt(formData.transferAmountRaw),
-                    deskripsi: `Pendaftaran Member - ${formData.institutionName}`,
-                    tanggal: new Date().toISOString().split('T')[0], // Format tanggal ke YYYY-MM-DD
-                }),
-            });
-
-            if (!keuanganResponse.ok) {
-                throw new Error("Gagal mencatat pemasukan keuangan");
-            }
-
-            // Simpan token baru ke localStorage
-            if (data.token) {
-                localStorage.setItem("token", data.token);
-                const decoded = JSON.parse(atob(data.token.split(".")[1]));
-                localStorage.setItem("role", decoded.role);
-            }
-
+            // Tampilkan notifikasi sukses
             await Swal.fire({
                 icon: "success",
                 title: "Berhasil!",
                 text: "Pendaftaran member berhasil, menunggu verifikasi",
             });
+
+            // Set status sukses dan mulai countdown
             setSuccess(true);
             setTimeout(() => navigate("/login"), 5000);
         } catch (error) {
@@ -191,12 +179,14 @@ const MembershipRegistration = () => {
         }
     };
 
+    // Countdown setelah sukses
     useEffect(() => {
         if (success) {
             const timer = setInterval(() => setCountdown((prev) => prev - 1), 1000);
             return () => clearInterval(timer);
         }
     }, [success]);
+
 
     return (
         <>
