@@ -38,11 +38,11 @@ function App() {
         <Route path="/events" element={<PageEvents />} />
         <Route path="/team" element={<PageTeam />} />
 
-        <Route path="/membership-registration" element={
+        {/* <Route path="/membership-registration" element={
           <ProtectedRoute>
             <MembershipRegistration />
           </ProtectedRoute>
-        } />
+        } /> */}
 
         <Route path="/perpanjang" element={
           <ProtectedRoute>
