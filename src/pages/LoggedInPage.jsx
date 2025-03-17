@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "../config";
 import Swal from "sweetalert2";
 import { Link as ScrollLink } from "react-scroll";
-import aboutImage from "../assets/images.jpg";
+import about1 from "../assets/about.jpg";
+import about2 from "../assets/about2.png";
 import LandingBg from "../assets/LandingBg.jpg";
 import Logo from "../assets/iccn.png";
 import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes, FaFlag } from "react-icons/fa";
@@ -36,17 +37,17 @@ const dummyServices = [
 const dummyEvents = [
     {
         _id: 1,
-        title: "Job Fair Nasional 2024",
+        title: "PAMERAN KARIER VIRTUAL INDONESIA",
         date: "2024-03-15",
-        description: "Pameran pekerjaan terbesar tahun ini",
-        image: "https://sleekr.co/wp-content/uploads/2019/08/shutterstock_1072495955-1.jpg"
+        description: "Salam kenal, dari kami Indonesia Career Center Network (ICCN). ICCN merupakan sebuah asosiasi profesi pengelola pusat karier perguruan tinggi Indonesia. ICCN memiliki tujuan untuk meningkatkan daya saing sumber daya manusia Indonesia melalui standarisasi pelayanan pusat karier perguruan tinggi.",
+        image: "https://indonesiacareercenter.id/wp-content/uploads/2023/06/05.png"
     },
     {
         _id: 1,
-        title: "Pelatihan CCOP 5 2025",
+        title: "Pelatihan CCOP JAWA TIMUR",
         date: "2024-03-15",
-        description: "Pelatihan CCOP Yang Ke 5 ",
-        image: "https://www.mditack.co.id/wp-content/uploads/2020/09/Employee_Training_and_Development.jpg"
+        description: "Pelatihan CCOP Yang diselenggarakan di Jawa Timur ",
+        image: "https://indonesiacareercenter.id/wp-content/uploads/2023/05/IMG_1470-1-scaled.jpg"
     },
     {
         _id: 1,
@@ -123,37 +124,57 @@ const partners = [
 const teamMembers = [
     {
         id: 1,
-        name: "Walter White",
-        position: "Chief Executive Officer",
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_vVBAvcz_VzzBC-8kmKTJ6j3B7t3LbYOhhg&s",
+        name: "Teddy Indira Budiwan, S.Psi., MM",
+        position: "Presiden ICCN",
+        asal: "Binus",
+        photo: "https://indonesiacareercenter.id/wp-content/uploads/2024/06/teddy-removebg-preview-295x300.png",
     },
     {
         id: 2,
-        name: "Sarah Jhonson",
-        position: "Product Manager",
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMdBuvbsYu7WYAAUY2AqSQRGNESsYdkucDkQ&s",
+        name: "Dr. Rosaria Mita Amalia, M.Hum.",
+        position: "Wakil Presiden ICCN",
+        asal: "Universitas Padjadjaran",
+        photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-21-at-12.36.51-e1663803429823-256x256.jpeg",
     },
     {
         id: 3,
-        name: "William Anderson",
-        position: "CTO",
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgiFdgv377GbHewlOp8pafN1iCpITSEyXr0A&s",
+        name: "Prof. Dr. Elly Munadziroh , drg. MS",
+        position: "Sekretaris Jendral ICCN",
+        asal: "Universitas Airlangga",
+        photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-20-at-12.29.34-278x278.jpeg",
     },
 ];
 
 const dummyBerita = [
     {
         id: 1,
-        judul: "Peluncuran Program Baru",
-        deskripsi: "ICCN meluncurkan program mentoring karir...",
-        gambar: "https://komunikasi.untag-sby.ac.id/uploads/berita/WhatsApp_Image_2024-04-12_at_15_12_08.jpeg",
+        judul: "Menaker: Aset Indonesia Harus Bertransformasi pada Sumber Daya Manusianya",
+        deskripsi: "Menteri Tenaga Kerja Republik Indonesia, Hanif Dhakiri mengatakan bahwa sumber daya manusia di Indonesia merupakan aset yang berharga bagi negeri, jauh nilainya dibandingkan SDM negara lain di ASEAN.",
+        gambar: "https://indonesiacareercenter.id/wp-content/uploads/2021/11/6-2-1024x683.jpg",
         waktu_tayang: "2024-02-20",
         status: "branding"
-    }
+    },
+    {
+        id: 2,
+        judul: "Jalin Kerja Sama guna Kemajuan Bersama",
+        deskripsi: "Telah berlangsung seremonial penandatanganan kerja sama antara Indonesian Career Centre Network (ICCN) dengan Himpunan Psikologi Indonesia (HIMPSI)  pada Sabtu (10/4/21). Penandatanganan dilakukan oleh Presiden ICCN, Teddy Indira Budiwan dengan Ketua Umum HIMPSI, Seger Handoyo.",
+        gambar: "https://indonesiacareercenter.id/wp-content/uploads/2022/05/Dark-Blue-Aesthetic-Business-Plan-Cover-Page-Presentasi-169-1.png",
+        waktu_tayang: "2024-02-20",
+        status: "branding"
+    },
+    {
+        id: 3,
+        judul: "Menaker: Aset Indonesia Harus Bertransformasi pada Sumber Daya Manusianya",
+        deskripsi: "Menteri Tenaga Kerja Republik Indonesia, Hanif Dhakiri mengatakan bahwa sumber daya manusia di Indonesia merupakan aset yang berharga bagi negeri, jauh nilainya dibandingkan SDM negara lain di ASEAN.",
+        gambar: "https://indonesiacareercenter.id/wp-content/uploads/2021/11/6-2-1024x683.jpg",
+        waktu_tayang: "2024-02-20",
+        status: "branding"
+    },
 ];
 
 const dummyGallery = [
     { image_url: "https://indonesiacareercenter.id/wp-content/uploads/2022/06/WhatsApp-Image-2021-03-20-at-10.32.25-1.jpeg", created_at: "2024-02-01" },
+    { image_url: "https://indonesiacareercenter.id/wp-content/uploads/2023/05/IMG_1470-1-scaled.jpg", created_at: "2024-02-01" },
     { image_url: "https://indonesiacareercenter.id/wp-content/uploads/2021/11/XiMCvhPwidiH1Vmw4WXJKc5wP8WVVcn4ZkV364hWF2f503mqLIV3MIxkngqRqRo1lOeWJdflfRp78EjTIgs1600.png", created_at: "2024-02-02" }
 ];
 
@@ -564,7 +585,7 @@ const LoggedInPage = () => {
                                 transition={{ duration: 0.8 }}
                                 viewport={{ once: true }}
                             >
-                                <img src={aboutImage} alt="About ICCN" className="rounded-lg shadow-lg w-full max-w-lg" />
+                                <img src={about1} alt="About ICCN" className="rounded-lg shadow-lg w-full max-w-lg" />
                             </motion.div>
 
                             <motion.div
@@ -612,7 +633,7 @@ const LoggedInPage = () => {
                                 transition={{ duration: 0.8 }}
                                 viewport={{ once: true }}
                             >
-                                <img src={aboutImage} alt="ICCN Network" className="rounded-lg shadow-lg w-full max-w-lg" />
+                                <img src={about2} alt="ICCN Network" className="rounded-lg shadow-lg w-full max-w-lg" />
                             </motion.div>
                         </div>
                     </div>
@@ -660,7 +681,7 @@ const LoggedInPage = () => {
                 {/* Events Section */}
                 <section id="events" className="py-12 bg-white">
                     <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Upcoming Events</h2>
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Events</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {events.slice(0, 2).map((event, index) => (
                                 <motion.div
@@ -780,7 +801,8 @@ const LoggedInPage = () => {
                                     </h3>
 
                                     {/* Posisi/Jabatan */}
-                                    <p className="text-gray-700">{member.position}</p>
+                                    <p className="font-bold">{member.position}</p>
+                                    <p className="text-gray-700">{member.asal}</p>
                                 </div>
                             ))}
                         </div>
