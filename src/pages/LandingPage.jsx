@@ -468,6 +468,25 @@ const LandingPage = () => {
                                 )}
                             </button>
                             {/* Tombol Burger */}
+                            <button
+                                className="text-white"
+                                onClick={toggleMenu}
+                            >
+                                <svg
+                                    className="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M4 6h16M4 12h16m-7 6h7"
+                                    ></path>
+                                </svg>
+                            </button>
                         </div>
                         {/* Menu Desktop */}
                         <ul className="hidden lg:flex space-x-8 font-semibold text-white z-20">
@@ -732,10 +751,10 @@ const LandingPage = () => {
                         </div>
                     )}
                 </div>
-            </header>
+            </header >
 
             {/* Main Content */}
-            <main>
+            <div main >
                 <section
                     id="home"
                     className="flex flex-col items-center justify-center h-screen text-gray-800 bg-cover bg-center pt-48"
@@ -1110,58 +1129,62 @@ const LandingPage = () => {
                 </section>
 
                 {/* Modal Gallery */}
-                {isGalleryModalOpen && selectedPhoto && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
-                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 relative">
-                            <button
-                                className="absolute top-4 right-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300"
-                                onClick={closeGalleryModal}
-                            >
-                                <FaTimes className="w-5 h-5" />
-                            </button>
-                            <img
-                                src={selectedPhoto.image_url}
-                                alt={`Gallery Full`}
-                                className="w-full h-auto rounded-lg"
-                            />
-                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-4">
-                                Foto Kegiatan ICCN ({formatDate(selectedPhoto.created_at)})
-                            </p>
-                        </div>
-                    </div>
-                )}
-
-                {/* Modal Detail Berita */}
-                {showDetailModal && selectedBerita && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-lg p-6 w-full max-w-3xl">
-                            <h3 className="text-2xl font-bold mb-4">{selectedBerita.judul}</h3>
-                            {selectedBerita.gambar && (
+                {
+                    isGalleryModalOpen && selectedPhoto && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 relative">
+                                <button
+                                    className="absolute top-4 right-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300"
+                                    onClick={closeGalleryModal}
+                                >
+                                    <FaTimes className="w-5 h-5" />
+                                </button>
                                 <img
-                                    src={`${API_BASE_URL}/uploads/berita/${selectedBerita.gambar}`}
-                                    alt={selectedBerita.judul}
-                                    className="w-full h-64 object-cover rounded-lg mb-4"
+                                    src={selectedPhoto.image_url}
+                                    alt={`Gallery Full`}
+                                    className="w-full h-auto rounded-lg"
                                 />
-                            )}
-                            <div className="max-h-96 overflow-y-auto">
-                                <p className="text-sm text-gray-600 whitespace-pre-line">
-                                    {selectedBerita.deskripsi}
+                                <p className="text-sm text-gray-700 dark:text-gray-300 mt-4">
+                                    Foto Kegiatan ICCN ({formatDate(selectedPhoto.created_at)})
                                 </p>
                             </div>
-                            <p className="text-sm text-gray-500 mt-4">
-                                {new Date(selectedBerita.waktu_tayang).toLocaleDateString()}
-                            </p>
-                            <div className="flex justify-end mt-4">
-                                <button
-                                    onClick={() => setShowDetailModal(false)}
-                                    className="px-4 py-2 bg-gray-500 text-white rounded-lg"
-                                >
-                                    Tutup
-                                </button>
+                        </div>
+                    )
+                }
+
+                {/* Modal Detail Berita */}
+                {
+                    showDetailModal && selectedBerita && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-3xl">
+                                <h3 className="text-2xl font-bold mb-4">{selectedBerita.judul}</h3>
+                                {selectedBerita.gambar && (
+                                    <img
+                                        src={`${API_BASE_URL}/uploads/berita/${selectedBerita.gambar}`}
+                                        alt={selectedBerita.judul}
+                                        className="w-full h-64 object-cover rounded-lg mb-4"
+                                    />
+                                )}
+                                <div className="max-h-96 overflow-y-auto">
+                                    <p className="text-sm text-gray-600 whitespace-pre-line">
+                                        {selectedBerita.deskripsi}
+                                    </p>
+                                </div>
+                                <p className="text-sm text-gray-500 mt-4">
+                                    {new Date(selectedBerita.waktu_tayang).toLocaleDateString()}
+                                </p>
+                                <div className="flex justify-end mt-4">
+                                    <button
+                                        onClick={() => setShowDetailModal(false)}
+                                        className="px-4 py-2 bg-gray-500 text-white rounded-lg"
+                                    >
+                                        Tutup
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
                 {/* Contact Section */}
                 <section id="contact" className="py-12 bg-gray-100">
@@ -1373,7 +1396,7 @@ const LandingPage = () => {
                         </div>
                     </div>
                 </footer>
-            </main>
+            </div>
             <div id="google_translate_element" style={{
                 position: 'absolute',
                 top: '-9999px',
