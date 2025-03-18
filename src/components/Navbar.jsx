@@ -4,6 +4,7 @@ import Logo from "../assets/iccn.png";
 
 const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false); // State untuk status login
+    const [isMenuOpen, setIsMenuOpen] = useState(false); // State untuk menu burger
     const navigate = useNavigate();
 
     // Fungsi untuk logout
@@ -24,6 +25,11 @@ const Navbar = () => {
         }
     };
 
+    // Fungsi untuk toggle menu burger
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
+
     return (
         <header className="fixed top-0 left-0 right-0 z-10 shadow-lg">
             <div className="relative bg-gray-800 opacity-80 h-full">
@@ -36,7 +42,29 @@ const Navbar = () => {
                         </button>
                     </div>
 
-                    <ul className="flex space-x-8 font-semibold text-white z-20">
+                    {/* Tombol Burger untuk Layar Kecil */}
+                    <button
+                        className="lg:hidden text-white z-20"
+                        onClick={toggleMenu}
+                    >
+                        <svg
+                            className="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M4 6h16M4 12h16m-7 6h7"
+                            ></path>
+                        </svg>
+                    </button>
+
+                    {/* Menu Normal untuk Layar Besar */}
+                    <ul className="hidden lg:flex space-x-8 font-semibold text-white z-20">
                         <li>
                             <button
                                 onClick={() => handleNavigation(isLoggedIn ? "/home" : "/")}
@@ -111,23 +139,124 @@ const Navbar = () => {
                         </li>
                     </ul>
 
-                    <div className="z-20 relative flex items-center space-x-6">
-                        {isLoggedIn ? (
-                            <button
-                                onClick={handleLogout}
-                                className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-500 duration-200"
-                            >
-                                Logout
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => navigate("/login")}
-                                className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-200"
-                            >
-                                Sign In
-                            </button>
-                        )}
-                    </div>
+                    {/* Menu Dropdown untuk Layar Kecil */}
+                    {isMenuOpen && (
+                        <ul className="lg:hidden absolute top-20 right-0 bg-gray-800 w-full flex flex-col items-center space-y-4 py-4 z-20">
+                            <li>
+                                <button
+                                    onClick={() => {
+                                        handleNavigation(isLoggedIn ? "/home" : "/");
+                                        toggleMenu();
+                                    }}
+                                    className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                >
+                                    Home
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={() => {
+                                        handleNavigation(isLoggedIn ? "/home" : "/");
+                                        toggleMenu();
+                                    }}
+                                    className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                >
+                                    About
+                                </button>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/services"
+                                    onClick={toggleMenu}
+                                    className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                >
+                                    Services
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/events"
+                                    onClick={toggleMenu}
+                                    className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                >
+                                    Events
+                                </Link>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={() => {
+                                        handleNavigation(isLoggedIn ? "/home" : "/");
+                                        toggleMenu();
+                                    }}
+                                    className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                >
+                                    Partnership
+                                </button>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/team"
+                                    onClick={toggleMenu}
+                                    className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                >
+                                    Our Team
+                                </Link>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={() => {
+                                        handleNavigation(isLoggedIn ? "/home" : "/");
+                                        toggleMenu();
+                                    }}
+                                    className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                >
+                                    Contact
+                                </button>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/gallery"
+                                    onClick={toggleMenu}
+                                    className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                >
+                                    Gallery
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/berita"
+                                    onClick={toggleMenu}
+                                    className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
+                                >
+                                    Berita
+                                </Link>
+                            </li>
+                            {/* Tombol Sign In/Logout di dalam menu burger */}
+                            <li>
+                                {isLoggedIn ? (
+                                    <button
+                                        onClick={() => {
+                                            handleLogout();
+                                            toggleMenu();
+                                        }}
+                                        className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-500 duration-200"
+                                    >
+                                        Logout
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            navigate("/login");
+                                            toggleMenu();
+                                        }}
+                                        className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-200"
+                                    >
+                                        Sign In
+                                    </button>
+                                )}
+                            </li>
+                        </ul>
+                    )}
                 </nav>
             </div>
         </header>
