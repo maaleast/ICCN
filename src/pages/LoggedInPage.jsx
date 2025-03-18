@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "../config";
 import Swal from "sweetalert2";
 import { Link as ScrollLink } from "react-scroll";
-import aboutImage from "../assets/images.jpg";
+import about1 from "../assets/about.jpg";
+import about2 from "../assets/about2.png";
 import LandingBg from "../assets/LandingBg.jpg";
 import Logo from "../assets/iccn.png";
 import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes, FaFlag } from "react-icons/fa";
-import usa from "../assets/usa.png";
+import uk from "../assets/uk.png";
 import ina from "../assets/ina.png";
 
 // Dummy data untuk semua section
@@ -36,17 +37,17 @@ const dummyServices = [
 const dummyEvents = [
     {
         _id: 1,
-        title: "Job Fair Nasional 2024",
+        title: "PAMERAN KARIER VIRTUAL INDONESIA",
         date: "2024-03-15",
-        description: "Pameran pekerjaan terbesar tahun ini",
-        image: "https://sleekr.co/wp-content/uploads/2019/08/shutterstock_1072495955-1.jpg"
+        description: "Salam kenal, dari kami Indonesia Career Center Network (ICCN). ICCN merupakan sebuah asosiasi profesi pengelola pusat karier perguruan tinggi Indonesia. ICCN memiliki tujuan untuk meningkatkan daya saing sumber daya manusia Indonesia melalui standarisasi pelayanan pusat karier perguruan tinggi.",
+        image: "https://indonesiacareercenter.id/wp-content/uploads/2023/06/05.png"
     },
     {
         _id: 1,
-        title: "Pelatihan CCOP 5 2025",
+        title: "Pelatihan CCOP JAWA TIMUR",
         date: "2024-03-15",
-        description: "Pelatihan CCOP Yang Ke 5 ",
-        image: "https://www.mditack.co.id/wp-content/uploads/2020/09/Employee_Training_and_Development.jpg"
+        description: "Pelatihan CCOP Yang diselenggarakan di Jawa Timur ",
+        image: "https://indonesiacareercenter.id/wp-content/uploads/2023/05/IMG_1470-1-scaled.jpg"
     },
     {
         _id: 1,
@@ -123,37 +124,57 @@ const partners = [
 const teamMembers = [
     {
         id: 1,
-        name: "Walter White",
-        position: "Chief Executive Officer",
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_vVBAvcz_VzzBC-8kmKTJ6j3B7t3LbYOhhg&s",
+        name: "Teddy Indira Budiwan, S.Psi., MM",
+        position: "Presiden ICCN",
+        asal: "Binus",
+        photo: "https://indonesiacareercenter.id/wp-content/uploads/2024/06/teddy-removebg-preview-295x300.png",
     },
     {
         id: 2,
-        name: "Sarah Jhonson",
-        position: "Product Manager",
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMdBuvbsYu7WYAAUY2AqSQRGNESsYdkucDkQ&s",
+        name: "Dr. Rosaria Mita Amalia, M.Hum.",
+        position: "Wakil Presiden ICCN",
+        asal: "Universitas Padjadjaran",
+        photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-21-at-12.36.51-e1663803429823-256x256.jpeg",
     },
     {
         id: 3,
-        name: "William Anderson",
-        position: "CTO",
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgiFdgv377GbHewlOp8pafN1iCpITSEyXr0A&s",
+        name: "Prof. Dr. Elly Munadziroh , drg. MS",
+        position: "Sekretaris Jendral ICCN",
+        asal: "Universitas Airlangga",
+        photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-20-at-12.29.34-278x278.jpeg",
     },
 ];
 
 const dummyBerita = [
     {
         id: 1,
-        judul: "Peluncuran Program Baru",
-        deskripsi: "ICCN meluncurkan program mentoring karir...",
-        gambar: "https://komunikasi.untag-sby.ac.id/uploads/berita/WhatsApp_Image_2024-04-12_at_15_12_08.jpeg",
+        judul: "Menaker: Aset Indonesia Harus Bertransformasi pada Sumber Daya Manusianya",
+        deskripsi: "Menteri Tenaga Kerja Republik Indonesia, Hanif Dhakiri mengatakan bahwa sumber daya manusia di Indonesia merupakan aset yang berharga bagi negeri, jauh nilainya dibandingkan SDM negara lain di ASEAN.",
+        gambar: "https://indonesiacareercenter.id/wp-content/uploads/2021/11/6-2-1024x683.jpg",
         waktu_tayang: "2024-02-20",
         status: "branding"
-    }
+    },
+    {
+        id: 2,
+        judul: "Jalin Kerja Sama guna Kemajuan Bersama",
+        deskripsi: "Telah berlangsung seremonial penandatanganan kerja sama antara Indonesian Career Centre Network (ICCN) dengan Himpunan Psikologi Indonesia (HIMPSI)  pada Sabtu (10/4/21). Penandatanganan dilakukan oleh Presiden ICCN, Teddy Indira Budiwan dengan Ketua Umum HIMPSI, Seger Handoyo.",
+        gambar: "https://indonesiacareercenter.id/wp-content/uploads/2022/05/Dark-Blue-Aesthetic-Business-Plan-Cover-Page-Presentasi-169-1.png",
+        waktu_tayang: "2024-02-20",
+        status: "branding"
+    },
+    {
+        id: 3,
+        judul: "Menaker: Aset Indonesia Harus Bertransformasi pada Sumber Daya Manusianya",
+        deskripsi: "Menteri Tenaga Kerja Republik Indonesia, Hanif Dhakiri mengatakan bahwa sumber daya manusia di Indonesia merupakan aset yang berharga bagi negeri, jauh nilainya dibandingkan SDM negara lain di ASEAN.",
+        gambar: "https://indonesiacareercenter.id/wp-content/uploads/2021/11/6-2-1024x683.jpg",
+        waktu_tayang: "2024-02-20",
+        status: "branding"
+    },
 ];
 
 const dummyGallery = [
     { image_url: "https://indonesiacareercenter.id/wp-content/uploads/2022/06/WhatsApp-Image-2021-03-20-at-10.32.25-1.jpeg", created_at: "2024-02-01" },
+    { image_url: "https://indonesiacareercenter.id/wp-content/uploads/2023/05/IMG_1470-1-scaled.jpg", created_at: "2024-02-01" },
     { image_url: "https://indonesiacareercenter.id/wp-content/uploads/2021/11/XiMCvhPwidiH1Vmw4WXJKc5wP8WVVcn4ZkV364hWF2f503mqLIV3MIxkngqRqRo1lOeWJdflfRp78EjTIgs1600.png", created_at: "2024-02-02" }
 ];
 
@@ -179,6 +200,7 @@ const LoggedInPage = () => {
     const [team, setTeam] = useState(teamMembers);
     const [berita, setBerita] = useState(dummyBerita);
     const [gallery, setGallery] = useState(dummyGallery);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Cek status login dan ambil data gallery
     useEffect(() => {
@@ -295,9 +317,8 @@ const LoggedInPage = () => {
 
     // Fungsi untuk logout
     const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem("userData");
-        localStorage.removeItem("isVerified");
+        localStorage.removeItem('token');
+        localStorage.removeItem("role");
         navigate('/login');
     };
 
@@ -350,6 +371,13 @@ const LoggedInPage = () => {
         setLanguage((prevLang) => (prevLang === "id" ? "en" : "id"));
     };
 
+    // Fungsi untuk toggle menu burger
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
+
+
+
     return (
         <div>
             {/* Header */}
@@ -357,14 +385,52 @@ const LoggedInPage = () => {
                 <div className="relative bg-gray-800 opacity-80 h-full">
                     <div className="absolute right-0 top-0 h-full w-64 bg-gradient-to-tr from-gray-950 via-gray-800 to-gray-600 clip-path-trapezoid-reverse"></div>
 
-                    <nav className="w-full px-10 flex justify-between items-center p-4 relative">
+                    <nav className="w-full px-4 lg:px-10 flex justify-between items-center p-4 relative">
+                        {/* Logo */}
                         <div className="z-20 flex items-center">
                             <button onClick={() => navigate("/home")}>
-                                <img src={Logo} alt="ICCN Logo" className="h-20 w-auto max-w-none" />
+                                <img src={Logo} alt="ICCN Logo" className="h-16 lg:h-20 w-auto max-w-none" />
                             </button>
                         </div>
 
-                        <ul className="flex space-x-8 font-semibold text-white z-20">
+                        {/* Bagian Kanan (Mobile) */}
+                        <div className="lg:hidden flex items-center space-x-4">
+                            {/* Tombol Translate */}
+                            <button
+                                onClick={toggleLanguage}
+                                className="text-white px-3 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-200 flex items-center gap-2"
+                            >
+                                {language === "id" ? (
+                                    <img src={ina} alt="Indonesia Flag" className="w-5 h-5" />
+                                ) : (
+                                    <img src={uk} alt="UK Flag" className="w-5 h-5" />
+                                )}
+                            </button>
+
+                            {/* Tombol Burger */}
+                            <button
+                                className="text-white"
+                                onClick={toggleMenu}
+                            >
+                                <svg
+                                    className="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M4 6h16M4 12h16m-7 6h7"
+                                    ></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Menu Desktop */}
+                        <ul className="hidden lg:flex space-x-8 font-semibold text-white z-20">
                             <li>
                                 <ScrollLink
                                     to="home"
@@ -457,7 +523,8 @@ const LoggedInPage = () => {
                             </li>
                         </ul>
 
-                        <div className="z-20 relative flex items-center space-x-6">
+                        {/* Bagian Kanan (Desktop) */}
+                        <div className="hidden lg:flex items-center space-x-6">
                             {/* Tombol Translate */}
                             <button
                                 onClick={toggleLanguage}
@@ -466,7 +533,7 @@ const LoggedInPage = () => {
                                 {language === "id" ? (
                                     <img src={ina} alt="Indonesia Flag" className="w-6 h-6" />
                                 ) : (
-                                    <img src={usa} alt="USA Flag" className="w-6 h-6" />
+                                    <img src={uk} alt="UK Flag" className="w-6 h-6" />
                                 )}
                             </button>
 
@@ -479,6 +546,138 @@ const LoggedInPage = () => {
                             </button>
                         </div>
                     </nav>
+
+                    {/* Mobile Menu Dropdown */}
+                    {isMenuOpen && (
+                        <div className="lg:hidden absolute top-16 left-0 right-0 bg-gray-800 w-full flex flex-col items-center space-y-4 py-4 z-20">
+                            <ul className="w-full space-y-4">
+                                <li>
+                                    <ScrollLink
+                                        to="home"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Home
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="about"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        About
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="services"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Services
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="event"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Event
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="partnership"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Partnership
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="team"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Our Team
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="contact"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Contact
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="gallery"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Gallery
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="berita"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Berita
+                                    </ScrollLink>
+                                </li>
+                            </ul>
+
+                            {/* Tombol Sign In/Logout Mobile */}
+                            <div className="w-full px-4">
+                                {isLoggedIn ? (
+                                    <button
+                                        onClick={() => {
+                                            handleLogout();
+                                            toggleMenu();
+                                        }}
+                                        className="w-full text-white px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 transition duration-300"
+                                    >
+                                        Logout
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            navigate("/login");
+                                            toggleMenu();
+                                        }}
+                                        className="w-full text-white px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 transition duration-300"
+                                    >
+                                        Sign In
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </header>
 
@@ -564,7 +763,7 @@ const LoggedInPage = () => {
                                 transition={{ duration: 0.8 }}
                                 viewport={{ once: true }}
                             >
-                                <img src={aboutImage} alt="About ICCN" className="rounded-lg shadow-lg w-full max-w-lg" />
+                                <img src={about1} alt="About ICCN" className="rounded-lg shadow-lg w-full max-w-lg" />
                             </motion.div>
 
                             <motion.div
@@ -612,7 +811,7 @@ const LoggedInPage = () => {
                                 transition={{ duration: 0.8 }}
                                 viewport={{ once: true }}
                             >
-                                <img src={aboutImage} alt="ICCN Network" className="rounded-lg shadow-lg w-full max-w-lg" />
+                                <img src={about2} alt="ICCN Network" className="rounded-lg shadow-lg w-full max-w-lg" />
                             </motion.div>
                         </div>
                     </div>
@@ -660,7 +859,7 @@ const LoggedInPage = () => {
                 {/* Events Section */}
                 <section id="events" className="py-12 bg-white">
                     <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Upcoming Events</h2>
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Events</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {events.slice(0, 2).map((event, index) => (
                                 <motion.div
@@ -780,7 +979,8 @@ const LoggedInPage = () => {
                                     </h3>
 
                                     {/* Posisi/Jabatan */}
-                                    <p className="text-gray-700">{member.position}</p>
+                                    <p className="font-bold">{member.position}</p>
+                                    <p className="text-gray-700">{member.asal}</p>
                                 </div>
                             ))}
                         </div>

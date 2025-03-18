@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "../config";
 import Swal from "sweetalert2";
 import { Link as ScrollLink } from "react-scroll";
-import aboutImage from "../assets/images.jpg";
+import about1 from "../assets/about.jpg";
+import about2 from "../assets/about2.png";
 import LandingBg from "../assets/LandingBg.jpg";
 import Logo from "../assets/iccn.png";
-import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes, FaFlag } from "react-icons/fa";
-import usa from "../assets/usa.png";
+import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes } from "react-icons/fa";
+import uk from "../assets/uk.png";
 import ina from "../assets/ina.png";
 
 // Dummy data untuk semua section
@@ -36,17 +37,17 @@ const dummyServices = [
 const dummyEvents = [
     {
         _id: 1,
-        title: "Job Fair Nasional 2024",
+        title: "PAMERAN KARIER VIRTUAL INDONESIA",
         date: "2024-03-15",
-        description: "Pameran pekerjaan terbesar tahun ini",
-        image: "https://sleekr.co/wp-content/uploads/2019/08/shutterstock_1072495955-1.jpg"
+        description: "Salam kenal, dari kami Indonesia Career Center Network (ICCN). ICCN merupakan sebuah asosiasi profesi pengelola pusat karier perguruan tinggi Indonesia. ICCN memiliki tujuan untuk meningkatkan daya saing sumber daya manusia Indonesia melalui standarisasi pelayanan pusat karier perguruan tinggi.",
+        image: "https://indonesiacareercenter.id/wp-content/uploads/2023/06/05.png"
     },
     {
         _id: 1,
-        title: "Pelatihan CCOP 5 2025",
+        title: "Pelatihan CCOP JAWA TIMUR",
         date: "2024-03-15",
-        description: "Pelatihan CCOP Yang Ke 5 ",
-        image: "https://www.mditack.co.id/wp-content/uploads/2020/09/Employee_Training_and_Development.jpg"
+        description: "Pelatihan CCOP Yang diselenggarakan di Jawa Timur ",
+        image: "https://indonesiacareercenter.id/wp-content/uploads/2023/05/IMG_1470-1-scaled.jpg"
     },
     {
         _id: 1,
@@ -123,37 +124,57 @@ const partners = [
 const teamMembers = [
     {
         id: 1,
-        name: "Walter White",
-        position: "Chief Executive Officer",
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_vVBAvcz_VzzBC-8kmKTJ6j3B7t3LbYOhhg&s",
+        name: "Teddy Indira Budiwan, S.Psi., MM",
+        position: "Presiden ICCN",
+        asal: "Binus",
+        photo: "https://indonesiacareercenter.id/wp-content/uploads/2024/06/teddy-removebg-preview-295x300.png",
     },
     {
         id: 2,
-        name: "Sarah Jhonson",
-        position: "Product Manager",
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMdBuvbsYu7WYAAUY2AqSQRGNESsYdkucDkQ&s",
+        name: "Dr. Rosaria Mita Amalia, M.Hum.",
+        position: "Wakil Presiden ICCN",
+        asal: "Universitas Padjadjaran",
+        photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-21-at-12.36.51-e1663803429823-256x256.jpeg",
     },
     {
         id: 3,
-        name: "William Anderson",
-        position: "CTO",
-        photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgiFdgv377GbHewlOp8pafN1iCpITSEyXr0A&s",
+        name: "Prof. Dr. Elly Munadziroh , drg. MS",
+        position: "Sekretaris Jendral ICCN",
+        asal: "Universitas Airlangga",
+        photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-20-at-12.29.34-278x278.jpeg",
     },
 ];
 
 const dummyBerita = [
     {
         id: 1,
-        judul: "Peluncuran Program Baru",
-        deskripsi: "ICCN meluncurkan program mentoring karir...",
-        gambar: "https://komunikasi.untag-sby.ac.id/uploads/berita/WhatsApp_Image_2024-04-12_at_15_12_08.jpeg",
+        judul: "Menaker: Aset Indonesia Harus Bertransformasi pada Sumber Daya Manusianya",
+        deskripsi: "Menteri Tenaga Kerja Republik Indonesia, Hanif Dhakiri mengatakan bahwa sumber daya manusia di Indonesia merupakan aset yang berharga bagi negeri, jauh nilainya dibandingkan SDM negara lain di ASEAN.",
+        gambar: "https://indonesiacareercenter.id/wp-content/uploads/2021/11/6-2-1024x683.jpg",
         waktu_tayang: "2024-02-20",
         status: "branding"
-    }
+    },
+    {
+        id: 2,
+        judul: "Jalin Kerja Sama guna Kemajuan Bersama",
+        deskripsi: "Telah berlangsung seremonial penandatanganan kerja sama antara Indonesian Career Centre Network (ICCN) dengan Himpunan Psikologi Indonesia (HIMPSI)  pada Sabtu (10/4/21). Penandatanganan dilakukan oleh Presiden ICCN, Teddy Indira Budiwan dengan Ketua Umum HIMPSI, Seger Handoyo.",
+        gambar: "https://indonesiacareercenter.id/wp-content/uploads/2022/05/Dark-Blue-Aesthetic-Business-Plan-Cover-Page-Presentasi-169-1.png",
+        waktu_tayang: "2024-02-20",
+        status: "branding"
+    },
+    {
+        id: 3,
+        judul: "Menaker: Aset Indonesia Harus Bertransformasi pada Sumber Daya Manusianya",
+        deskripsi: "Menteri Tenaga Kerja Republik Indonesia, Hanif Dhakiri mengatakan bahwa sumber daya manusia di Indonesia merupakan aset yang berharga bagi negeri, jauh nilainya dibandingkan SDM negara lain di ASEAN.",
+        gambar: "https://indonesiacareercenter.id/wp-content/uploads/2021/11/6-2-1024x683.jpg",
+        waktu_tayang: "2024-02-20",
+        status: "branding"
+    },
 ];
 
 const dummyGallery = [
     { image_url: "https://indonesiacareercenter.id/wp-content/uploads/2022/06/WhatsApp-Image-2021-03-20-at-10.32.25-1.jpeg", created_at: "2024-02-01" },
+    { image_url: "https://indonesiacareercenter.id/wp-content/uploads/2023/05/IMG_1470-1-scaled.jpg", created_at: "2024-02-01" },
     { image_url: "https://indonesiacareercenter.id/wp-content/uploads/2021/11/XiMCvhPwidiH1Vmw4WXJKc5wP8WVVcn4ZkV364hWF2f503mqLIV3MIxkngqRqRo1lOeWJdflfRp78EjTIgs1600.png", created_at: "2024-02-02" }
 ];
 
@@ -165,18 +186,88 @@ const LandingPage = () => {
     const [berita, setBerita] = useState([]);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedBerita, setSelectedBerita] = useState(null);
-    const [selectedPhoto, setSelectedPhoto] = useState(null); // State untuk foto yang dipilih
-    const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false); // State untuk modal gallery
-    // const [partners, setPartners] = useState([]);
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
+    const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
     const navigate = useNavigate();
-    const user_id = localStorage.getItem("user_id");
     const [selectedPartnerType, setSelectedPartnerType] = useState("All");
     const [services, setServices] = useState([]);
     const [events, setEvents] = useState([]);
-    const [selectedEvent, setSelectedEvent] = useState(null);
     const [team, setTeam] = useState([]);
-    const [selectedMember, setSelectedMember] = useState(null);
-    const [language, setLanguage] = useState("id"); // Tambahkan state ini
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const googleTranslateElementRef = useRef(null);
+    const [language, setLanguage] = useState("id"); // 'id' atau 'en'
+    const [isTranslating, setIsTranslating] = useState(false);
+
+    useEffect(() => {
+        const savedLang = localStorage.getItem('preferredLanguage') || 'id';
+        setLanguage(savedLang);
+
+        // Set hash parameter awal
+        const langHash = savedLang === 'en' ? 'id|en' : 'en|id';
+        window.location.hash = `#googtrans(${langHash})`;
+    }, []);
+
+    useEffect(() => {
+        const handleLanguageChange = () => {
+            const select = document.querySelector('.goog-te-combo');
+            if (select) {
+                const currentLang = select.value;
+                if (currentLang !== language) {
+                    setLanguage(currentLang);
+                    localStorage.setItem('preferredLanguage', currentLang);
+                }
+            }
+        };
+
+        const select = document.querySelector('.goog-te-combo');
+        if (select) {
+            select.addEventListener('change', handleLanguageChange);
+        }
+
+        return () => {
+            if (select) {
+                select.removeEventListener('change', handleLanguageChange);
+            }
+        };
+    }, [language]);
+
+    useEffect(() => {
+        const loadGoogleTranslate = () => {
+            // Hapus widget sebelumnya
+            const oldWidget = document.querySelector('.goog-te-combo');
+            if (oldWidget) oldWidget.remove();
+
+            const addScript = () => {
+                const script = document.createElement("script");
+                script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&t=${Date.now()}`;
+                script.async = true;
+                document.body.appendChild(script);
+            };
+
+            window.googleTranslateElementInit = () => {
+                new window.google.translate.TranslateElement(
+                    {
+                        pageLanguage: 'id',
+                        includedLanguages: 'en,id',
+                        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+                        autoDisplay: false
+                    },
+                    'google_translate_element'
+                );
+
+                // Setelah inisialisasi, paksa update terjemahan
+                const langHash = language === 'en' ? 'id|en' : 'en|id';
+                window.location.hash = `#googtrans(${langHash})`;
+                if (window.google && window.google.translate) {
+                    window.google.translate.TranslateElement.InlineLayout.SIMPLE;
+                }
+            };
+
+            addScript();
+        };
+
+        loadGoogleTranslate();
+    }, [language]);
 
     // Cek status login dan ambil data gallery
     useEffect(() => {
@@ -211,11 +302,9 @@ const LandingPage = () => {
                 const response = await fetch(`${API_BASE_URL}/berita/all-berita`);
                 const data = await response.json();
                 if (data.success) {
-                    // Filter berita yang hanya memiliki status 'latest' atau 'branding'
                     const filteredBerita = data.data.filter(
                         (item) => item.status === "latest" || item.status === "branding"
                     );
-                    // Urutkan berita: 'branding' lebih diutamakan
                     const sortedBerita = filteredBerita.sort((a, b) => {
                         if (a.status === "branding" && b.status !== "branding") return -1;
                         if (a.status !== "branding" && b.status === "branding") return 1;
@@ -232,7 +321,7 @@ const LandingPage = () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/services`);
                 const data = await response.json();
-                setServices(data); // Simpan data ke state
+                setServices(data);
             } catch (error) {
                 console.error("Error fetching services:", error);
             }
@@ -242,7 +331,7 @@ const LandingPage = () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/events`);
                 const data = await response.json();
-                setEvents(data); // Simpan data ke state
+                setEvents(data);
             } catch (error) {
                 console.error("Error fetching events:", error);
             }
@@ -252,7 +341,7 @@ const LandingPage = () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/team`);
                 const data = await response.json();
-                setTeam(data); // Simpan data ke state
+                setTeam(data);
             } catch (error) {
                 console.error("Error fetching team data:", error);
             }
@@ -260,34 +349,20 @@ const LandingPage = () => {
 
         fetchTeam();
         fetchEvents();
-        fetchServices(); // Panggil fungsi fetc
+        fetchServices();
         checkLoginStatus();
         fetchGallery();
         fetchBerita();
-        // fetchPartners();
         window.addEventListener("storage", checkLoginStatus);
 
         return () => window.removeEventListener("storage", checkLoginStatus);
     }, []);
 
-    const fetchPartners = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/partner/partners`);
-            const data = await response.json();
-            if (data.success) {
-                setPartners(data.data);
-            }
-        } catch (error) {
-            console.error("Error fetching partners data:", error);
-        }
-    };
-
     // Fungsi untuk logout
     const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem("userData");
-        localStorage.removeItem("isVerified");
-        navigate('/login');
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        navigate("/login");
     };
 
     // Fungsi untuk memeriksa status pendaftaran member berdasarkan role
@@ -323,17 +398,37 @@ const LandingPage = () => {
         });
     };
 
-    const filteredPartners = partners.filter(partner => {
+    const filteredPartners = partners.filter((partner) => {
         if (selectedPartnerType === "All") return true;
         return partner.type.toLowerCase() === selectedPartnerType.toLowerCase();
     });
 
-    // Fungsi untuk mengganti bahasa (sementara hanya mengganti ikon)
-    const toggleLanguage = () => {
-        setLanguage((prevLang) => (prevLang === "id" ? "en" : "id"));
+    // Fungsi untuk toggle menu burger
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
     };
 
+    const toggleLanguage = () => {
+        const newLang = language === "id" ? "en" : "id";
+        setLanguage(newLang);
+        localStorage.setItem('preferredLanguage', newLang);
 
+        // Hapus semua element Google Translate
+        const iframes = document.querySelectorAll('.goog-te-banner-frame, .goog-te-menu-frame');
+        iframes.forEach(iframe => iframe.remove());
+
+        // Paksa reload widget dengan hash baru
+        const langHash = newLang === 'en' ? 'id|en' : 'en|id';
+        window.location.hash = `#googtrans(${langHash})`;
+
+        // Tambahkan timeout untuk memastikan element sudah terhapus
+        setTimeout(() => {
+            const script = document.createElement("script");
+            script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&t=${Date.now()}`;
+            script.async = true;
+            document.body.appendChild(script);
+        }, 100);
+    };
 
     return (
         <div>
@@ -342,14 +437,40 @@ const LandingPage = () => {
                 <div className="relative bg-gray-800 opacity-80 h-full">
                     <div className="absolute right-0 top-0 h-full w-64 bg-gradient-to-tr from-gray-950 via-gray-800 to-gray-600 clip-path-trapezoid-reverse"></div>
 
-                    <nav className="w-full px-10 flex justify-between items-center p-4 relative">
+                    <nav className="w-full px-4 lg:px-10 flex justify-between items-center p-4 relative">
+                        {/* Logo */}
                         <div className="z-20 flex items-center">
                             <button onClick={() => navigate("/home")}>
-                                <img src={Logo} alt="ICCN Logo" className="h-20 w-auto max-w-none" />
+                                <img src={Logo} alt="ICCN Logo" className="h-16 lg:h-20 w-auto max-w-none" />
                             </button>
                         </div>
 
-                        <ul className="flex space-x-8 font-semibold text-white z-20">
+                        {/* Bagian Kanan (Mobile) */}
+                        <div className="lg:hidden flex items-center space-x-4">
+                            {/* Hapus div wrapper yang tidak perlu */}
+                            <button
+                                onClick={toggleLanguage}
+                                disabled={isTranslating}
+                                className="text-white p-2 rounded-lg transition-all shadow-md font-bold hover:scale-105 hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-300"
+                            >
+                                {isTranslating ? (
+                                    <div className="animate-spin h-6 w-6 flex items-center justify-center">
+                                        <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                                    </div>
+                                ) : (
+                                    <div className="relative w-6 h-6 overflow-hidden rounded-full">
+                                        <img
+                                            src={language === "id" ? ina : uk}
+                                            alt="Language Flag"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                )}
+                            </button>
+                            {/* Tombol Burger */}
+                        </div>
+                        {/* Menu Desktop */}
+                        <ul className="hidden lg:flex space-x-8 font-semibold text-white z-20">
                             <li>
                                 <ScrollLink
                                     to="home"
@@ -412,12 +533,12 @@ const LandingPage = () => {
                             </li>
                             <li>
                                 <ScrollLink
-                                    to="contact"
+                                    to="berita"
                                     smooth={true}
                                     duration={500}
                                     className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                                 >
-                                    Contact
+                                    Berita
                                 </ScrollLink>
                             </li>
                             <li>
@@ -432,47 +553,184 @@ const LandingPage = () => {
                             </li>
                             <li>
                                 <ScrollLink
-                                    to="berita"
+                                    to="contact"
                                     smooth={true}
                                     duration={500}
                                     className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                                 >
-                                    Berita
+                                    Contact
                                 </ScrollLink>
                             </li>
                         </ul>
 
-                        <div className="z-20 relative flex items-center space-x-6">
+                        {/* Bagian Kanan (Desktop) */}
+                        <div className="hidden lg:flex items-center space-x-6">
                             {/* Tombol Translate */}
                             <button
                                 onClick={toggleLanguage}
-                                className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-200 flex items-center gap-2"
+                                disabled={isTranslating}
+                                className="text-white px-4 py-2 rounded-xl transition-all shadow-lg font-bold hover:scale-105 hover:shadow-md hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-300 flex items-center gap-2 group"
                             >
-                                {language === "id" ? (
-                                    <img src={ina} alt="Indonesia Flag" className="w-6 h-6" /> // Gunakan gambar bendera Indonesia
+                                {isTranslating ? (
+                                    <div className="animate-spin h-6 w-6 flex items-center justify-center">
+                                        <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                                    </div>
                                 ) : (
-                                    <img src={usa} alt="USA Flag" className="w-6 h-6" /> // Gunakan gambar bendera USA
+                                    <>
+                                        <div className="relative w-8 h-8 overflow-hidden rounded-full shadow-md transition-transform duration-300 group-hover:scale-110">
+                                            <img
+                                                src={language === "id" ? ina : uk}
+                                                alt="Language Flag"
+                                                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                                            />
+                                        </div>
+                                        <span className="hidden md:inline-block text-sm">
+                                            {language === "id" ? "ID" : "EN"}
+                                        </span>
+                                    </>
                                 )}
                             </button>
 
-                            {/* Tombol Sign In/Logout */}
-                            {isLoggedIn ? (
-                                <button
-                                    onClick={handleLogout}
-                                    className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-500 duration-200"
-                                >
-                                    Logout
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={() => navigate("/login")}
-                                    className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-200"
-                                >
-                                    Sign In
-                                </button>
-                            )}
+                            <button
+                                onClick={() => navigate("/login")}
+                                className="text-white px-4 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-200"
+                            >
+                                Sign In
+                            </button>
                         </div>
                     </nav>
+
+                    {/* Mobile Menu Dropdown */}
+                    {isMenuOpen && (
+                        <div className="lg:hidden absolute top-16 left-0 right-0 bg-gray-800 w-full flex flex-col items-center space-y-4 py-4 z-20">
+                            <ul className="w-full space-y-4">
+                                <li>
+                                    <ScrollLink
+                                        to="home"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Home
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="about"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        About
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="services"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Services
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="event"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Event
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="partnership"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Partnership
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="team"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Our Team
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="berita"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Berita
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="gallery"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Gallery
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="contact"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Contact
+                                    </ScrollLink>
+                                </li>
+                            </ul>
+
+                            {/* Tombol Sign In/Logout Mobile */}
+                            <div className="w-full px-4">
+                                {isLoggedIn ? (
+                                    <button
+                                        onClick={() => {
+                                            handleLogout();
+                                            toggleMenu();
+                                        }}
+                                        className="w-full text-white px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 transition duration-300"
+                                    >
+                                        Logout
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            navigate("/login");
+                                            toggleMenu();
+                                        }}
+                                        className="w-full text-white px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 transition duration-300"
+                                    >
+                                        Sign In
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </header>
 
@@ -506,6 +764,7 @@ const LandingPage = () => {
                         Jadi Member
                     </button>
 
+                    {/* Scroll indicator */}
                     <motion.div
                         initial={{ opacity: 1, y: 0 }}
                         animate={{ y: [0, -10, 0] }}
@@ -557,7 +816,7 @@ const LandingPage = () => {
                                 transition={{ duration: 0.8 }}
                                 viewport={{ once: true }}
                             >
-                                <img src={aboutImage} alt="About ICCN" className="rounded-lg shadow-lg w-full max-w-lg" />
+                                <img src={about1} alt="About ICCN" className="rounded-lg shadow-lg w-full max-w-lg" />
                             </motion.div>
 
                             <motion.div
@@ -605,7 +864,7 @@ const LandingPage = () => {
                                 transition={{ duration: 0.8 }}
                                 viewport={{ once: true }}
                             >
-                                <img src={aboutImage} alt="ICCN Network" className="rounded-lg shadow-lg w-full max-w-lg" />
+                                <img src={about2} alt="ICCN Network" className="rounded-lg shadow-lg w-full max-w-lg" />
                             </motion.div>
                         </div>
                     </div>
@@ -649,9 +908,9 @@ const LandingPage = () => {
                 </section>
 
                 {/* Events Section */}
-                <section id="events" className="py-12 bg-white">
+                <section id="event" className="py-12 bg-white">
                     <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Upcoming Events</h2>
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Events</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {dummyEvents.slice(0, 2).map((event, index) => (
                                 <motion.div
@@ -771,7 +1030,8 @@ const LandingPage = () => {
                                     </h3>
 
                                     {/* Posisi/Jabatan */}
-                                    <p className="text-gray-700">{member.position}</p>
+                                    <p className="font-bold">{member.position}</p>
+                                    <p className="text-gray-700">{member.asal}</p>
                                 </div>
                             ))}
                         </div>
@@ -1114,8 +1374,14 @@ const LandingPage = () => {
                     </div>
                 </footer>
             </main>
-        </div>
+            <div id="google_translate_element" style={{
+                position: 'absolute',
+                top: '-9999px',
+                left: '-9999px',
+                opacity: 0,
+                zIndex: -1
+            }}></div>
+        </div >
     );
 };
-
 export default LandingPage;
