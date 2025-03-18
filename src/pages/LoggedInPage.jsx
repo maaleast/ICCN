@@ -9,7 +9,7 @@ import about2 from "../assets/about2.png";
 import LandingBg from "../assets/LandingBg.jpg";
 import Logo from "../assets/iccn.png";
 import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes, FaFlag } from "react-icons/fa";
-import usa from "../assets/usa.png";
+import uk from "../assets/uk.png";
 import ina from "../assets/ina.png";
 
 // Dummy data untuk semua section
@@ -200,6 +200,7 @@ const LoggedInPage = () => {
     const [team, setTeam] = useState(teamMembers);
     const [berita, setBerita] = useState(dummyBerita);
     const [gallery, setGallery] = useState(dummyGallery);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Cek status login dan ambil data gallery
     useEffect(() => {
@@ -316,9 +317,8 @@ const LoggedInPage = () => {
 
     // Fungsi untuk logout
     const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem("userData");
-        localStorage.removeItem("isVerified");
+        localStorage.removeItem('token');
+        localStorage.removeItem("role");
         navigate('/login');
     };
 
@@ -371,6 +371,13 @@ const LoggedInPage = () => {
         setLanguage((prevLang) => (prevLang === "id" ? "en" : "id"));
     };
 
+    // Fungsi untuk toggle menu burger
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
+
+
+
     return (
         <div>
             {/* Header */}
@@ -378,14 +385,52 @@ const LoggedInPage = () => {
                 <div className="relative bg-gray-800 opacity-80 h-full">
                     <div className="absolute right-0 top-0 h-full w-64 bg-gradient-to-tr from-gray-950 via-gray-800 to-gray-600 clip-path-trapezoid-reverse"></div>
 
-                    <nav className="w-full px-10 flex justify-between items-center p-4 relative">
+                    <nav className="w-full px-4 lg:px-10 flex justify-between items-center p-4 relative">
+                        {/* Logo */}
                         <div className="z-20 flex items-center">
                             <button onClick={() => navigate("/home")}>
-                                <img src={Logo} alt="ICCN Logo" className="h-20 w-auto max-w-none" />
+                                <img src={Logo} alt="ICCN Logo" className="h-16 lg:h-20 w-auto max-w-none" />
                             </button>
                         </div>
 
-                        <ul className="flex space-x-8 font-semibold text-white z-20">
+                        {/* Bagian Kanan (Mobile) */}
+                        <div className="lg:hidden flex items-center space-x-4">
+                            {/* Tombol Translate */}
+                            <button
+                                onClick={toggleLanguage}
+                                className="text-white px-3 py-1 rounded-xl transition-all shadow-white shadow-md font-bold hover:scale-105 hover:shadow-sm hover:shadow-white hover:shadow-opacity-30 hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-200 flex items-center gap-2"
+                            >
+                                {language === "id" ? (
+                                    <img src={ina} alt="Indonesia Flag" className="w-5 h-5" />
+                                ) : (
+                                    <img src={uk} alt="UK Flag" className="w-5 h-5" />
+                                )}
+                            </button>
+
+                            {/* Tombol Burger */}
+                            <button
+                                className="text-white"
+                                onClick={toggleMenu}
+                            >
+                                <svg
+                                    className="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M4 6h16M4 12h16m-7 6h7"
+                                    ></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Menu Desktop */}
+                        <ul className="hidden lg:flex space-x-8 font-semibold text-white z-20">
                             <li>
                                 <ScrollLink
                                     to="home"
@@ -478,7 +523,8 @@ const LoggedInPage = () => {
                             </li>
                         </ul>
 
-                        <div className="z-20 relative flex items-center space-x-6">
+                        {/* Bagian Kanan (Desktop) */}
+                        <div className="hidden lg:flex items-center space-x-6">
                             {/* Tombol Translate */}
                             <button
                                 onClick={toggleLanguage}
@@ -487,7 +533,7 @@ const LoggedInPage = () => {
                                 {language === "id" ? (
                                     <img src={ina} alt="Indonesia Flag" className="w-6 h-6" />
                                 ) : (
-                                    <img src={usa} alt="USA Flag" className="w-6 h-6" />
+                                    <img src={uk} alt="UK Flag" className="w-6 h-6" />
                                 )}
                             </button>
 
@@ -500,6 +546,138 @@ const LoggedInPage = () => {
                             </button>
                         </div>
                     </nav>
+
+                    {/* Mobile Menu Dropdown */}
+                    {isMenuOpen && (
+                        <div className="lg:hidden absolute top-16 left-0 right-0 bg-gray-800 w-full flex flex-col items-center space-y-4 py-4 z-20">
+                            <ul className="w-full space-y-4">
+                                <li>
+                                    <ScrollLink
+                                        to="home"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Home
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="about"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        About
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="services"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Services
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="event"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Event
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="partnership"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Partnership
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="team"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Our Team
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="contact"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Contact
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="gallery"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Gallery
+                                    </ScrollLink>
+                                </li>
+                                <li>
+                                    <ScrollLink
+                                        to="berita"
+                                        smooth={true}
+                                        duration={500}
+                                        onClick={toggleMenu}
+                                        className="block px-4 py-2 text-white hover:bg-orange-600 text-center"
+                                    >
+                                        Berita
+                                    </ScrollLink>
+                                </li>
+                            </ul>
+
+                            {/* Tombol Sign In/Logout Mobile */}
+                            <div className="w-full px-4">
+                                {isLoggedIn ? (
+                                    <button
+                                        onClick={() => {
+                                            handleLogout();
+                                            toggleMenu();
+                                        }}
+                                        className="w-full text-white px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 transition duration-300"
+                                    >
+                                        Logout
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            navigate("/login");
+                                            toggleMenu();
+                                        }}
+                                        className="w-full text-white px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 transition duration-300"
+                                    >
+                                        Sign In
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </header>
 
