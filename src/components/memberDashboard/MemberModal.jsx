@@ -121,15 +121,14 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal }) 
     };
 
     const handleMendaftarPelatihan = async () => {
-        if (!kode) {
-            setError('Kode pelatihan harus diisi');
-            return;
-        }
-        console.
-        setLoading(true);
-        setError('');
-    
-        try {
+        // if (!kode) {
+        //     setError('Kode pelatihan harus diisi');
+        //     return;
+        // }
+        // setLoading(true);
+        // setError('');
+        // console.log('localStorage.getItem(member_id)', localStorage.getItem('member_id'));
+        try {   
             const response = await fetch(`${API_BASE_URL}/members/mendaftar-pelatihan`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

@@ -1,15 +1,33 @@
 import { motion } from 'framer-motion';
 import TrainingCard from './TrainingCard';
 
+const transformBadges = (badgesObj) => {
+    let result = [];
+    Object.values(badgesObj).forEach((tahun) => {
+        Object.values(tahun).forEach((badge) => {
+            result.push(badge);
+        });
+    });
+    return result;
+};
+
+
 export default function TrainingList({ trainings, badges, onRegister }) {
+    // Ubah badges ke array jika masih berbentuk objek
+    const badgesArray = Array.isArray(badges) ? badges : transformBadges(badges);
+
     const getTrainingStatus = (training) => {
         const currentDate = new Date();
         const trainingEndDate = new Date(training.tanggal_berakhir);
-        const isCompleted = badges.some(badge => badge.pelatihan_id === training.id);
+        const isCompleted = badgesArray.some(badge => badge.pelatihan_id === training.id);
 
         if (isCompleted) return 'completed';
         if (currentDate > trainingEndDate) return 'uncompleted';
         return training.status;
+    };
+
+    const getTrainingBadges = (pelatihan_id) => {
+        return badgesArray.filter(badge => badge.pelatihan_id === pelatihan_id);
     };
 
     const activeTrainings = trainings
@@ -45,7 +63,7 @@ export default function TrainingList({ trainings, badges, onRegister }) {
                             startDate={training.tanggal_pelatihan}
                             endDate={training.tanggal_berakhir}
                             status={getTrainingStatus(training)}
-                            badges={badges.filter(badge => badge.pelatihan_id === training.id)}
+                            badges={getTrainingBadges(badges, training.id)}
                             onRegister={() => onRegister(training)}
                             training={training}
                         />
@@ -64,7 +82,7 @@ export default function TrainingList({ trainings, badges, onRegister }) {
                             startDate={training.tanggal_pelatihan}
                             endDate={training.tanggal_berakhir}
                             status={getTrainingStatus(training)}
-                            badges={badges.filter(badge => badge.pelatihan_id === training.id)}
+                            badges={getTrainingBadges(badges, training.id)}
                             onRegister={() => onRegister(training)}
                             training={training}
                         />
@@ -83,7 +101,7 @@ export default function TrainingList({ trainings, badges, onRegister }) {
                             startDate={training.tanggal_pelatihan}
                             endDate={training.tanggal_berakhir}
                             status={getTrainingStatus(training)}
-                            badges={badges.filter(badge => badge.pelatihan_id === training.id)}
+                            badges={getTrainingBadges(badges, training.id)}
                             onRegister={() => onRegister(training)}
                             training={training}
                         />
