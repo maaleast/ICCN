@@ -125,7 +125,7 @@ const MembershipRegistration = () => {
     // Fungsi untuk mengirim data ke backend
     const submitForm = async () => {
         setIsSubmitting(true);
-
+    
         const formDataToSend = new FormData();
         formDataToSend.append("tipe_keanggotaan", formData.userType);
         formDataToSend.append("institusi", formData.institutionName);
@@ -143,27 +143,33 @@ const MembershipRegistration = () => {
         if (formData.logoFile) {
             formDataToSend.append("logo", formData.logoFile);
         }
-
+    
         try {
-            // Kirim data ke backend
+            console.log("Mengirim data ke /register-member...");
             const response = await fetch(`${API_BASE_URL}/members/register-member`, {
                 method: "POST",
                 body: formDataToSend,
             });
-
+    
             const data = await response.json();
-
+            console.log("Response dari /register-member:", data);
+    
             if (!response.ok) {
                 throw new Error(data.message || "Gagal mendaftar member");
             }
-
+    
+            // Pastikan no_identitas ada di respons
+            if (!data.no_identitas) {
+                throw new Error("no_identitas tidak ditemukan di respons backend");
+            }
+    
             // Tampilkan notifikasi sukses
             await Swal.fire({
                 icon: "success",
                 title: "Berhasil!",
                 text: "Pendaftaran member berhasil, menunggu verifikasi",
             });
-
+    
             // Set status sukses dan mulai countdown
             setSuccess(true);
             setTimeout(() => navigate("/login"), 5000);

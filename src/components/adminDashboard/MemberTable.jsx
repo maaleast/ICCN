@@ -1,5 +1,5 @@
 import React from "react";
-import Pagination from "./Pagination";
+import Pagination from "../Pagination";
 
 export default function MemberTable({
     currentMembers,
@@ -21,6 +21,7 @@ export default function MemberTable({
                 <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
+                            <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">No. Identitas</th>
                             <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Nama</th>
                             <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Tanggal Daftar</th>
                             <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Status</th>
@@ -31,14 +32,15 @@ export default function MemberTable({
                     <tbody>
                         {currentMembers.length === 0 ? (
                             <tr>
-                                <td colSpan="5" className="py-4 text-center text-gray-500 dark:text-gray-400">
+                                <td colSpan="6" className="py-4 text-center text-gray-500 dark:text-gray-400">
                                     Tidak ada data yang ditemukan
                                 </td>
                             </tr>
                         ) : (
                             currentMembers.map((member) => (
                                 <tr key={member.id} className="border-t dark:border-gray-700">
-                                    <td className="py-3 px-4 dark:text-gray-300">{member.nama_pembayar}</td>
+                                    <td className="py-3 px-4 dark:text-gray-300">{member.no_identitas}</td>
+                                    <td className="py-3 px-4 dark:text-gray-300">{member.nama}</td>
                                     <td className="py-3 px-4 dark:text-gray-300">{formatDate(member.tanggal_submit)}</td>
                                     <td className="py-3 px-4">
                                         <span
