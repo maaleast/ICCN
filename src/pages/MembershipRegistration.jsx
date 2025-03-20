@@ -158,16 +158,11 @@ const MembershipRegistration = () => {
                 throw new Error(data.message || "Gagal mendaftar member");
             }
     
-            // Pastikan no_identitas ada di respons
-            if (!data.no_identitas) {
-                throw new Error("no_identitas tidak ditemukan di respons backend");
-            }
-    
             // Tampilkan notifikasi sukses
             await Swal.fire({
                 icon: "success",
                 title: "Berhasil!",
-                text: "Pendaftaran member berhasil, menunggu verifikasi",
+                text: data.message || "Pendaftaran member berhasil, menunggu verifikasi",
             });
     
             // Set status sukses dan mulai countdown
@@ -192,7 +187,6 @@ const MembershipRegistration = () => {
             return () => clearInterval(timer);
         }
     }, [success]);
-
 
     return (
         <>
@@ -278,7 +272,6 @@ const MembershipRegistration = () => {
                                                 <option value="Perusahaan">Perusahaan</option>
                                                 <option value="Individu">Individu/Pribadi</option>
                                             </select>
-                                            {errors.userType && <p className="text-red-500 text-sm mt-1">{errors.userType}</p>}
                                             {errors.userType && <p className="text-red-500 text-sm mt-1">{errors.userType}</p>}
                                         </div>
 
