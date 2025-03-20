@@ -13,6 +13,7 @@ import Settings from '../components/memberDashboard/Settings';
 import Penghargaan from '../components/memberDashboard/Penghargaan'
 import { API_BASE_URL } from '../config';
 import { TrainingDetailModal, VerificationStatusModal } from '../components/memberDashboard/MemberModal';
+import axios from 'axios';
 
 export default function MemberDashboard() {
     const [activeMenu, setActiveMenu] = useState('Dashboard');
@@ -24,6 +25,20 @@ export default function MemberDashboard() {
     const [userId, setUserId] = useState(localStorage.getItem("user_id"));
     const [status, setStatus] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!userId) return; // Cegah request jika userId belum tersedia
+    
+        console.log("Fetching pelatihan data for userId:", userId);
+    
+        axios.get(`${API_BASE_URL}/pelatihan/${userId}`)
+            .then(response => {
+                setTrainings(response.data); // Simpan data pelatihan ke state yang benar
+            })
+            .catch(error => {
+                console.error("Error fetching pelatihan data:", error);
+            });
+    }, [userId]);    
 
     useEffect(() => {
         const fetchVerificationStatus = async () => {
