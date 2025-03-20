@@ -1072,7 +1072,7 @@ const LoggedInPage = () => {
 
                         {/* Grid untuk Card Team */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {teamMembers.map((member) => (
+                            {teamMembers.slice(0, 3).map((member) => (
                                 <div
                                     key={member.id}
                                     className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 text-center"
@@ -1096,6 +1096,30 @@ const LoggedInPage = () => {
                                     <p className="text-gray-700">{member.asal}</p>
                                 </div>
                             ))}
+                        </div>
+
+                        {/* Tombol More dan Panah */}
+                        <div className="flex justify-center mt-12 space-x-4">
+                            <button
+                                onClick={() => navigate("/team")} // Navigasi ke /team saat tombol diklik
+                                className="flex items-center px-6 py-3 bg-blue-900 text-white rounded-full hover:bg-blue-700 transition-colors duration-300"
+                            >
+                                <span>More</span>
+                                <svg
+                                    className="w-6 h-6 ml-2"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                    />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </section>

@@ -76,8 +76,8 @@ export default function AdminPanel() {
         try {
             const [membersRes, keuanganRes, photosRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/admin/all-members`),
-                fetch(`${API_BASE_URL}/admin/keuangan`),
-                fetch(`${API_BASE_URL}/admin/gallery`)
+                // fetch(`${API_BASE_URL}/admin/keuangan`),
+                // fetch(`${API_BASE_URL}/admin/gallery`)
             ]);
 
             const members = await membersRes.json();
