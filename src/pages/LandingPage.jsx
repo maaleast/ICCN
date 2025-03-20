@@ -233,17 +233,11 @@ const LandingPage = () => {
 
     useEffect(() => {
         const loadGoogleTranslate = () => {
-            // Hapus widget sebelumnya
+            // Hapus widget sebelumnya jika ada
             const oldWidget = document.querySelector('.goog-te-combo');
             if (oldWidget) oldWidget.remove();
 
-            const addScript = () => {
-                const script = document.createElement("script");
-                script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&t=${Date.now()}`;
-                script.async = true;
-                document.body.appendChild(script);
-            };
-
+            // Fungsi inisialisasi widget
             window.googleTranslateElementInit = () => {
                 new window.google.translate.TranslateElement(
                     {
@@ -258,16 +252,17 @@ const LandingPage = () => {
                 // Setelah inisialisasi, paksa update terjemahan
                 const langHash = language === 'en' ? 'id|en' : 'en|id';
                 window.location.hash = `#googtrans(${langHash})`;
-                if (window.google && window.google.translate) {
-                    window.google.translate.TranslateElement.InlineLayout.SIMPLE;
-                }
             };
 
-            addScript();
+            // Muat ulang script Google Translate
+            const script = document.createElement("script");
+            script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&t=${Date.now()}`;
+            script.async = true;
+            document.body.appendChild(script);
         };
 
         loadGoogleTranslate();
-    }, [language]);
+    }, [language]); // Jalankan ulang setiap kali `language` berubah // Jalankan ulang setiap kali `language` berubah
 
     // Cek status login dan ambil data gallery
     useEffect(() => {
@@ -413,7 +408,7 @@ const LandingPage = () => {
         setLanguage(newLang);
         localStorage.setItem('preferredLanguage', newLang);
 
-        // Hapus semua element Google Translate
+        // Hapus widget Google Translate yang ada
         const iframes = document.querySelectorAll('.goog-te-banner-frame, .goog-te-menu-frame');
         iframes.forEach(iframe => iframe.remove());
 
@@ -421,7 +416,7 @@ const LandingPage = () => {
         const langHash = newLang === 'en' ? 'id|en' : 'en|id';
         window.location.hash = `#googtrans(${langHash})`;
 
-        // Tambahkan timeout untuk memastikan element sudah terhapus
+        // Tunggu sebentar untuk memastikan elemen sudah terhapus, lalu muat ulang widget
         setTimeout(() => {
             const script = document.createElement("script");
             script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&t=${Date.now()}`;
@@ -1029,7 +1024,7 @@ const LandingPage = () => {
 
                         {/* Grid untuk Card Team */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {teamMembers.map((member) => (
+                            {teamMembers.slice(0, 3).map((member) => (
                                 <div
                                     key={member.id}
                                     className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 text-center"
@@ -1053,6 +1048,30 @@ const LandingPage = () => {
                                     <p className="text-gray-700">{member.asal}</p>
                                 </div>
                             ))}
+                        </div>
+
+                        {/* Tombol More dan Panah */}
+                        <div className="flex justify-center mt-12 space-x-4">
+                            <button
+                                onClick={() => navigate("/team")} // Navigasi ke /team saat tombol diklik
+                                className="flex items-center px-6 py-3 bg-blue-900 text-white rounded-full hover:bg-blue-700 transition-colors duration-300"
+                            >
+                                <span>More</span>
+                                <svg
+                                    className="w-6 h-6 ml-2"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                    />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </section>
