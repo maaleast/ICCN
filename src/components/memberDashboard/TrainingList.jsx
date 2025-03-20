@@ -16,6 +16,10 @@ export default function TrainingList({ trainings, badges, onRegister }) {
     // Ubah badges ke array jika masih berbentuk objek
     const badgesArray = Array.isArray(badges) ? badges : transformBadges(badges);
 
+    console.log('badgesArray: ', badgesArray);
+    console.log('trainings: ', trainings);
+    console.log('onRegister: ', onRegister);
+
     const getTrainingStatus = (training) => {
         const currentDate = new Date();
         const trainingEndDate = new Date(training.tanggal_berakhir);

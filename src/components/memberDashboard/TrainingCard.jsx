@@ -51,10 +51,19 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
 
     // Jika pelatihan sudah selesai (ada badge), override status menjadi 'completed'
     const isCompleted = badges.length > 0;
+    console.log('badges: ', badges);
+    console.log('badgesLength: ', badges.length);
+    console.log('isCompleted: ', isCompleted);
+    console.log('status: ', status);
+    console.log('startDate: ', startDate);
+    console.log('endDate: ', endDate);
+    console.log('trainingEndDate: ', trainingEndDate);
+    console.log('currentDate: ', currentDate);
     const finalStatus = isCompleted ? 'completed' : status;
 
     // Jika waktu pelatihan sudah lewat dan tidak ada badge, status menjadi 'uncompleted'
     const isOverdue = currentDate > trainingEndDate;
+    
     const finalStatusWithOverdue = isOverdue && !isCompleted ? 'uncompleted' : finalStatus;
 
     // Tentukan apakah pelatihan masih aktif meskipun sudah selesai
