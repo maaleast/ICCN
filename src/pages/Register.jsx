@@ -82,7 +82,7 @@ export default function Register() {
         const formDataToSend = new FormData();
         Object.keys(formData).forEach((key) => {
             if (formData[key]) {
-                formDataToSend.append(key, formData[key] || "");
+                formDataToSend.append(key, formData[key]);
             }
         });
 
@@ -97,7 +97,7 @@ export default function Register() {
                 throw new Error(data.message || "Registrasi gagal!");
             }
 
-            Swal.fire({ icon: "success", title: "Pendaftaran Berhasil!", text: "Silakan tunggu verifikasi." });
+            Swal.fire({ icon: "success", title: "Pendaftaran Berhasil!", text: "Pendaftaran Berhasil! Silahkan Verifikasi Email Anda untuk melanjutkan" });
             setTimeout(() => navigate("/login"), 5000);
         } catch (error) {
             Swal.fire({ icon: "error", title: "Gagal", text: error.message || "Terjadi kesalahan." });
