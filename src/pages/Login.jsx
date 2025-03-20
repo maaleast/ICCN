@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import { FaUser, FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaEnvelope } from "react-icons/fa";
 import { motion } from "framer-motion";
-import Logo from "../assets/iccn.png"
+import Logo from "../assets/iccn.png";
+import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -20,39 +21,47 @@ export default function Login() {
     const handleLogin = async (e) => {
         e.preventDefault();
         setError("");
-
+    
         try {
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password }),
             });
-
+    
             const data = await response.json();
-
+    
             if (!response.ok) {
                 setError(data.message || "Terjadi kesalahan. Silakan coba lagi.");
                 return;
             }
-
+    
             const token = data.token;
             localStorage.setItem("token", token);
-
+    
             try {
-                const decoded = JSON.parse(atob(token.split(".")[1])); // Decode token JWT
-                const { id, role, is_verified } = decoded;
-
+                const decoded = jwtDecode(token); // Decode token JWT
+                const { id, role, is_verified, member_id, no_identitas } = decoded;
+    
                 console.log("Decoded token:", decoded); // Debugging
-
+    
                 localStorage.setItem("user_id", id);
                 localStorage.setItem("role", role);
                 localStorage.setItem("is_verified", is_verified.toString());
+                
+                if (member_id) {
+                    localStorage.setItem("member_id", member_id); // 🔹 Simpan member_id jika ada
+                }
 
+                if (no_identitas) {
+                    localStorage.setItem("no_identitas", no_identitas); // 🔹 Simpan no_identitas jika ada
+                }
+    
                 if (is_verified === 0) {
                     setError("Akun ini belum memverifikasi email.");
                     return;
                 }
-
+    
                 if (role === "admin") {
                     navigate("/admin");
                 } else if (role === "member") {
@@ -61,7 +70,7 @@ export default function Login() {
                     navigate("/home");
                 }
             } catch (decodeError) {
-                console.error("Decode error:", decodeError); // Debugging
+                console.error("Decode error:", decodeError);
                 setError("Token tidak valid.");
                 localStorage.removeItem("token");
             }

@@ -1,7 +1,20 @@
 import { motion } from 'framer-motion';
 import { CheckCircleIcon, ClockIcon, ExclamationCircleIcon } from '@heroicons/react/24/solid';
 
+const transformBadges = (badgesObj) => {
+    let result = [];
+    Object.values(badgesObj).forEach((tahun) => {
+        Object.values(tahun).forEach((badge) => {
+            result.push(badge);
+        });
+    });
+    return result;
+};
+
 export default function RecentActivities({ activities, badges }) {
+
+    // Konversi badges dari objek ke array
+    const badgesArray = Array.isArray(badges) ? badges : transformBadges(badges);
     // Fungsi untuk menentukan status pelatihan
     const getActivityStatus = (activity) => {
         const currentDate = new Date();
@@ -9,7 +22,7 @@ export default function RecentActivities({ activities, badges }) {
         const trainingEndDate = new Date(activity.tanggal_berakhir);
 
         // Cek apakah pelatihan ada di badges (COMPLETED)
-        const isCompleted = badges.some(badge => badge.pelatihan_id === activity.id);
+        const isCompleted = badgesArray.some(badge => badge.pelatihan_id === activity.id);
 
         if (isCompleted) {
             return 'completed';

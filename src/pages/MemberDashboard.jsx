@@ -76,6 +76,7 @@ export default function MemberDashboard() {
             try {
                 const response = await fetch(`${API_BASE_URL}/members/badge/${localStorage.getItem('user_id')}`);
                 const data = await response.json();
+                console.log('Fetched badges:', data); // Debugging
                 setBadges(data.badges);
             } catch (error) {
                 console.error('Error fetching badges:', error);
