@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import { FaUser, FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaEnvelope } from "react-icons/fa";
 import { motion } from "framer-motion";
-import Logo from "../assets/iccn.png"
+import Logo from "../assets/iccn.png";
+import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -39,8 +40,8 @@ export default function Login() {
             localStorage.setItem("token", token);
     
             try {
-                const decoded = JSON.parse(atob(token.split(".")[1])); // Decode token JWT
-                const { id, role, is_verified, member_id } = decoded;
+                const decoded = jwtDecode(token); // Decode token JWT
+                const { id, role, is_verified, member_id, no_identitas } = decoded;
     
                 console.log("Decoded token:", decoded); // Debugging
     
@@ -50,6 +51,10 @@ export default function Login() {
                 
                 if (member_id) {
                     localStorage.setItem("member_id", member_id); // 🔹 Simpan member_id jika ada
+                }
+
+                if (no_identitas) {
+                    localStorage.setItem("no_identitas", no_identitas); // 🔹 Simpan no_identitas jika ada
                 }
     
                 if (is_verified === 0) {
