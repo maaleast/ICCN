@@ -104,7 +104,7 @@ export default function Pengeluaran() {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    status: editingId ? formData.status : 'MASUK', // Status pemasukan atau pengeluaran
+                    status: editingId ? formData.status : 'KELUAR', // Status pemasukan atau pengeluaran
                     jumlah: parseFloat(formData.jumlah.replace(/[^0-9]/g, '')), // Hilangkan "Rp." dan format ribuan
                     deskripsi: formData.deskripsi,
                     tanggal: formattedDate, // Hanya tanggal, tanpa waktu
