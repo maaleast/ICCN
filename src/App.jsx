@@ -18,9 +18,37 @@ function ProtectedRoute({ children, allowedRoles }) {
   const userRole = localStorage.getItem("role");
   const isVerified = parseInt(localStorage.getItem("is_verified"), 10);
 
-  if (!token) return <Navigate to="/login" replace />;
-  if (isVerified === 0) return <Navigate to="/login" replace />;
-  if (allowedRoles && !allowedRoles.includes(userRole)) return <Navigate to="/home" replace />;
+  // if (!token) return <Navigate to="/login" replace />;
+  // if (isVerified === 0) return <Navigate to="/login" replace />;
+  // if (allowedRoles && !allowedRoles.includes(userRole)) return <Navigate to="/home" replace />;
+
+  console.log("ProtectedRoute - Token:", token); // Debugging
+  console.log("ProtectedRoute - Role:", userRole); // Debugging
+  console.log("ProtectedRoute - Allowed Roles:", allowedRoles); // Debugging
+
+  // Jika tidak ada token atau belum terverifikasi, redirect ke /login
+  if (!token || isVerified === 0) {
+    console.log("Redirecting to /login"); // Debugging
+    return <Navigate to="/login" replace />;
+  }
+
+  // Jika role tidak diizinkan, redirect ke /home
+  if (allowedRoles && !allowedRoles.includes(userRole)) {
+    console.log("Redirecting to /home"); // Debugging
+    return <Navigate to="/home" replace />;
+  }
+
+  return children;
+}
+
+
+function RouteGuard({ children }) {
+  const token = localStorage.getItem("token");
+
+  // Jika sudah login, redirect ke /home
+  if (token) {
+    return <Navigate to="/home" replace />;
+  }
 
   return children;
 }
@@ -29,7 +57,13 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        {/* Route untuk landing page dengan proteksi */}
+        <Route path="/" element={
+          <RouteGuard>
+            <LandingPage />
+          </RouteGuard>
+        } />
+
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/gallery" element={<PageGallery />} />
@@ -56,18 +90,22 @@ function App() {
           </ProtectedRoute>
         } />
 
-        <Route path="/member" element={
-          <ProtectedRoute allowedRoles={["member", "admin"]}>
-            <MemberDashboard />
-          </ProtectedRoute>
-        } />
-
-
-        <Route path="/admin" element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <AdminPanel />
-          </ProtectedRoute>
-        } />
+        <Route
+          path="/member"
+          element={
+            <ProtectedRoute allowedRoles={["member", "admin"]}>
+              <MemberDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminPanel />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
