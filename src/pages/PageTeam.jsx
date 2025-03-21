@@ -23,19 +23,19 @@ const PageTeam = () => {
             position: "Presiden",
             name: "Dr. Rosaria Mita Amalia, S.S., S.IP., M.Hum",
             affiliation: "Universitas Padjadjaran",
-            photo: userImg,
+            photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-21-at-12.36.51-e1663803429823-256x256.jpeg",
             children: [
                 {
                     position: "Wakil Presiden",
                     name: "Prof. Dr. Elly Munadziroh, drg. MS",
                     affiliation: "Universitas Airlangga",
-                    photo: userImg,
+                    photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-20-at-12.29.34-278x278.jpeg",
                     children: [
                         {
                             position: "Bendahara Umum",
                             name: "Dr. Tiara Nirmala, SE., M.Sc.",
                             affiliation: "Universitas Lampung",
-                            photo: userImg,
+                            photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkTp_Hk6d7FXDJkFFt1fS88yf4yBG7Q7Lw0A&s",
                         },
                         {
                             position: "Wakil Bendahara Umum",
@@ -49,7 +49,7 @@ const PageTeam = () => {
                     position: "Sekretaris Jendral",
                     name: "Dr. Teddy Indira Budiwan, S.Psi., M.M",
                     affiliation: "Universitas Bina Nusantara",
-                    photo: userImg,
+                    photo: "https://indonesiacareercenter.id/wp-content/uploads/2024/06/teddy-removebg-preview-295x300.png",
                     children: [
                         {
                             position: "Wakil Sekretaris Jendral",
@@ -61,9 +61,9 @@ const PageTeam = () => {
                         {
                             position: "Wakil Sekretaris Jendral",
                             subPosition: "Bidang Komunikasi Publik, Pendampingan Dan Kerjasama",
-                            name: "Ir. Petiana, M.M",
+                            name: "Ir. Petiana Indriati, M.M",
                             affiliation: "Universitas Pancasila",
-                            photo: userImg,
+                            photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/01/0c23d3b5-43a0-4b24-8b46-557097d0ed56-Pramono-Aji-1-255x255.jpg",
                         }
                     ]
                 }
@@ -84,7 +84,7 @@ const PageTeam = () => {
             {
                 name: "Sistem Informasi",
                 direktur: { name: "Kusnawi, S.Kom, M.Eng", affiliation: "Universitas Amikom Yogyakarta", photo: userImg },
-                wakil: { name: "Dr. Sendi Novianto, S.Kom., M.T.", affiliation: "Universitas Dian Nuswantoro", photo: userImg }
+                wakil: { name: "Dr. Sendi Novianto, S.Kom., M.T.", affiliation: "Universitas Dian Nuswantoro", photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-23-at-07.20.36-e1663895747140-166x166.jpeg" }
             },
             {
                 name: "Kajian Ilmiah",
@@ -93,7 +93,7 @@ const PageTeam = () => {
             },
             {
                 name: "Pendampingan Pusat Karir",
-                direktur: { name: "Salamah Agung M.A., Ph.D.", affiliation: "UIN Syarif Hidayatullah Jakarta", photo: userImg },
+                direktur: { name: "Salamah Agung M.A., Ph.D.", affiliation: "UIN Syarif Hidayatullah Jakarta", photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-23-at-11.31.54-288x288.jpeg" },
                 wakil: { name: "Rusliansyah, SE, M.Si.", affiliation: "Universitas Mulawarman", photo: userImg }
             },
             {
@@ -138,7 +138,7 @@ const PageTeam = () => {
 
             {/* Node */}
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-8 w-64 text-center relative z-10 shadow-lg">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-2 border-white">
+                <div className="w-40 h-40 mx-auto mb-4 rounded-full overflow-hidden border-2 border-white">
                     <img src={node.photo} alt={node.name} className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-lg font-bold text-blue-400 mb-2">{node.position}</h3>
@@ -204,11 +204,11 @@ const PageTeam = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {organizationData.badanPengawas.map((member, index) => (
                                 <div key={index} className="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-colors">
-                                    <div className="w-16 h-16 mx-auto mb-3 rounded-full overflow-hidden border-2 border-white">
+                                    <div className="w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden border-2 border-white">
                                         <img src={member.photo} alt={member.name} className="w-full h-full object-cover" />
                                     </div>
-                                    <p className="text-white font-semibold text-sm">{member.name}</p>
-                                    <p className="text-xs text-gray-300 mt-1">{member.affiliation}</p>
+                                    <p className="text-white text-center font-semibold text-sm">{member.name}</p>
+                                    <p className="text-xs text-center text-gray-300 mt-1">{member.affiliation}</p>
                                 </div>
                             ))}
                         </div>
@@ -221,7 +221,7 @@ const PageTeam = () => {
                                 <h3 className="text-lg font-bold text-blue-400 mb-4">Direktorat {direktorat.name}</h3>
                                 <div className="space-y-6">
                                     <div className="flex items-center space-x-4">
-                                        <div className="w-12 h-12 flex-shrink-0 rounded-full overflow-hidden border-2 border-white">
+                                        <div className="w-16 h-16 flex-shrink-0 rounded-full overflow-hidden border-2 border-white">
                                             <img src={direktorat.direktur.photo} alt={direktorat.direktur.name} className="w-full h-full object-cover" />
                                         </div>
                                         <div>
@@ -231,7 +231,7 @@ const PageTeam = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center space-x-4">
-                                        <div className="w-12 h-12 flex-shrink-0 rounded-full overflow-hidden border-2 border-white">
+                                        <div className="w-16 h-16 flex-shrink-0 rounded-full overflow-hidden border-2 border-white">
                                             <img src={direktorat.wakil.photo} alt={direktorat.wakil.name} className="w-full h-full object-cover" />
                                         </div>
                                         <div>
