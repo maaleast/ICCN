@@ -45,35 +45,43 @@ const styles = `
         }
 `;
 
-export default function TrainingCard({ title, startDate, endDate, status, badges, onRegister, training }) {
+export default function TrainingCard({ title, startDate, endDate, status, badges, onRegister, training, endTraining }) {
     const currentDate = new Date();
     const trainingEndDate = new Date(endDate);
+    const trainginStartDate = new Date(startDate);
 
     // Jika pelatihan sudah selesai (ada badge), override status menjadi 'completed'
-    const isCompleted = badges.length > 0;
-    console.log('badges: ', badges);
-    console.log('badgesLength: ', badges.length);
-    console.log('isCompleted: ', isCompleted);
-    console.log('status: ', status);
-    console.log('startDate: ', startDate);
-    console.log('endDate: ', endDate);
-    console.log('trainingEndDate: ', trainingEndDate);
-    console.log('currentDate: ', currentDate);
-    const finalStatus = isCompleted ? 'completed' : status;
+    const isCompleted = Array.isArray(badges) && badges.length > 0;
+    // console.log('badges: ', badges);
+    // console.log('badgesLength: ', badges.length);
+    // console.log('isCompleted: ', isCompleted);
+    // console.log('status: ', status);
+    // console.log('startDate: ', startDate);
+    // console.log('endDate: ', endDate);
+    // console.log('title: ', title);
+    // console.log('trainingStartDate: ', trainginStartDate);
+    // console.log('trainingEndDate: ', trainingEndDate);
+    // console.log('currentDate: ', currentDate);
+    // console.log('endTraining: ', endTraining);
 
-    // Jika waktu pelatihan sudah lewat dan tidak ada badge, status menjadi 'uncompleted'
-    const isOverdue = currentDate > trainingEndDate;
-    
-    const finalStatusWithOverdue = isOverdue && !isCompleted ? 'uncompleted' : finalStatus;
+    console.log('title: ', title);
+
+    const finalStatusWithOverdue = status;
+
+    console.log('finalStatusWithOverdue: ', finalStatusWithOverdue);
 
     // Tentukan apakah pelatihan masih aktif meskipun sudah selesai
     const isStillActive = currentDate <= trainingEndDate;
+    console.log('isStillActive: ', isStillActive);
 
     // Tampilkan dua status jika pelatihan sudah selesai tetapi masih aktif
     const showDualStatus = isCompleted && isStillActive;
 
+    console.log('showDualStatus: ', showDualStatus);
+
     // Tentukan badge yang akan ditampilkan
     const badgeValue = badges.length > 0 ? badges[0].badge : training.badge || 'bronze';
+    const badgeValueKey = typeof badgeValue === 'string' ? badgeValue.toLowerCase() : 'bronze';
 
     const statusConfig = {
         active: {
@@ -97,6 +105,8 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
             label: 'TIDAK SELESAI'
         }
     };
+
+    const handleRegister = onRegister || (() => console.warn("onRegister function is not provided"));
 
     return (
         <motion.div
@@ -143,8 +153,8 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
                 </div>
 
                 <button
-                    onClick={onRegister}
-                    disabled={finalStatusWithOverdue !== 'active'}
+                    onClick={handleRegister}
+                    disabled={finalStatusWithOverdue !== 'active' || finalStatusWithOverdue !== 'ongoing'}
                     className={`w-full mt-6 py-2 rounded-lg font-medium transition-all ${
                         finalStatusWithOverdue === 'active'
                             ? 'bg-blue-600 text-white hover:bg-blue-700'

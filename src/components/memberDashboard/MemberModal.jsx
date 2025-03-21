@@ -59,7 +59,7 @@ const styles = `
     }
 `;
 
-export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal }) => {
+export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, memberId }) => {
     const [kode, setKode] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -134,7 +134,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal }) 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     pelatihan_id: selectedTraining.id,
-                    member_id: localStorage.getItem('member_id'),
+                    member_id: memberId,
                 }),
             });
     
@@ -194,8 +194,8 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal }) 
                         </motion.div>
                         <h2 className="text-2xl font-bold mb-4">Selamat!</h2>
                         <p className="text-gray-600 dark:text-gray-300 mb-4">
-                            Anda telah menyelesaikan pelatihan{" "}
-                            <span className="font-semibold">{selectedTraining.judul_pelatihan}</span> dan mendapatkan:
+                            Anda telah mendaftar ke pelatihan{" "}
+                            <span className="font-semibold">{selectedTraining.judul_pelatihan}</span> dan jika selesai akan mendapatkan:
                         </p>
                         <div className="flex items-center justify-center mb-4">
                             <div className="mr-2">

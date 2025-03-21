@@ -43,7 +43,7 @@ export default function Login() {
                 const decoded = jwtDecode(token); // Decode token JWT
                 const { id, role, is_verified } = decoded;
     
-                console.log("Decoded token:", decoded); // Debugging
+                // console.log("Decoded token:", decoded); // Debugging
     
                 localStorage.setItem("user_id", id);
                 localStorage.setItem("role", role);
