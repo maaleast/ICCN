@@ -32,40 +32,38 @@ const PageTeam = () => {
                     photo: userImg,
                     children: [
                         {
-                            position: "Sekretaris Jendral",
-                            name: "Dr. Teddy Indira Budiwan, S.Psi., M.M",
-                            affiliation: "Universitas Bina Nusantara",
-                            photo: userImg,
-                            children: [
-                                {
-                                    position: "Wakil Sekretaris Jendral",
-                                    subPosition: "Bidang Keuangan, Sistem Informasi dan Tata Kelola",
-                                    name: "Dessy Dwi Nurhandayani, S.T., M.M",
-                                    affiliation: "Universitas Telkom",
-                                    photo: userImg
-                                },
-                                {
-                                    position: "Wakil Sekretaris Jendral",
-                                    subPosition: "Bidang Komunikasi Publik, Pendampingan Dan Kerjasama",
-                                    name: "Ir. Petiana, M.M",
-                                    affiliation: "Universitas Pancasila",
-                                    photo: userImg
-                                }
-                            ]
-                        },
-                        {
                             position: "Bendahara Umum",
                             name: "Dr. Tiara Nirmala, SE., M.Sc.",
                             affiliation: "Universitas Lampung",
                             photo: userImg,
-                            children: [
-                                {
-                                    position: "Wakil Bendahara Umum",
-                                    name: "Lia Marlia, S.Sos., M.I.Kom.",
-                                    affiliation: "Universitas Telkom",
-                                    photo: userImg
-                                }
-                            ]
+                        },
+                        {
+                            position: "Wakil Bendahara Umum",
+                            name: "Lia Marlia, S.Sos., M.I.Kom.",
+                            affiliation: "Universitas Telkom",
+                            photo: userImg
+                        }
+                    ]
+                },
+                {
+                    position: "Sekretaris Jendral",
+                    name: "Dr. Teddy Indira Budiwan, S.Psi., M.M",
+                    affiliation: "Universitas Bina Nusantara",
+                    photo: userImg,
+                    children: [
+                        {
+                            position: "Wakil Sekretaris Jendral",
+                            subPosition: "Bidang Keuangan, Sistem Informasi dan Tata Kelola",
+                            name: "Dessy Dwi Nurhandayani, S.T., M.M",
+                            affiliation: "Universitas Telkom",
+                            photo: userImg
+                        },
+                        {
+                            position: "Wakil Sekretaris Jendral",
+                            subPosition: "Bidang Komunikasi Publik, Pendampingan Dan Kerjasama",
+                            name: "Ir. Petiana, M.M",
+                            affiliation: "Universitas Pancasila",
+                            photo: userImg,
                         }
                     ]
                 }
@@ -131,20 +129,19 @@ const PageTeam = () => {
         ]
     };
 
-    const OrganizationNode = ({ node, isRoot = false, isLast = false }) => (
+    const OrganizationNode = ({ node, isRoot = false, isLast = false, hasSibling = false }) => (
         <div className="flex flex-col items-center relative">
-            {/* Garis vertikal ke atas kecuali untuk root */}
-            {!isRoot && (
+            {/* Garis vertikal ke atas hanya jika memiliki saudara */}
+            {!isRoot && hasSibling && (
                 <div className="absolute top-0 w-0.5 h-8 bg-white/50 -translate-y-full"></div>
             )}
 
             {/* Node */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-8 w-64 text-center hover:bg-white/20 transition-all relative z-10 shadow-lg">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-8 w-64 text-center relative z-10 shadow-lg">
                 <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-2 border-white">
                     <img src={node.photo} alt={node.name} className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-lg font-bold text-blue-400 mb-2">{node.position}</h3>
-                {node.subPosition && <p className="text-xs text-gray-300 mb-1">{node.subPosition}</p>}
                 <p className="text-white font-semibold">{node.name}</p>
                 <p className="text-sm text-gray-200 mt-2">{node.affiliation}</p>
             </div>
@@ -152,20 +149,35 @@ const PageTeam = () => {
             {/* Garis dan children */}
             {node.children && (
                 <div className="relative">
-                    {/* Garis vertikal ke bawah */}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-0.5 h-8 bg-white/50"></div>
+                    {/* Garis vertikal ke bawah hanya jika ada grandchildren */}
+                    {node.children.some(child => child.children) && !isLast && (
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-0.5 h-8"></div>
+                    )}
 
-                    {/* Container untuk children */}
                     <div className="flex relative pt-16">
                         {/* Garis horizontal penghubung */}
-                        <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[calc(100%-4rem)] h-0.5 bg-white/50"></div>
+                        {node.children.length > 1 && (
+                            <>
+                                {/* Garis horizontal */}
+                                <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[calc(89%-12rem)] h-0.5 bg-white/50"></div>
+
+                                {/* Garis vertikal tengah yang diperpanjang */}
+                                <div className="absolute top-[-2rem] left-1/2 -translate-x-1/2 w-0.5 h-[4rem] bg-white/50"></div>
+                            </>
+                        )}
 
                         <div className="flex space-x-16">
                             {node.children.map((child, index) => (
                                 <div key={index} className="relative">
-                                    {/* Garis vertikal ke node child */}
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-8 bg-white/50 -translate-y-8"></div>
-                                    <OrganizationNode node={child} isLast={index === node.children.length - 1} />
+                                    {/* Garis vertikal antar child */}
+                                    {index !== node.children.length - 1 && (
+                                        <div ></div>
+                                    )}
+                                    <OrganizationNode
+                                        node={child}
+                                        isLast={index === node.children.length - 1}
+                                        hasSibling={node.children.length > 1}
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -174,7 +186,6 @@ const PageTeam = () => {
             )}
         </div>
     );
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500">
             <Navbar />

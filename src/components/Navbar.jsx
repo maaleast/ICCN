@@ -36,39 +36,38 @@ const Navbar = () => {
         navigate("/login");
     };
 
-    // Fungsi untuk mengganti bahasa
     const toggleLanguage = () => {
-        const newLang = language === "id" ? "en" : "id";
+        const newLang = language === 'id' ? 'en' : 'id';
+        // Set cookie untuk terjemahan
+        if (newLang === 'en') {
+            document.cookie = `googtrans=/id/en; expires=Thu, 31 Dec 2025 23:59:59 UTC; path=/`;
+        } else {
+            document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
         setLanguage(newLang);
-        localStorage.setItem('preferredLanguage', newLang);
-
-        // Hapus widget Google Translate yang ada
-        const iframes = document.querySelectorAll('.goog-te-banner-frame, .goog-te-menu-frame');
-        iframes.forEach(iframe => iframe.remove());
-
-        // Paksa reload widget dengan hash baru
-        const langHash = newLang === 'en' ? 'id|en' : 'en|id';
-        window.location.hash = `#googtrans(${langHash})`;
-
-        // Tunggu sebentar untuk memastikan elemen sudah terhapus, lalu muat ulang widget
-        setTimeout(() => {
-            const script = document.createElement("script");
-            script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&t=${Date.now()}`;
-            script.async = true;
-            document.body.appendChild(script);
-        }, 100);
+        window.location.reload();
     };
 
-    // Inisialisasi Google Translate
     useEffect(() => {
-        const savedLang = localStorage.getItem('preferredLanguage') || 'id';
-        setLanguage(savedLang);
+        // Cek cookie untuk menentukan bahasa awal
+        const cookies = document.cookie.split(';');
+        let lang = 'id';
+        for (const cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'googtrans') {
+                lang = value === '/id/en' ? 'en' : 'id';
+                break;
+            }
+        }
+        setLanguage(lang);
 
-        // Set hash parameter awal
-        const langHash = savedLang === 'en' ? 'id|en' : 'en|id';
-        window.location.hash = `#googtrans(${langHash})`;
+        // Hapus script sebelumnya jika ada
+        const existingScript = document.querySelector('script[src*="translate.google.com"]');
+        if (existingScript) {
+            existingScript.remove();
+        }
 
-        // Fungsi inisialisasi widget
+        // Inisialisasi widget Google Translate
         window.googleTranslateElementInit = () => {
             new window.google.translate.TranslateElement(
                 {
@@ -81,11 +80,14 @@ const Navbar = () => {
             );
         };
 
-        // Muat script Google Translate
-        const script = document.createElement("script");
-        script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&t=${Date.now()}`;
+        const script = document.createElement('script');
+        script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit`;
         script.async = true;
         document.body.appendChild(script);
+
+        return () => {
+            document.body.removeChild(script);
+        };
     }, []);
 
     // Gunakan useEffect untuk memeriksa status login saat komponen dimuat

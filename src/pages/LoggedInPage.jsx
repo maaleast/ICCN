@@ -206,75 +206,46 @@ const LoggedInPage = () => {
     const googleTranslateElementRef = useRef(null);
 
     useEffect(() => {
-        const savedLang = localStorage.getItem('preferredLanguage') || 'id';
-        setLanguage(savedLang);
-
-        // Set hash parameter awal
-        const langHash = savedLang === 'en' ? 'id|en' : 'en|id';
-        window.location.hash = `#googtrans(${langHash})`;
-    }, []);
-
-    useEffect(() => {
-        const handleLanguageChange = () => {
-            const select = document.querySelector('.goog-te-combo');
-            if (select) {
-                const currentLang = select.value;
-                if (currentLang !== language) {
-                    setLanguage(currentLang);
-                    localStorage.setItem('preferredLanguage', currentLang);
-                }
+        // Cek cookie untuk menentukan bahasa awal
+        const cookies = document.cookie.split(';');
+        let lang = 'id';
+        for (const cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'googtrans') {
+                lang = value === '/id/en' ? 'en' : 'id';
+                break;
             }
-        };
+        }
+        setLanguage(lang);
 
-        const select = document.querySelector('.goog-te-combo');
-        if (select) {
-            select.addEventListener('change', handleLanguageChange);
+        // Hapus script sebelumnya jika ada
+        const existingScript = document.querySelector('script[src*="translate.google.com"]');
+        if (existingScript) {
+            existingScript.remove();
         }
 
+        // Inisialisasi widget Google Translate
+        window.googleTranslateElementInit = () => {
+            new window.google.translate.TranslateElement(
+                {
+                    pageLanguage: 'id',
+                    includedLanguages: 'en,id',
+                    layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+                    autoDisplay: false
+                },
+                'google_translate_element'
+            );
+        };
+
+        const script = document.createElement('script');
+        script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit`;
+        script.async = true;
+        document.body.appendChild(script);
+
         return () => {
-            if (select) {
-                select.removeEventListener('change', handleLanguageChange);
-            }
+            document.body.removeChild(script);
         };
-    }, [language]);
-
-    useEffect(() => {
-        const loadGoogleTranslate = () => {
-            // Hapus widget sebelumnya
-            const oldWidget = document.querySelector('.goog-te-combo');
-            if (oldWidget) oldWidget.remove();
-
-            const addScript = () => {
-                const script = document.createElement("script");
-                script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&t=${Date.now()}`;
-                script.async = true;
-                document.body.appendChild(script);
-            };
-
-            window.googleTranslateElementInit = () => {
-                new window.google.translate.TranslateElement(
-                    {
-                        pageLanguage: 'id',
-                        includedLanguages: 'en,id',
-                        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-                        autoDisplay: false
-                    },
-                    'google_translate_element'
-                );
-
-                // Setelah inisialisasi, paksa update terjemahan
-                const langHash = language === 'en' ? 'id|en' : 'en|id';
-                window.location.hash = `#googtrans(${langHash})`;
-                if (window.google && window.google.translate) {
-                    window.google.translate.TranslateElement.InlineLayout.SIMPLE;
-                }
-            };
-
-            addScript();
-        };
-
-        loadGoogleTranslate();
-    }, [language]);
+    }, []);
 
     // Cek status login dan ambil data gallery
     useEffect(() => {
@@ -447,25 +418,15 @@ const LoggedInPage = () => {
     };
 
     const toggleLanguage = () => {
-        const newLang = language === "id" ? "en" : "id";
+        const newLang = language === 'id' ? 'en' : 'id';
+        // Set cookie untuk terjemahan
+        if (newLang === 'en') {
+            document.cookie = `googtrans=/id/en; expires=Thu, 31 Dec 2025 23:59:59 UTC; path=/`;
+        } else {
+            document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
         setLanguage(newLang);
-        localStorage.setItem('preferredLanguage', newLang);
-
-        // Hapus semua element Google Translate
-        const iframes = document.querySelectorAll('.goog-te-banner-frame, .goog-te-menu-frame');
-        iframes.forEach(iframe => iframe.remove());
-
-        // Paksa reload widget dengan hash baru
-        const langHash = newLang === 'en' ? 'id|en' : 'en|id';
-        window.location.hash = `#googtrans(${langHash})`;
-
-        // Tambahkan timeout untuk memastikan element sudah terhapus
-        setTimeout(() => {
-            const script = document.createElement("script");
-            script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&t=${Date.now()}`;
-            script.async = true;
-            document.body.appendChild(script);
-        }, 100);
+        window.location.reload();
     };
 
     return (
