@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Pagination from "../Pagination";
-import { FaMedal, FaCrown, FaGem, FaStar, FaTrophy, FaAward } from "react-icons/fa";
+import { FaMedal, FaCrown, FaGem, FaStar, FaTrophy, FaAward, FaUser } from "react-icons/fa";
 
 export default function Pelatihan() {
     const [pelatihan, setPelatihan] = useState([]);
@@ -301,53 +301,71 @@ export default function Pelatihan() {
                 <>
                     {/* Tabel */}
                     <table className="w-full">
-                        <thead className="bg-gray-50 dark:bg-gray-900">
-                            <tr>
-                                <th className="text-left py-3 px-4">Judul</th>
-                                <th className="text-left py-3 px-4">Tanggal Mulai</th>
-                                <th className="text-left py-3 px-4">Tanggal Berakhir</th>
-                                <th className="text-left py-3 px-4">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {displayedPelatihan.map((item) => (
-                                <tr key={item.id} className="border-t">
-                                    <td className="py-3 px-4">{item.judul_pelatihan}</td>
-                                    <td className="py-3 px-4">{formatDate(item.tanggal_pelatihan)}</td>
-                                    <td className="py-3 px-4">{formatDate(item.tanggal_berakhir)}</td>
-                                    <td className="py-3 px-4 flex gap-2">
-                                        <button
-                                            className="text-blue-600 hover:underline"
-                                            onClick={() => {
-                                                setSelectedPelatihan(item);
-                                                setShowDetailModal(true);
-                                            }}
-                                        >
-                                            Detail
-                                        </button>
-                                        <button
-                                            className="text-green-600 hover:underline"
-                                            onClick={() => {
-                                                setSelectedPelatihan(item);
-                                                setShowEditModal(true);
-                                            }}
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            className="text-red-600 hover:underline"
-                                            onClick={() => {
-                                                setSelectedPelatihan(item);
-                                                setShowDeleteModal(true);
-                                            }}
-                                        >
-                                            Hapus
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+    <thead className="bg-gray-50 dark:bg-gray-900">
+        <tr>
+            <th className="text-left py-3 px-4">Judul</th>
+            <th className="text-left py-3 px-4">Tanggal Mulai</th>
+            <th className="text-left py-3 px-4">Tanggal Berakhir</th>
+            <th className="text-left py-3 px-4">Total Member Mendaftar</th> {/* Kolom Baru */}
+            <th className="text-left py-3 px-4">Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {displayedPelatihan.map((item) => (
+            <tr key={item.id} className="border-t">
+                <td className="py-3 px-4">{item.judul_pelatihan}</td>
+                <td className="py-3 px-4">{formatDate(item.tanggal_pelatihan)}</td>
+                <td className="py-3 px-4">{formatDate(item.tanggal_berakhir)}</td>
+                {/* Kolom Baru: Total Member Mendaftar */}
+                <td className="py-3 px-4">
+                    <div className="flex items-center gap-2">
+                        {/* Tombol memanjang dengan ikon, angka, dan teks */}
+                        <button
+                            className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600"
+                            onClick={() => {
+                                // Tidak ada aksi karena hanya tampilan frontend
+                            }}
+                        >
+                            <FaUser /> {/* Ikon member */}
+                            <span>200</span> {/* Angka */}
+                            <span>Detail Pendaftar</span> {/* Teks */}
+                        </button>
+                    </div>
+                </td>
+                {/* Kolom Aksi */}
+                <td className="py-3 px-4 flex gap-2">
+                    <button
+                        className="text-blue-600 hover:underline"
+                        onClick={() => {
+                            setSelectedPelatihan(item);
+                            setShowDetailModal(true);
+                        }}
+                    >
+                        Detail
+                    </button>
+                    <button
+                        className="text-green-600 hover:underline"
+                        onClick={() => {
+                            setSelectedPelatihan(item);
+                            setShowEditModal(true);
+                        }}
+                    >
+                        Edit
+                    </button>
+                    <button
+                        className="text-red-600 hover:underline"
+                        onClick={() => {
+                            setSelectedPelatihan(item);
+                            setShowDeleteModal(true);
+                        }}
+                    >
+                        Hapus
+                    </button>
+                </td>
+            </tr>
+        ))}
+    </tbody>
+</table>
 
                     <div className="mt-6">
                         <Pagination

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../../config";
-import MemberTable from "../MemberTable";
+import MemberTable from "../adminDashboard/MemberTable";
 
 export default function AktivasiMember() {
     const [members, setMembers] = useState([]);
@@ -21,7 +21,7 @@ export default function AktivasiMember() {
                 const response = await fetch(`${API_BASE_URL}/admin/all-members`);
                 if (!response.ok) throw new Error("Gagal mengambil data");
                 const data = await response.json();
-                setMembers(data);
+                setMembers(data); // Simpan data ke state members
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -32,13 +32,18 @@ export default function AktivasiMember() {
     }, []);
 
     useEffect(() => {
+        if (!Array.isArray(members)) return;
+
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
 
         // Filter berdasarkan status dan keyword pencarian
         const filtered = members
             .filter(member => statusFilter === "SEMUA" || member.status_verifikasi === statusFilter) // Filter berdasarkan status
-            .filter(member => member.nama_pembayar.toLowerCase().includes(searchKeyword.toLowerCase())); // Filter berdasarkan keyword
+            .filter(member =>
+                member.no_identitas?.toLowerCase().includes(searchKeyword.toLowerCase()) || // Cari berdasarkan no_identitas
+                member.nama?.toLowerCase().includes(searchKeyword.toLowerCase()) // Cari berdasarkan nama
+            );
 
         setCurrentMembers(filtered.slice(startIndex, endIndex));
     }, [currentPage, members, searchKeyword, statusFilter]);
@@ -115,7 +120,8 @@ export default function AktivasiMember() {
         e.preventDefault();
         const keyword = searchKeyword.toLowerCase();
         const filtered = members.filter(member =>
-            member.nama_pembayar.toLowerCase().includes(keyword)
+            member.no_identitas?.toLowerCase().includes(keyword) || // Cari berdasarkan no_identitas
+            member.nama?.toLowerCase().includes(keyword) // Cari berdasarkan nama
         );
         setCurrentMembers(filtered.slice(0, itemsPerPage));
         setCurrentPage(1);
@@ -123,7 +129,8 @@ export default function AktivasiMember() {
 
     const totalPages = Math.ceil(
         members.filter(member =>
-            member.nama_pembayar.toLowerCase().includes(searchKeyword.toLowerCase())
+            member.no_identitas?.toLowerCase().includes(searchKeyword.toLowerCase()) || // Cari berdasarkan no_identitas
+            member.nama?.toLowerCase().includes(searchKeyword.toLowerCase()) // Cari berdasarkan nama
         ).length / itemsPerPage
     );
     const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
@@ -132,7 +139,7 @@ export default function AktivasiMember() {
 
     if (loading) return <div className="p-6 text-gray-500">Memuat data...</div>;
     if (error) return <div className="p-6 text-red-500">Error: {error}</div>;
-    if (members.length === 0) return <div className="p-6 text-gray-500">Tidak ada data member</div>;
+    if (members.length === 0 && !loading) return <div className="p-6 text-gray-500">Tidak ada data member</div>;
 
     return (
         <div>
@@ -213,17 +220,24 @@ export default function AktivasiMember() {
                     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-4xl">
                         <h2 className="text-2xl font-bold mb-4 dark:text-gray-100">Detail Member</h2>
                         <div className="grid grid-cols-2 gap-4">
-                            {/* Field yang sudah ada */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nama Pembayar</label>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">No. Identitas</label>
                                 <input
                                     type="text"
-                                    value={detailMember.nama_pembayar}
+                                    value={detailMember.no_identitas}
                                     readOnly
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nama</label>
+                                <input
+                                    type="text"
+                                    value={detailMember.nama}
+                                    readOnly
+                                    className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                                />
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Tipe Anggota</label>
                                 <input
@@ -233,7 +247,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Tanggal Daftar</label>
                                 <input
@@ -243,7 +256,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Status Verifikasi</label>
                                 <input
@@ -253,7 +265,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Masa Aktif</label>
                                 <input
@@ -263,7 +274,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Institusi</label>
                                 <input
@@ -273,7 +283,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Email</label>
                                 <input
@@ -283,7 +292,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Alamat</label>
                                 <textarea
@@ -293,7 +301,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nomor WA</label>
                                 <input
@@ -303,8 +310,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
-                            {/* Field baru yang ditambahkan */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Website</label>
                                 <input
@@ -314,7 +319,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Wilayah</label>
                                 <input
@@ -324,7 +328,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nominal Transfer</label>
                                 <input
@@ -334,7 +337,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Nama Kuitansi</label>
                                 <input
@@ -344,7 +346,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Informasi Tambahan</label>
                                 <textarea
@@ -354,8 +355,6 @@ export default function AktivasiMember() {
                                     className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                                 />
                             </div>
-
-                            {/* Field yang sudah ada */}
                             {detailMember.tipe_keanggotaan !== "Individu" && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Bukti Pembayaran</label>

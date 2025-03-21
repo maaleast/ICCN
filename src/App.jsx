@@ -4,7 +4,6 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import AdminPanel from "./pages/AdminPanel";
 import MemberDashboard from "./pages/MemberDashboard";
-import MembershipRegistration from "./pages/MembershipRegistration";
 import LoggedInPage from "./pages/LoggedInPage";
 import PageGallery from "./pages/PageGallery";
 import PerpanjangMember from "./pages/PerpanjangMember";
@@ -71,12 +70,6 @@ function App() {
         <Route path="/services" element={<PageServices />} />
         <Route path="/events" element={<PageEvents />} />
         <Route path="/team" element={<PageTeam />} />
-
-        {/* <Route path="/membership-registration" element={
-          <ProtectedRoute>
-            <MembershipRegistration />
-          </ProtectedRoute>
-        } /> */}
 
         <Route path="/perpanjang" element={
           <ProtectedRoute>
