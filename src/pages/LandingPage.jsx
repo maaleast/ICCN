@@ -199,70 +199,46 @@ const LandingPage = () => {
     const [isTranslating, setIsTranslating] = useState(false);
 
     useEffect(() => {
-        const savedLang = localStorage.getItem('preferredLanguage') || 'id';
-        setLanguage(savedLang);
-
-        // Set hash parameter awal
-        const langHash = savedLang === 'en' ? 'id|en' : 'en|id';
-        window.location.hash = `#googtrans(${langHash})`;
-    }, []);
-
-    useEffect(() => {
-        const handleLanguageChange = () => {
-            const select = document.querySelector('.goog-te-combo');
-            if (select) {
-                const currentLang = select.value;
-                if (currentLang !== language) {
-                    setLanguage(currentLang);
-                    localStorage.setItem('preferredLanguage', currentLang);
-                }
+        // Cek cookie untuk menentukan bahasa awal
+        const cookies = document.cookie.split(';');
+        let lang = 'id';
+        for (const cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'googtrans') {
+                lang = value === '/id/en' ? 'en' : 'id';
+                break;
             }
-        };
+        }
+        setLanguage(lang);
 
-        const select = document.querySelector('.goog-te-combo');
-        if (select) {
-            select.addEventListener('change', handleLanguageChange);
+        // Hapus script sebelumnya jika ada
+        const existingScript = document.querySelector('script[src*="translate.google.com"]');
+        if (existingScript) {
+            existingScript.remove();
         }
 
+        // Inisialisasi widget Google Translate
+        window.googleTranslateElementInit = () => {
+            new window.google.translate.TranslateElement(
+                {
+                    pageLanguage: 'id',
+                    includedLanguages: 'en,id',
+                    layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+                    autoDisplay: false
+                },
+                'google_translate_element'
+            );
+        };
+
+        const script = document.createElement('script');
+        script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit`;
+        script.async = true;
+        document.body.appendChild(script);
+
         return () => {
-            if (select) {
-                select.removeEventListener('change', handleLanguageChange);
-            }
+            document.body.removeChild(script);
         };
-    }, [language]);
-
-    useEffect(() => {
-        const loadGoogleTranslate = () => {
-            // Hapus widget sebelumnya jika ada
-            const oldWidget = document.querySelector('.goog-te-combo');
-            if (oldWidget) oldWidget.remove();
-
-            // Fungsi inisialisasi widget
-            window.googleTranslateElementInit = () => {
-                new window.google.translate.TranslateElement(
-                    {
-                        pageLanguage: 'id',
-                        includedLanguages: 'en,id',
-                        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-                        autoDisplay: false
-                    },
-                    'google_translate_element'
-                );
-
-                // Setelah inisialisasi, paksa update terjemahan
-                const langHash = language === 'en' ? 'id|en' : 'en|id';
-                window.location.hash = `#googtrans(${langHash})`;
-            };
-
-            // Muat ulang script Google Translate
-            const script = document.createElement("script");
-            script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&t=${Date.now()}`;
-            script.async = true;
-            document.body.appendChild(script);
-        };
-
-        loadGoogleTranslate();
-    }, [language]); // Jalankan ulang setiap kali `language` berubah // Jalankan ulang setiap kali `language` berubah
+    }, []);
 
     // Cek status login dan ambil data gallery
     useEffect(() => {
@@ -404,27 +380,16 @@ const LandingPage = () => {
     };
 
     const toggleLanguage = () => {
-        const newLang = language === "id" ? "en" : "id";
+        const newLang = language === 'id' ? 'en' : 'id';
+        // Set cookie untuk terjemahan
+        if (newLang === 'en') {
+            document.cookie = `googtrans=/id/en; expires=Thu, 31 Dec 2025 23:59:59 UTC; path=/`;
+        } else {
+            document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
         setLanguage(newLang);
-        localStorage.setItem('preferredLanguage', newLang);
-
-        // Hapus widget Google Translate yang ada
-        const iframes = document.querySelectorAll('.goog-te-banner-frame, .goog-te-menu-frame');
-        iframes.forEach(iframe => iframe.remove());
-
-        // Paksa reload widget dengan hash baru
-        const langHash = newLang === 'en' ? 'id|en' : 'en|id';
-        window.location.hash = `#googtrans(${langHash})`;
-
-        // Tunggu sebentar untuk memastikan elemen sudah terhapus, lalu muat ulang widget
-        setTimeout(() => {
-            const script = document.createElement("script");
-            script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit&t=${Date.now()}`;
-            script.async = true;
-            document.body.appendChild(script);
-        }, 100);
+        window.location.reload();
     };
-
     return (
         <div>
             {/* Header */}
@@ -446,20 +411,25 @@ const LandingPage = () => {
                             <button
                                 onClick={toggleLanguage}
                                 disabled={isTranslating}
-                                className="text-white p-2 rounded-lg transition-all shadow-md font-bold hover:scale-105 hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-300"
+                                className="text-white px-4 py-2 rounded-xl transition-all shadow-lg font-bold hover:scale-105 hover:shadow-md hover:bg-gradient-to-b from-orange-600 to-orange-400 duration-300 flex items-center gap-2 group"
                             >
                                 {isTranslating ? (
                                     <div className="animate-spin h-6 w-6 flex items-center justify-center">
                                         <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
                                     </div>
                                 ) : (
-                                    <div className="relative w-6 h-6 overflow-hidden rounded-full">
-                                        <img
-                                            src={language === "id" ? ina : uk}
-                                            alt="Language Flag"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
+                                    <>
+                                        <div className="relative w-8 h-8 overflow-hidden rounded-full shadow-md transition-transform duration-300 group-hover:scale-110">
+                                            <img
+                                                src={language === "id" ? ina : uk}
+                                                alt="Language Flag"
+                                                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                                            />
+                                        </div>
+                                        <span className="hidden md:inline-block text-sm">
+                                            {language === "id" ? "ID" : "EN"}
+                                        </span>
+                                    </>
                                 )}
                             </button>
                             {/* Tombol Burger */}
