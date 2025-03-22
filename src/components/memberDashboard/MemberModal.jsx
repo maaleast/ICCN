@@ -14,7 +14,9 @@ import {
   FaTrophy, 
   FaCrown, 
   FaGem, 
-  FaAward 
+  FaAward,
+  FaEye,
+  FaEyeSlash
 } from 'react-icons/fa';
 
 const badgeIcons = {
@@ -65,6 +67,8 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
     const [error, setError] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
     const [countdown, setCountdown] = useState(5);
+    const [showFinishedCode, setShowFinishedCode] = useState(false);
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
     const handleSelesaikanPelatihan = async () => {
         if (!kode) {
@@ -144,6 +148,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                 throw new Error(data.message || 'Gagal mendaftar pelatihan');
             }
 
+            // setLoading(true);
             setShowSuccess(true);
             
             // Mulai hitung mundur
@@ -220,6 +225,177 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-3xl"
                 >
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold">{selectedTraining.judul_pelatihan}</h2>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    >
+                        <FaTimes className="text-2xl" />
+                    </button>
+                    </div>
+                
+                    {/* Banner Pelatihan */}
+                    {selectedTraining.upload_banner && (
+                    <div className="mb-6">
+                        <img
+                        src={`http://localhost:5050${selectedTraining.upload_banner}`}
+                        alt="Banner Pelatihan"
+                        className="w-full max-h-96 object-contain rounded-lg"
+                        />
+                    </div>
+                    )}
+                
+                    {/* Grid untuk Konten */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Kolom Kiri */}
+                    <div>
+                        {/* Tanggal Mulai */}
+                        <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Tanggal Mulai
+                        </label>
+                        <input
+                            type="text"
+                            value={new Date(selectedTraining.tanggal_pelatihan).toLocaleString()}
+                            readOnly
+                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                        />
+                        </div>
+                
+                        {/* Tanggal Berakhir */}
+                        <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Tanggal Berakhir
+                        </label>
+                        <input
+                            type="text"
+                            value={new Date(selectedTraining.tanggal_berakhir).toLocaleString()}
+                            readOnly
+                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                        />
+                        </div>
+                
+                        {/* Narasumber */}
+                        <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Narasumber
+                        </label>
+                        <input
+                            type="text"
+                            value={selectedTraining.narasumber}
+                            readOnly
+                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                        />
+                        </div>
+                
+                        {/* Badge */}
+                        <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Badge
+                        </label>
+                        <div className="flex items-center">
+                            <div className="mr-2">
+                            {badgeIcons[selectedTraining.badge.toLowerCase()] || badgeIcons.bronze}
+                            </div>
+                            <input
+                            type="text"
+                            value={selectedTraining.badge}
+                            readOnly
+                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                            />
+                        </div>
+                        </div>
+                
+                        {/* Kode Penyelesaian */}
+                        <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Kode Penyelesaian
+                        </label>
+                        <div className="flex items-center">
+                            <input
+                            type={showFinishedCode ? "text" : "password"}
+                            value={'Rahasia Dong'}
+                            readOnly
+                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                            />
+                            <button
+                            type="button"
+                            onClick={() => setShowFinishedCode(!showFinishedCode)}
+                            className="ml-2 p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
+                            >
+                            {showFinishedCode ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                
+                    {/* Kolom Kanan */}
+                    <div>
+                        {/* Deskripsi Pelatihan */}
+                        <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Deskripsi Pelatihan
+                        </label>
+                        <textarea
+                            value={selectedTraining.deskripsi_pelatihan}
+                            readOnly
+                            rows="5"
+                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                        />
+                        </div>
+                
+                        {/* Link Pelatihan */}
+                        {selectedTraining.link && (
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Link Pelatihan
+                            </label>
+                            <a
+                            href={selectedTraining.link}
+                            rel="noopener noreferrer"
+                            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center block"
+                            >
+                            Buka Link Pelatihan
+                            </a>
+                        </div>
+                        )}
+                
+                        {/* Kode Pelatihan */}
+                        <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Kode Pelatihan
+                        </label>
+                        <input
+                            type="text"
+                            value={kode}
+                            onChange={(e) => setKode(e.target.value)}
+                            placeholder="Masukkan kode pelatihan"
+                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                        />
+                        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+                        </div>
+                    </div>
+                    </div>
+                
+                    {/* Tombol Daftar */}
+                    <div className="mt-6 flex justify-end">
+                    <button
+                        onClick={() => setShowConfirmationModal(true)}
+                        disabled={loading || showSuccess}
+                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        {loading ? 'Memproses...' : 'Daftar'}
+                    </button>
+                    </div>
+                </motion.div>
+            ) : (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-3xl"
+                >
                     {/* Daftar Modal Content */}
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold">{selectedTraining.judul_pelatihan}</h2>
@@ -249,25 +425,6 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                             Batal
                         </button>
                     </div>
-                </motion.div>
-            ) : (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-3xl"
-                >
-                    {/* Training Detail Modal Content */}
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold">{selectedTraining.judul_pelatihan}</h2>
-                        <button
-                            onClick={onClose}
-                            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                        >
-                            <FaTimes className="text-2xl" />
-                        </button>
-                    </div>
-
-                    {/* ... (kode lainnya tetap sama) */}
                 </motion.div>
             )}
         </div>

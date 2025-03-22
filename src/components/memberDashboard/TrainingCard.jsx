@@ -49,9 +49,10 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
     const currentDate = new Date();
     const trainingEndDate = new Date(endDate);
     const trainginStartDate = new Date(startDate);
+    const statusTraining = status;
 
     // Jika pelatihan sudah selesai (ada badge), override status menjadi 'completed'
-    const isCompleted = Array.isArray(badges) && badges.length > 0;
+    const isCompleted = statusTraining === 'completed' ? true : false;
     // console.log('badges: ', badges);
     // console.log('badgesLength: ', badges.length);
     // console.log('isCompleted: ', isCompleted);
@@ -86,8 +87,8 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
     const statusConfig = {
         active: {
             color: 'bg-blue-100 text-blue-700',
-            icon: <PlayCircleIcon className="w-5 h-5 mr-2" />, // Logo untuk ONGOING
-            label: 'ONGOING'
+            icon: <PlayCircleIcon className="w-5 h-5 mr-2" />,
+            label: 'Buruan Daftar'
         },
         upcoming: {
             color: 'bg-yellow-100 text-yellow-700',
@@ -103,6 +104,11 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
             color: 'bg-red-100 text-red-700',
             icon: <LockClosedIcon className="w-5 h-5 mr-2" />,
             label: 'TIDAK SELESAI'
+        },
+        ongoing: {
+            color: 'bg-purple-100 text-purple-700',
+            icon: <PlayCircleIcon className="w-5 h-5 mr-2" />,
+            label: 'Sedang Berlangsung'
         }
     };
 
@@ -154,10 +160,12 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
 
                 <button
                     onClick={handleRegister}
-                    disabled={finalStatusWithOverdue !== 'active' || finalStatusWithOverdue !== 'ongoing'}
+                    disabled={finalStatusWithOverdue !== 'active' && finalStatusWithOverdue !== 'ongoing'}
                     className={`w-full mt-6 py-2 rounded-lg font-medium transition-all ${
                         finalStatusWithOverdue === 'active'
                             ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : finalStatusWithOverdue === 'ongoing'
+                            ? 'bg-purple-600 text-white hover:bg-purple-700' // Warna untuk ongoing
                             : finalStatusWithOverdue === 'uncompleted'
                             ? 'bg-red-100 text-red-700 cursor-not-allowed'
                             : 'bg-gray-100 text-gray-500 cursor-not-allowed'
