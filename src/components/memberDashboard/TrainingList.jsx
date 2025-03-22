@@ -12,32 +12,44 @@ const transformBadges = (badgesObj) => {
 };
 
 
-export default function TrainingList({ trainings, badges, onRegister }) {
+export default function TrainingList({ trainings, badges, onRegister, endTraining }) {
     // Ubah badges ke array jika masih berbentuk objek
     const badgesArray = Array.isArray(badges) ? badges : transformBadges(badges);
 
-    console.log('badgesArray: ', badgesArray);
-    console.log('trainings: ', trainings);
-    console.log('onRegister: ', onRegister);
+    const trainingsList = trainings;
+
+    // console.log('trainings list: ', trainingsList);
 
     const getTrainingStatus = (training) => {
         const currentDate = new Date();
         const trainingEndDate = new Date(training.tanggal_berakhir);
-        const isCompleted = badgesArray.some(badge => badge.pelatihan_id === training.id);
+        const isCompleted = badgesArray.some(badge => badge.pelatihan_id === training.id && badge.status === 'completed');
+        const isRegistered = badgesArray.some(badge => badge.pelatihan_id === training.id && badge.status === 'ongoing'); // Cek pendaftaran
+        // console.log('badgesArray: ', badgesArray);
+        // if (badgesArray.some(badge => badge.pelatihan_id === training.id && badge.status === 'ongoing')) {
+        //     console.log('training', training.judul_pelatihan, 'isRegistered: ', isRegistered, 'badge: ', badgesArray.filter(badge => badge.pelatihan_id === training.id));
+        // }
+        // console.log('training', training.judul_pelatihan, 'isRegistered: ', isRegistered, 'badge: ', badgesArray.filter(badge => badge.pelatihan_id === training.id));
+        if (isRegistered && currentDate <= trainingEndDate) {
+            return 'ongoing'; // Status ongoing jika terdaftar
+        } else if (isCompleted) {
+            return 'completed'; // Status completed jika sudah mendapatkan badge
+        } else if (currentDate > trainingEndDate && isRegistered) {
+            return 'uncompleted'; // Status uncompleted jika sudah lewat
+        } else if (currentDate < new Date(training.tanggal_pelatihan)) {
+            return 'upcoming'; // Status upcoming jika belum dimulai
+        }
 
-        if (isCompleted) return 'completed';
-        if (currentDate > trainingEndDate) return 'uncompleted';
-        return training.status;
+        return training.status; // Kembalikan status default
     };
-
-    const getTrainingBadges = (pelatihan_id) => {
-        return badgesArray.filter(badge => badge.pelatihan_id === pelatihan_id);
+    const getTrainingBadges = (trainingId) => {
+        return badgesArray.filter(badge => badge.pelatihan_id === trainingId);
     };
 
     const activeTrainings = trainings
         .filter(training => {
             const status = getTrainingStatus(training);
-            return status === 'active' || (status === 'completed' && new Date(training.tanggal_berakhir) >= new Date());
+            return status === 'active' || status ==="ongoing" || (status === 'completed' && new Date(training.tanggal_berakhir) >= new Date());
         })
         .sort((a, b) => new Date(a.tanggal_pelatihan) - new Date(b.tanggal_pelatihan));
 
@@ -67,9 +79,10 @@ export default function TrainingList({ trainings, badges, onRegister }) {
                             startDate={training.tanggal_pelatihan}
                             endDate={training.tanggal_berakhir}
                             status={getTrainingStatus(training)}
-                            badges={getTrainingBadges(badges, training.id)}
+                            badges={getTrainingBadges(training.id)}
                             onRegister={() => onRegister(training)}
                             training={training}
+                            endTraining={endTraining}
                         />
                     ))}
                 </div>
@@ -86,7 +99,7 @@ export default function TrainingList({ trainings, badges, onRegister }) {
                             startDate={training.tanggal_pelatihan}
                             endDate={training.tanggal_berakhir}
                             status={getTrainingStatus(training)}
-                            badges={getTrainingBadges(badges, training.id)}
+                            badges={getTrainingBadges(training.id)}
                             onRegister={() => onRegister(training)}
                             training={training}
                         />
@@ -105,7 +118,7 @@ export default function TrainingList({ trainings, badges, onRegister }) {
                             startDate={training.tanggal_pelatihan}
                             endDate={training.tanggal_berakhir}
                             status={getTrainingStatus(training)}
-                            badges={getTrainingBadges(badges, training.id)}
+                            badges={getTrainingBadges(training.id)}
                             onRegister={() => onRegister(training)}
                             training={training}
                         />

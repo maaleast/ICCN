@@ -41,22 +41,13 @@ export default function Login() {
     
             try {
                 const decoded = jwtDecode(token); // Decode token JWT
-                const { id, role, is_verified, member_id, no_identitas } = decoded;
+                const { id, role, is_verified } = decoded;
     
-                console.log("Decoded token:", decoded); // Debugging
+                // console.log("Decoded token:", decoded); // Debugging
     
                 localStorage.setItem("user_id", id);
                 localStorage.setItem("role", role);
-                localStorage.setItem("is_verified", is_verified.toString());
-                
-                if (member_id) {
-                    localStorage.setItem("member_id", member_id); // 🔹 Simpan member_id jika ada
-                }
 
-                if (no_identitas) {
-                    localStorage.setItem("no_identitas", no_identitas); // 🔹 Simpan no_identitas jika ada
-                }
-    
                 if (is_verified === 0) {
                     setError("Akun ini belum memverifikasi email.");
                     return;

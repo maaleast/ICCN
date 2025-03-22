@@ -13,17 +13,45 @@ import Settings from '../components/memberDashboard/Settings';
 import Penghargaan from '../components/memberDashboard/Penghargaan'
 import { API_BASE_URL } from '../config';
 import { TrainingDetailModal, VerificationStatusModal } from '../components/memberDashboard/MemberModal';
+import axios from 'axios';
 
 export default function MemberDashboard() {
     const [activeMenu, setActiveMenu] = useState('Dashboard');
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [trainings, setTrainings] = useState([]);
+    const [endTrainings, setEndTrainings] = useState([]);
     const [badges, setBadges] = useState([]);
     const [selectedTraining, setSelectedTraining] = useState(null);
     const [verificationStatus, setVerificationStatus] = useState(null);
     const [userId, setUserId] = useState(localStorage.getItem("user_id"));
+    const [memberId, setMemberId] = useState(null);
     const [status, setStatus] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!userId) return; // Cegah request jika userId belum tersedia
+    
+        // console.log("Fetching member_id for userId:", userId);
+    
+        let isMounted = true; // Flag untuk mencegah setState jika komponen unmounted
+    
+        axios.get(`${API_BASE_URL}/pelatihan/members/id/${userId}`)
+            .then(memberRes => {
+                if (!isMounted) return;
+    
+                // console.log("🔥 Member API Response:", memberRes.data); // Pastikan datanya benar
+                setMemberId(memberRes.data.member_id);
+            })
+            .catch(error => {
+                console.error("❌ Error fetching member ID:", error);
+            });
+    
+        return () => {
+            isMounted = false; // Set flag menjadi false saat komponen unmounted
+        };
+    }, [userId]);
+
+    // console.log('memberId', memberId);
 
     useEffect(() => {
         const fetchVerificationStatus = async () => {
@@ -44,8 +72,8 @@ export default function MemberDashboard() {
             try {
                 const response = await fetch(`${API_BASE_URL}/members/pelatihan`);
                 const data = await response.json();
-                console.log('Fetched trainings:', data); // Debugging
-
+                // console.log('Fetched trainings:', data); // Debugging
+    
                 const updatedTrainings = await Promise.all(
                     data.map(async (training) => {
                         const status = await getTrainingStatus(
@@ -54,7 +82,7 @@ export default function MemberDashboard() {
                             localStorage.getItem('user_id'),
                             training.id
                         );
-                        console.log(`Training ${training.id} status:`, status); // Debugging
+                        // console.log(`Training ${training.id} status:`, status); // Debugging
                         return {
                             ...training,
                             status: status,
@@ -63,6 +91,8 @@ export default function MemberDashboard() {
                 );
 
                 setTrainings(updatedTrainings);
+                // console.log('updatedTrainings:', updatedTrainings);
+                // console.log('trainings:', trainings);
             } catch (error) {
                 console.error('Error fetching trainings:', error);
             }
@@ -76,7 +106,7 @@ export default function MemberDashboard() {
             try {
                 const response = await fetch(`${API_BASE_URL}/members/badge/${localStorage.getItem('user_id')}`);
                 const data = await response.json();
-                console.log('Fetched badges:', data); // Debugging
+                // console.log('Fetched badges:', data); // Debugging
                 setBadges(data.badges);
             } catch (error) {
                 console.error('Error fetching badges:', error);
@@ -112,10 +142,10 @@ export default function MemberDashboard() {
 
         if (isRegistered) {
             setStatus(true);
-            console.log('status', status);
+            // console.log('status', status);
         } else {
             setStatus(false);
-            console.log('status', status);
+            // console.log('status', status);
         }
 
         if (currentDate < trainingStartDate) {
@@ -127,6 +157,18 @@ export default function MemberDashboard() {
         } else if (currentDate >= trainingStartDate && currentDate <= trainingEndDate && isRegistered) {
             return 'ongoing';
         }
+    };
+
+    const transformBadges = (badges) => {
+        if (!badges || typeof badges !== 'object') return [];
+        
+        // Ekstrak nilai dari object badges
+        const badgeValues = Object.values(badges);
+        
+        // Gabungkan semua nilai menjadi satu array
+        const flattenedBadges = badgeValues.flatMap(badgeGroup => Object.values(badgeGroup));
+        
+        return flattenedBadges;
     };
 
     const activeTrainingsCount = trainings.filter(training => training.status === 'active').length;
@@ -147,11 +189,7 @@ export default function MemberDashboard() {
     const handlePerpanjang = () => {
         navigate('/perpanjang');
     };
-
-    const getBadgesForTraining = (trainingId) => {
-        return badges.filter(badge => badge.pelatihan_id === trainingId);
-    };
-
+    
     const handleNavigateToTraining = () => {
         setActiveMenu('Pelatihan');
     };
@@ -269,9 +307,10 @@ export default function MemberDashboard() {
                                 trainings={trainings}
                                 badges={badges} // Teruskan badges ke TrainingList
                                 onRegister={handleTrainingClick} // Teruskan prop onRegister ke TrainingList
+                                endTrainings={endTrainings}
                             />
                         )}
-                        {activeMenu === 'Penghargaan' && <Penghargaan badges={badges} trainings={trainings} />}
+                        {activeMenu === 'Penghargaan' && <Penghargaan badges={transformBadges(badges)} trainings={trainings} />}
                         {/* {activeMenu === 'Profil' && <Profile />} */}
                         {activeMenu === 'Notifikasi' && <Notifications />}
                         {activeMenu === 'Pengaturan' && <Settings userId={userId} />}
@@ -282,8 +321,8 @@ export default function MemberDashboard() {
             {selectedTraining && (
                 <TrainingDetailModal
                     selectedTraining={selectedTraining}
-                    badges={getBadgesForTraining(selectedTraining.id)}
                     statusModal={status}
+                    memberId={memberId}
                     onClose={handleCloseModal}
                 />
             )}
