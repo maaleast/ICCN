@@ -159,6 +159,18 @@ export default function MemberDashboard() {
         }
     };
 
+    const transformBadges = (badges) => {
+        if (!badges || typeof badges !== 'object') return [];
+        
+        // Ekstrak nilai dari object badges
+        const badgeValues = Object.values(badges);
+        
+        // Gabungkan semua nilai menjadi satu array
+        const flattenedBadges = badgeValues.flatMap(badgeGroup => Object.values(badgeGroup));
+        
+        return flattenedBadges;
+    };
+
     const activeTrainingsCount = trainings.filter(training => training.status === 'active').length;
     const upcomingTrainingsCount = trainings.filter(training => training.status === 'upcoming').length;
 
@@ -177,17 +189,7 @@ export default function MemberDashboard() {
     const handlePerpanjang = () => {
         navigate('/perpanjang');
     };
-
-    const getBadgesForTraining = (badges) => {
-        if (!badges || typeof badges !== "object") {
-            console.error("badges is not a valid object:", badges);
-            return [];
-        }
     
-        return Object.values(badges).filter(badge => badge.isActive);
-    };
-    
-
     const handleNavigateToTraining = () => {
         setActiveMenu('Pelatihan');
     };
@@ -308,7 +310,7 @@ export default function MemberDashboard() {
                                 endTrainings={endTrainings}
                             />
                         )}
-                        {activeMenu === 'Penghargaan' && <Penghargaan badges={badges} trainings={trainings} />}
+                        {activeMenu === 'Penghargaan' && <Penghargaan badges={transformBadges(badges)} trainings={trainings} />}
                         {/* {activeMenu === 'Profil' && <Profile />} */}
                         {activeMenu === 'Notifikasi' && <Notifications />}
                         {activeMenu === 'Pengaturan' && <Settings userId={userId}/>}
@@ -319,7 +321,6 @@ export default function MemberDashboard() {
             {selectedTraining && (
                 <TrainingDetailModal
                     selectedTraining={selectedTraining}
-                    badges={getBadgesForTraining(selectedTraining.id)}
                     statusModal={status}
                     memberId={memberId}
                     onClose={handleCloseModal}

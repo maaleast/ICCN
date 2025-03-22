@@ -65,20 +65,20 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
     // console.log('currentDate: ', currentDate);
     // console.log('endTraining: ', endTraining);
 
-    console.log('title: ', title);
+    // console.log('title: ', title);
 
     const finalStatusWithOverdue = status;
 
-    console.log('finalStatusWithOverdue: ', finalStatusWithOverdue);
+    // console.log('finalStatusWithOverdue: ', finalStatusWithOverdue);
 
     // Tentukan apakah pelatihan masih aktif meskipun sudah selesai
     const isStillActive = currentDate <= trainingEndDate;
-    console.log('isStillActive: ', isStillActive);
+    // console.log('isStillActive: ', isStillActive);
 
     // Tampilkan dua status jika pelatihan sudah selesai tetapi masih aktif
     const showDualStatus = isCompleted && isStillActive;
 
-    console.log('showDualStatus: ', showDualStatus);
+    // console.log('showDualStatus: ', showDualStatus);
 
     // Tentukan badge yang akan ditampilkan
     const badgeValue = badges.length > 0 ? badges[0].badge : training.badge || 'bronze';
