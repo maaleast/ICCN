@@ -308,6 +308,7 @@ export default function MemberDashboard() {
                                 badges={badges} // Teruskan badges ke TrainingList
                                 onRegister={handleTrainingClick} // Teruskan prop onRegister ke TrainingList
                                 endTrainings={endTrainings}
+                                memberId={memberId}
                             />
                         )}
                         {activeMenu === 'Penghargaan' && <Penghargaan badges={transformBadges(badges)} trainings={trainings} />}
