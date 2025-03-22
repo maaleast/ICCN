@@ -29,6 +29,7 @@ export default function Pelatihan() {
     const [searchTerm, setSearchTerm] = useState("");
     const [showDetailPendaftarModal, setShowDetailPendaftarModal] = useState(false);
     const [pendaftarData, setPendaftarData] = useState([]);
+    const [totalPendaftar, setTotalPendaftar] = useState({});
 
     // Fungsi untuk menampilkan modal dan mengambil data pendaftar
     const handleShowDetailPendaftar = async (pelatihanId) => {
@@ -61,6 +62,22 @@ export default function Pelatihan() {
             });
         }
     };
+
+    const fetchTotalPendaftar = async (pelatihanId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/pelatihan/${pelatihanId}/total-pendaftar`);
+            const data = await response.json();
+            setTotalPendaftar((prev) => ({ ...prev, [pelatihanId]: data.total }));
+        } catch (error) {
+            console.error("❌ Gagal mengambil jumlah pendaftar:", error);
+        }
+    };
+
+    useEffect(() => {
+        pelatihan.forEach((item) => {
+            fetchTotalPendaftar(item.id);
+        });
+    }, [pelatihan]);
 
     // Fetch data dari backend
     useEffect(() => {
@@ -362,7 +379,7 @@ export default function Pelatihan() {
                             }}
                         >
                             <FaUser /> {/* Ikon member */}
-                            <span>200</span> {/* Angka */}
+                            <span>{totalPendaftar[item.id] ?? 0}</span> {/* Angka */}
                             <span>Detail Pendaftar</span> {/* Teks */}
                         </button>
                     </div>

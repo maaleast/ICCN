@@ -1,5 +1,7 @@
 import React, { useMemo } from "react";
 import { useTable } from "react-table";
+import { API_BASE_URL } from '../../config';
+import Swal from "sweetalert2";
 
 const DetailMemberPelatihan = ({ isOpen, onClose, data }) => {
 
@@ -20,17 +22,18 @@ const DetailMemberPelatihan = ({ isOpen, onClose, data }) => {
                 Cell: ({ row }) => (
                     <div className="flex gap-2 justify-center">
                         <button
-                            onClick={() => deletePeserta(row.original.aksi.deleteId)}
+                            onClick={() => deletePeserta(row.original.aksi.deleteId, row.original.nama)}
                             className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700"
                         >
                             Hapus
                         </button>
                         <button
                             id={`btnKirim${row.original.aksi.kirimId}`}
-                            onClick={() => kirimPeserta(row.original.aksi.kirimId)}
+                            onClick={() => kirimPeserta(row.original.aksi.kirimId, row.original.aksi.pelatihanId)}
                             className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 flex items-center gap-2"
+                            disabled={row.original.aksi.isKirim} // Nonaktifkan jika sudah dikirim
                         >
-                            <i className="fas fa-paper-plane"></i> Kirim
+                            {row.original.aksi.isKirim ? "Sudah Dikirim" : <><i className="fas fa-paper-plane"></i> Kirim</>}
                         </button>
                     </div>
                 )
@@ -43,23 +46,40 @@ const DetailMemberPelatihan = ({ isOpen, onClose, data }) => {
 
     if (!isOpen) return null;
 
-    async function deletePeserta(id) {
-        if (confirm("Yakin ingin menghapus peserta ini?")) {
-            const response = await fetch(`${API_BASE_URL}/pelatihan/peserta/${id}`, { method: "DELETE" });
-            if (response.ok) {
-                alert("Peserta berhasil dihapus");
-                location.reload();
-            } else {
-                alert("Gagal menghapus peserta");
+    // Fungsi untuk menghapus peserta dengan konfirmasi
+    async function deletePeserta(id, nama) {
+        Swal.fire({
+            title: `Hapus Peserta?`,
+            text: `Apakah Anda yakin ingin menghapus peserta "${nama}"?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Ya, Hapus!",
+            cancelButtonText: "Batal"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const response = await fetch(`${API_BASE_URL}/pelatihan/peserta/${id}`, { method: "DELETE" });
+
+                if (response.ok) {
+                    Swal.fire("Terhapus!", "Peserta telah dihapus.", "success");
+                    location.reload();
+                } else {
+                    Swal.fire("Gagal!", "Peserta gagal dihapus.", "error");
+                }
             }
-        }
+        });
     }
     
-    async function kirimPeserta(id) {
+    async function kirimPeserta(id, pelatihanId) {
         const response = await fetch(`${API_BASE_URL}/pelatihan/peserta/${id}/kirim`, { 
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ kirim: 1 }) 
+            body: JSON.stringify({ 
+                kirim: 1,
+                pelatihan_id: pelatihanId,
+                member_id: id
+            }) 
         });
     
         if (response.ok) {
