@@ -66,8 +66,8 @@ const PageGallery = () => {
             {/* Main Content */}
             <main className="pt-24 pb-12 px-4 md:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <h1 className="text-4xl md:text-5xl font-bold text-center text-white mb-8">
-                        Galeri Kegiatan ICCN
+                    <h1 className="text-4xl md:text-5xl font-bold text-center text-white mb-8 mt-8">
+                        Galeri ICCN
                     </h1>
 
                     {/* Tahun Accordion */}
@@ -90,36 +90,39 @@ const PageGallery = () => {
                                 </button>
 
                                 {activeYear === year && (
-                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                                        {groupedPhotos[year].map((photo, index) => (
-                                            <motion.div
-                                                key={index}
-                                                initial={{ opacity: 0, scale: 0.9 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ duration: 0.3, delay: index * 0.05 }}
-                                                className="relative group cursor-pointer"
-                                                onClick={() => {
-                                                    setSelectedPhoto(photo);
-                                                    setIsModalOpen(true);
-                                                }}
-                                            >
-                                                <img
-                                                    src={photo.image_url}
-                                                    alt={`Kegiatan ICCN ${year}`}
-                                                    className="w-full h-48 object-cover rounded-lg transform transition-transform group-hover:scale-105"
-                                                />
-                                                <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <span className="text-white font-medium">
-                                                        Lihat Detail
-                                                    </span>
-                                                </div>
-                                                <p className="text-sm text-white bg-black/50 p-2 rounded-b-lg text-center">
-                                                    {formatDate(photo.created_at)}
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                                    {groupedPhotos[year].map((photo, index) => (
+                                        <motion.div
+                                            key={index}
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                                            className="relative group cursor-pointer"
+                                            onClick={() => {
+                                                setSelectedPhoto(photo);
+                                                setIsModalOpen(true);
+                                            }}
+                                        >
+                                            <img
+                                                src={photo.image_url}
+                                                alt={`Kegiatan ICCN ${year}`}
+                                                className="w-full h-48 object-cover rounded-lg transform transition-transform group-hover:scale-105"
+                                            />
+                                            <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <span className="text-white font-medium">
+                                                    Lihat Detail
+                                                </span>
+                                            </div>
+                                            {/* Tambahkan keterangan foto di sini */}
+                                            <div className="p-2 bg-black/50 rounded-b-lg">
+                                                <p className="text-sm text-white text-center">
+                                                   {formatDate(photo.created_at)}
                                                 </p>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                )}
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
                             </div>
                         ))}
                 </div>
@@ -127,28 +130,32 @@ const PageGallery = () => {
 
             {/* Modal untuk menampilkan gambar secara penuh */}
             {isModalOpen && selectedPhoto && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50 p-4">
-                    <div className="bg-white rounded-xl max-w-5xl w-full overflow-hidden relative">
-                        <button
-                            className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 z-50"
-                            onClick={() => setIsModalOpen(false)}
-                        >
-                            <FaTimes className="w-8 h-8" />
-                        </button>
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50 p-4">
+                <div className="bg-white rounded-xl max-w-5xl w-full overflow-hidden relative">
+                    <button
+                        className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 z-50"
+                        onClick={() => setIsModalOpen(false)}
+                    >
+                        <FaTimes className="w-8 h-8" />
+                    </button>
 
-                        <div className="flex flex-col items-center p-6">
-                            <img
-                                src={selectedPhoto.image_url}
-                                alt="Detail Kegiatan ICCN"
-                                className="w-full max-h-[80vh] object-contain rounded-lg"
-                            />
-                            <p className="text-sm text-gray-600 mt-4">
-                                {formatDate(selectedPhoto.created_at)}
+                    <div className="flex flex-col items-center p-6">
+                        <img
+                            src={selectedPhoto.image_url}
+                            alt="Detail Kegiatan ICCN"
+                            className="w-full max-h-[80vh] object-contain rounded-lg"
+                        />
+                        {/* Tambahkan keterangan foto di sini */}
+                        <div className="mt-4 text-center">
+                            <p className="text-sm text-gray-600">
+                                {selectedPhoto.keterangan_foto} 
+                                {/* diposting pada {formatDate(selectedPhoto.created_at)} */}
                             </p>
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
+        )}
         </div>
     );
 };
