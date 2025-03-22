@@ -124,24 +124,24 @@ const partners = [
 const teamMembers = [
     {
         id: 1,
-        name: "Teddy Indira Budiwan, S.Psi., MM",
-        position: "Presiden ICCN",
-        asal: "Binus",
-        photo: "https://indonesiacareercenter.id/wp-content/uploads/2024/06/teddy-removebg-preview-295x300.png",
-    },
-    {
-        id: 2,
         name: "Dr. Rosaria Mita Amalia, M.Hum.",
-        position: "Wakil Presiden ICCN",
+        position: "Presiden ICCN",
         asal: "Universitas Padjadjaran",
         photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-21-at-12.36.51-e1663803429823-256x256.jpeg",
     },
     {
-        id: 3,
+        id: 2,
         name: "Prof. Dr. Elly Munadziroh , drg. MS",
-        position: "Sekretaris Jendral ICCN",
+        position: "Wakil Presiden ICCN",
         asal: "Universitas Airlangga",
         photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-20-at-12.29.34-278x278.jpeg",
+    },
+    {
+        id: 3,
+        name: "Teddy Indira Budiwan, S.Psi., MM",
+        position: "Sekretaris Jendral ICCN",
+        asal: "Binus",
+        photo: "https://indonesiacareercenter.id/wp-content/uploads/2024/06/teddy-removebg-preview-295x300.png",
     },
 ];
 
@@ -785,7 +785,7 @@ const LandingPage = () => {
                     </motion.div>
                 </section>
 
-                <section id="about" className="py-12 bg-white mt-24 mb-24">
+                <section id="about" className="py-12 bg-white mt-24 mb-24 scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-12">
                             Tentang ICCN
@@ -855,7 +855,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* Services Section */}
-                <section id="services" className="py-12 bg-gray-100">
+                <section id="services" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Our Services</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -892,7 +892,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* Events Section */}
-                <section id="event" className="py-12 bg-white">
+                <section id="event" className="py-12 bg-white scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Events</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -933,7 +933,7 @@ const LandingPage = () => {
 
                 <AnimatePresence>
                     {/* Partnership Section */}
-                    <section id="partnership" className="py-12 bg-gray-100">
+                    <section id="partnership" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
                         <div className="container mx-auto px-4">
                             <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Our Partners</h2>
 
@@ -984,7 +984,7 @@ const LandingPage = () => {
                 </AnimatePresence>
 
                 {/* Team Section */}
-                <section id="team" className="py-12 bg-white">
+                <section id="team" className="py-12 bg-white scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         {/* Judul dan Subjudul */}
                         <div className="text-center mb-12">
@@ -1047,7 +1047,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* Berita Section */}
-                <section id="berita" className="py-12 bg-gray-100">
+                <section id="berita" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Berita Terbaru</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1085,7 +1085,7 @@ const LandingPage = () => {
 
 
                 {/* Gallery Section */}
-                <section id="gallery" className="py-12 bg-white">
+                <section id="gallery" className="py-12 bg-white scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

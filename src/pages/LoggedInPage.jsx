@@ -124,24 +124,24 @@ const partners = [
 const teamMembers = [
     {
         id: 1,
-        name: "Teddy Indira Budiwan, S.Psi., MM",
-        position: "Presiden ICCN",
-        asal: "Binus",
-        photo: "https://indonesiacareercenter.id/wp-content/uploads/2024/06/teddy-removebg-preview-295x300.png",
-    },
-    {
-        id: 2,
         name: "Dr. Rosaria Mita Amalia, M.Hum.",
-        position: "Wakil Presiden ICCN",
+        position: "Presiden ICCN",
         asal: "Universitas Padjadjaran",
         photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-21-at-12.36.51-e1663803429823-256x256.jpeg",
     },
     {
-        id: 3,
+        id: 2,
         name: "Prof. Dr. Elly Munadziroh , drg. MS",
-        position: "Sekretaris Jendral ICCN",
+        position: "Wakil Presiden ICCN",
         asal: "Universitas Airlangga",
         photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-20-at-12.29.34-278x278.jpeg",
+    },
+    {
+        id: 3,
+        name: "Teddy Indira Budiwan, S.Psi., MM",
+        position: "Sekretaris Jendral ICCN",
+        asal: "Binus",
+        photo: "https://indonesiacareercenter.id/wp-content/uploads/2024/06/teddy-removebg-preview-295x300.png",
     },
 ];
 
@@ -373,8 +373,6 @@ const LoggedInPage = () => {
             navigate("/member");
         } else if (userRole === "admin") {
             navigate("/admin");
-        } else {
-            navigate("/membership-registration");
         }
     };
 
@@ -432,7 +430,7 @@ const LoggedInPage = () => {
     return (
         <div>
             {/* Header */}
-            <header className="fixed top-0 left-0 right-0 z-10 shadow-lg">
+            <header className="fixed top-0 left-0 right-0 z-50 h-[100px] bg-gray-800 opacity-90">
                 <div className="relative bg-gray-800 opacity-80 h-full">
                     <div className="absolute right-0 top-0 h-full w-64 bg-gradient-to-tr from-gray-950 via-gray-800 to-gray-600 clip-path-trapezoid-reverse"></div>
 
@@ -523,7 +521,7 @@ const LoggedInPage = () => {
                             </li>
                             <li>
                                 <ScrollLink
-                                    to="event"
+                                    to="events"
                                     smooth={true}
                                     duration={500}
                                     className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
@@ -660,7 +658,7 @@ const LoggedInPage = () => {
                                 </li>
                                 <li>
                                     <ScrollLink
-                                        to="event"
+                                        to="events"
                                         smooth={true}
                                         duration={500}
                                         onClick={toggleMenu}
@@ -782,7 +780,7 @@ const LoggedInPage = () => {
                         onClick={handleNavigation}
                         className="mt-6 bg-gradient-to-r from-orange-600 to-orange-400 text-white px-6 py-2 rounded-lg shadow-md hover:scale-105 duration-200"
                     >
-                        {userRole === "member" || userRole === "admin" ? "Dashboard" : "Jadi Member"}
+                        Dashboard
                     </button>
 
                     <motion.div
@@ -822,7 +820,7 @@ const LoggedInPage = () => {
                 </section>
 
                 {/* About Section */}
-                <section id="about" className="py-12 bg-white mt-24 mb-24">
+                <section id="about" className="py-12 bg-white mt-24 mb-24 scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-12">
                             Tentang ICCN
@@ -841,7 +839,8 @@ const LoggedInPage = () => {
                             </motion.div>
 
                             <motion.div
-                                initial={{ opacity: 0, x: 50 }}
+                                className="about-text"
+                                initial={{ opacity: 1, x: 50 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.8 }}
                                 viewport={{ once: true }}
@@ -861,8 +860,8 @@ const LoggedInPage = () => {
                         {/* Baris kedua (Teks kiri, gambar kanan) */}
                         <div className="grid grid-cols-1 md:grid-cols-2 items-center mt-12">
                             <motion.div
-                                className="text-gray-700 md:order-1 order-2"
-                                initial={{ opacity: 0, x: -50 }}
+                                className="text-gray-700 md:order-1 order-2 about-text"
+                                initial={{ opacity: 1, x: -50 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.8 }}
                                 viewport={{ once: true }}
@@ -892,7 +891,7 @@ const LoggedInPage = () => {
                 </section>
 
                 {/* Services Section */}
-                <section id="services" className="py-12 bg-gray-100">
+                <section id="services" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Our Services</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -931,7 +930,7 @@ const LoggedInPage = () => {
                 </section>
 
                 {/* Events Section */}
-                <section id="events" className="py-12 bg-white">
+                <section id="events" className="py-12 bg-white scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Events</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -973,7 +972,7 @@ const LoggedInPage = () => {
                 </section>
 
                 {/* Partnership Section */}
-                <section id="partnership" className="py-12 bg-gray-100">
+                <section id="partnership" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Our Partners</h2>
 
@@ -1023,7 +1022,7 @@ const LoggedInPage = () => {
                 </section>
 
                 {/* Team Section */}
-                <section id="team" className="py-12 bg-white">
+                <section id="team" className="py-12 bg-white scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         {/* Judul dan Subjudul */}
                         <div className="text-center mb-12">
@@ -1086,7 +1085,7 @@ const LoggedInPage = () => {
                 </section>
 
                 {/* Berita Section */}
-                <section id="berita" className="py-12 bg-gray-100">
+                <section id="berita" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Berita Terbaru</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1139,7 +1138,7 @@ const LoggedInPage = () => {
                 </section>
 
                 {/* Gallery Section */}
-                <section id="gallery" className="py-12 bg-white">
+                <section id="gallery" className="py-12 bg-white scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
