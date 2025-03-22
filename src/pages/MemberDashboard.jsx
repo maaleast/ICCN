@@ -89,7 +89,7 @@ export default function MemberDashboard() {
                         };
                     })
                 );
-    
+
                 setTrainings(updatedTrainings);
                 // console.log('updatedTrainings:', updatedTrainings);
                 // console.log('trainings:', trainings);
@@ -97,7 +97,7 @@ export default function MemberDashboard() {
                 console.error('Error fetching trainings:', error);
             }
         };
-    
+
         fetchTrainings();
     }, []);
 
@@ -112,7 +112,7 @@ export default function MemberDashboard() {
                 console.error('Error fetching badges:', error);
             }
         };
-    
+
         fetchBadges();
     }, []); // Hapus `trainings` dari dependency array
 
@@ -123,7 +123,7 @@ export default function MemberDashboard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ member_id: memberId, pelatihan_id: pelatihanId }),
             });
-    
+
             const data = await response.json();
             return data.isRegistered; // Pastikan API mengembalikan { isRegistered: true/false }
         } catch (error) {
@@ -136,7 +136,7 @@ export default function MemberDashboard() {
         const currentDate = new Date();
         const trainingStartDate = new Date(startDate);
         const trainingEndDate = new Date(endDate);
-    
+
         // Cek apakah member sudah terdaftar di pelatihan ini
         const isRegistered = await checkIfMemberIsRegistered(memberId, pelatihanId);
 
@@ -147,7 +147,7 @@ export default function MemberDashboard() {
             setStatus(false);
             // console.log('status', status);
         }
-    
+
         if (currentDate < trainingStartDate) {
             return 'upcoming';
         } else if (currentDate >= trainingStartDate && currentDate <= trainingEndDate && !isRegistered) {
@@ -313,7 +313,7 @@ export default function MemberDashboard() {
                         {activeMenu === 'Penghargaan' && <Penghargaan badges={transformBadges(badges)} trainings={trainings} />}
                         {/* {activeMenu === 'Profil' && <Profile />} */}
                         {activeMenu === 'Notifikasi' && <Notifications />}
-                        {activeMenu === 'Pengaturan' && <Settings userId={userId}/>}
+                        {activeMenu === 'Pengaturan' && <Settings userId={userId} />}
                     </AnimatePresence>
                 </main>
             </div>
