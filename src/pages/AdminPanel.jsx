@@ -9,6 +9,7 @@ import FinanceReport from "../components/adminDashboard/FinanceReport";
 import Pemasukan from "../components/adminDashboard/Pemasukan";
 import Pengeluaran from "../components/adminDashboard/Pengeluaran";
 import Berita from "../components/adminDashboard/Berita";
+import KelolaOrganisasi from "../components/adminDashboard/KelolaOrganisasi";
 import { getPendapatanBulanan, getSaldoAkhir } from "../components/adminDashboard/FinanceReport";
 import { API_BASE_URL } from "../config";
 import MemberGrowthChart from "../components/MemberGrowthChart";
@@ -365,6 +366,7 @@ export default function AdminPanel() {
                     {activeMenu === "Kelola Pelatihan" && <Pelatihan />}
                     {activeMenu === "Galeri Kegiatan" && <Gallery />}
                     {activeMenu === "Kelola Berita" && <Berita />}
+                    {activeMenu === "Kelola Organisasi" && <KelolaOrganisasi />}
                     {activeMenu === "Laporan Keuangan" && <FinanceReport />}
                     {activeMenu === "Pengeluaran" && <Pengeluaran />}
                     {activeMenu === "Pemasukan" && <Pemasukan />}
