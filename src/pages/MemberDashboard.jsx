@@ -311,7 +311,7 @@ export default function MemberDashboard() {
                                 memberId={memberId}
                             />
                         )}
-                        {activeMenu === 'Penghargaan' && <Penghargaan badges={transformBadges(badges)} trainings={trainings} />}
+                        {activeMenu === 'Penghargaan' && <Penghargaan badges={transformBadges(badges)} />}
                         {/* {activeMenu === 'Profil' && <Profile />} */}
                         {activeMenu === 'Notifikasi' && <Notifications />}
                         {activeMenu === 'Pengaturan' && <Settings userId={userId} />}

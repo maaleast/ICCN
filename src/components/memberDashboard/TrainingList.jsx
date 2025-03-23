@@ -43,18 +43,21 @@ export default function TrainingList({ trainings, badges, onRegister, endTrainin
         const trainingEndDate = new Date(training.tanggal_berakhir);
         const isCompleted = badgesArray.some(badge => badge.pelatihan_id === training.id && badge.status === 'completed');
         const isRegistered = badgesArray.some(badge => badge.pelatihan_id === training.id && badge.status === 'ongoing'); // Cek pendaftaran
+        const isUncompleted = badgesArray.some(badge => badge.pelatihan_id === training.id && badge.status === 'uncompleted'); // Cek pendaftaran
         // console.log('badgesArray: ', badgesArray);
         // if (badgesArray.some(badge => badge.pelatihan_id === training.id && badge.status === 'ongoing')) {
         //     console.log('training', training.judul_pelatihan, 'isRegistered: ', isRegistered, 'badge: ', badgesArray.filter(badge => badge.pelatihan_id === training.id));
         // }
         // console.log('training', training.judul_pelatihan, 'isRegistered: ', isRegistered, 'badge: ', badgesArray.filter(badge => badge.pelatihan_id === training.id));
-        if (isRegistered && (currentDate <= trainingEndDate)) {
+        if (isRegistered && currentDate <= trainingEndDate) {
             return 'ongoing'; // Status ongoing jika terdaftar
         } else if (isCompleted) {
             return 'completed'; // Status completed jika sudah mendapatkan badge
-        } else if ((currentDate > trainingEndDate) && isRegistered) {
-            markAsUncompleted(memberId, training.id);
-            console.log('memberId: ' + memberId, "training Id: " + training.id)
+        } else if (currentDate > trainingEndDate && isRegistered || isUncompleted) {
+            if (!isUncompleted) {
+                markAsUncompleted(memberId, training.id);
+            }
+            // console.log('memberId: ' + memberId, "training Id: " + training.id)
             return 'uncompleted'; // Status uncompleted jika sudah lewat
         } else if (currentDate < new Date(training.tanggal_pelatihan)) {
             return 'upcoming'; // Status upcoming jika belum dimulai
@@ -62,6 +65,7 @@ export default function TrainingList({ trainings, badges, onRegister, endTrainin
 
         return training.status; // Kembalikan status default
     };
+
     const getTrainingBadges = (trainingId) => {
         return badgesArray.filter(badge => badge.pelatihan_id === trainingId);
     };
