@@ -152,10 +152,20 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
 
                 {/* Tampilkan badge yang akan didapat */}
                 <div className="mt-4 flex items-center">
-                    <span className="text-sm text-gray-600 dark:text-white">Badge yang akan didapat:</span>
-                    <div className="ml-2">
-                        {badgeIcons[badgeValue.toLowerCase()] || badgeIcons.bronze}
-                    </div>
+                    {finalStatusWithOverdue === "uncompleted" ? (
+                        <span className="text-sm text-red-600 dark:text-red-400">
+                            ❌ Tidak mendapatkan badge
+                        </span>
+                    ) : (
+                        <>
+                            <span className="text-sm text-gray-600 dark:text-white">
+                                Badge yang akan didapat:
+                            </span>
+                            <div className="ml-2">
+                                {badgeIcons[badgeValueKey] || badgeIcons.bronze}
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <button
