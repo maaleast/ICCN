@@ -13,9 +13,10 @@ export default function Settings({ userId }) { // Terima userId sebagai prop
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [userInfo, setUserInfo] = useState({
+        no_identitas: "",
         tipe_keanggotaan: "",
         institusi: "",
-        nama_pembayar: "",
+        nama: "",
         nomor_wa: "",
     });
     const navigate = useNavigate();
@@ -101,7 +102,13 @@ export default function Settings({ userId }) { // Terima userId sebagai prop
 
             {/* Informasi Member */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Informasi Member</h3>
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Informasi Member</h3>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                        No. Identitas: {userInfo.no_identitas}
+                    </span>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">
