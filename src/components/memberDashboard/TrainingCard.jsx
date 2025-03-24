@@ -45,32 +45,50 @@ const styles = `
         }
 `;
 
-export default function TrainingCard({ title, startDate, endDate, status, badges, onRegister, training }) {
+export default function TrainingCard({ title, startDate, endDate, status, badges, onRegister, training, endTraining }) {
     const currentDate = new Date();
     const trainingEndDate = new Date(endDate);
+    const trainginStartDate = new Date(startDate);
+    const statusTraining = status;
 
     // Jika pelatihan sudah selesai (ada badge), override status menjadi 'completed'
-    const isCompleted = badges.length > 0;
-    const finalStatus = isCompleted ? 'completed' : status;
+    const isCompleted = statusTraining === 'completed' ? true : false;
+    // console.log('badges: ', badges);
+    // console.log('badgesLength: ', badges.length);
+    // console.log('isCompleted: ', isCompleted);
+    // console.log('status: ', status);
+    // console.log('startDate: ', startDate);
+    // console.log('endDate: ', endDate);
+    // console.log('title: ', title);
+    // console.log('trainingStartDate: ', trainginStartDate);
+    // console.log('trainingEndDate: ', trainingEndDate);
+    // console.log('currentDate: ', currentDate);
+    // console.log('endTraining: ', endTraining);
 
-    // Jika waktu pelatihan sudah lewat dan tidak ada badge, status menjadi 'uncompleted'
-    const isOverdue = currentDate > trainingEndDate;
-    const finalStatusWithOverdue = isOverdue && !isCompleted ? 'uncompleted' : finalStatus;
+    // console.log('title: ', title);
+
+    const finalStatusWithOverdue = status;
+
+    // console.log('finalStatusWithOverdue: ', finalStatusWithOverdue);
 
     // Tentukan apakah pelatihan masih aktif meskipun sudah selesai
     const isStillActive = currentDate <= trainingEndDate;
+    // console.log('isStillActive: ', isStillActive);
 
     // Tampilkan dua status jika pelatihan sudah selesai tetapi masih aktif
     const showDualStatus = isCompleted && isStillActive;
 
+    // console.log('showDualStatus: ', showDualStatus);
+
     // Tentukan badge yang akan ditampilkan
     const badgeValue = badges.length > 0 ? badges[0].badge : training.badge || 'bronze';
+    const badgeValueKey = typeof badgeValue === 'string' ? badgeValue.toLowerCase() : 'bronze';
 
     const statusConfig = {
         active: {
             color: 'bg-blue-100 text-blue-700',
-            icon: <PlayCircleIcon className="w-5 h-5 mr-2" />, // Logo untuk ONGOING
-            label: 'ONGOING'
+            icon: <PlayCircleIcon className="w-5 h-5 mr-2" />,
+            label: 'Buruan Daftar'
         },
         upcoming: {
             color: 'bg-yellow-100 text-yellow-700',
@@ -86,8 +104,15 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
             color: 'bg-red-100 text-red-700',
             icon: <LockClosedIcon className="w-5 h-5 mr-2" />,
             label: 'TIDAK SELESAI'
+        },
+        ongoing: {
+            color: 'bg-purple-100 text-purple-700',
+            icon: <PlayCircleIcon className="w-5 h-5 mr-2" />,
+            label: 'Sedang Berlangsung'
         }
     };
+
+    const handleRegister = onRegister || (() => console.warn("onRegister function is not provided"));
 
     return (
         <motion.div
@@ -134,11 +159,13 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
                 </div>
 
                 <button
-                    onClick={onRegister}
-                    disabled={finalStatusWithOverdue !== 'active'}
+                    onClick={handleRegister}
+                    disabled={finalStatusWithOverdue !== 'active' && finalStatusWithOverdue !== 'ongoing'}
                     className={`w-full mt-6 py-2 rounded-lg font-medium transition-all ${
                         finalStatusWithOverdue === 'active'
                             ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : finalStatusWithOverdue === 'ongoing'
+                            ? 'bg-purple-600 text-white hover:bg-purple-700' // Warna untuk ongoing
                             : finalStatusWithOverdue === 'uncompleted'
                             ? 'bg-red-100 text-red-700 cursor-not-allowed'
                             : 'bg-gray-100 text-gray-500 cursor-not-allowed'

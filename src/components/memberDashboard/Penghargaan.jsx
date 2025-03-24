@@ -291,11 +291,14 @@ export default function Penghargaan({ badges, trainings }) {
                                             <span className="capitalize">{badge.badge}</span>
                                         </td>
                                         <td className="px-4 py-2">
-                                            {new Date(badge.tanggal_selesai).toLocaleDateString('id-ID', {
-                                                day: 'numeric',
-                                                month: 'long',
-                                                year: 'numeric',
-                                            })}
+                                            {badge.tanggal_selesai
+                                                ? new Date(badge.tanggal_selesai).toLocaleDateString('id-ID', {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                })
+                                                : "Belum menyelesaikan pelatihan"
+                                            }
                                         </td>
                                         <td className="px-4 py-2">
                                             {getJudulPelatihan(badge.pelatihan_id)}

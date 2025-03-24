@@ -81,54 +81,54 @@ export default function Pengeluaran() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         // Validasi di frontend
         if (!formData.tanggal || !formData.jumlah || !formData.deskripsi) {
             toast.error('Semua data harus diisi!');
             return;
         }
-
+    
         const url = editingId
             ? `${API_BASE_URL}/admin/keuangan/edit/${editingId}`
             : `${API_BASE_URL}/admin/keuangan/tambah`;
-
+    
         const method = editingId ? 'PUT' : 'POST';
-
+    
         // Format tanggal ke YYYY-MM-DD tanpa pengaruh timezone
         const formattedDate = new Date(
             formData.tanggal.getTime() - formData.tanggal.getTimezoneOffset() * 60000
         ).toISOString().split('T')[0];
-
+    
         try {
             const response = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    status: 'KELUAR', // Status pengeluaran
+                    status: editingId ? formData.status : 'KELUAR', // Status pemasukan atau pengeluaran
                     jumlah: parseFloat(formData.jumlah.replace(/[^0-9]/g, '')), // Hilangkan "Rp." dan format ribuan
                     deskripsi: formData.deskripsi,
                     tanggal: formattedDate, // Hanya tanggal, tanpa waktu
                 }),
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Gagal menyimpan');
             }
-
+    
             // Refresh data
             await fetchData();
-
+    
             // Tampilkan notifikasi
-            toast.success(editingId ? 'Pengeluaran berhasil diupdate!' : 'Pengeluaran berhasil ditambahkan!');
-
+            toast.success(editingId ? 'Transaksi berhasil diupdate!' : 'Transaksi berhasil ditambahkan!');
+    
             // Reset form
             setIsModalOpen(false);
             setFormData({ jumlah: '', deskripsi: '', tanggal: new Date() });
             setEditingId(null);
         } catch (error) {
             console.error('Error:', error);
-            toast.error(error.message || 'Gagal menyimpan pengeluaran');
+            toast.error(error.message || 'Gagal menyimpan transaksi');
         }
     };
 
@@ -141,28 +141,28 @@ export default function Pengeluaran() {
     // Handle delete action
     const handleDelete = async () => {
         if (!deletingId) return;
-
+    
         try {
             const response = await fetch(`${API_BASE_URL}/admin/keuangan/delete/${deletingId}`, {
                 method: 'DELETE',
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Gagal menghapus');
             }
-
+    
             // Refresh data
             await fetchData();
-
+    
             // Tampilkan notifikasi
-            toast.success('Pengeluaran berhasil dihapus!');
-
+            toast.success('Transaksi berhasil dihapus!');
+    
             // Tutup modal konfirmasi
             setIsDeleteModalOpen(false);
         } catch (error) {
             console.error('Gagal menghapus:', error);
-            toast.error(error.message || 'Gagal menghapus pengeluaran');
+            toast.error(error.message || 'Gagal menghapus transaksi');
         }
     };
 

@@ -21,8 +21,21 @@ ChartJS.register(
 );
 
 export default function ProgressChart({ badges }) {
+    // Konversi badges dari objek ke array
+    const transformBadges = (badgesObj) => {
+        let result = [];
+        Object.values(badgesObj).forEach((tahun) => {
+            Object.values(tahun).forEach((badge) => {
+                result.push(badge);
+            });
+        });
+        return result;
+    };
+
+    const badgesArray = Array.isArray(badges) ? badges : transformBadges(badges);
+
     // Hitung jumlah pelatihan yang selesai per bulan berdasarkan badges
-    const monthlyCompletedTrainings = badges.reduce((acc, badge) => {
+    const monthlyCompletedTrainings = badgesArray.reduce((acc, badge) => {
         const month = new Date(badge.tanggal_selesai).toLocaleString('default', { month: 'short' });
         if (!acc[month]) {
             acc[month] = 0;

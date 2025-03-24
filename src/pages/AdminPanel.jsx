@@ -1,22 +1,22 @@
-// AdminPanel.jsx
-import { useState, useEffect } from 'react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
-import AktivasiMember from '../components/adminDashboard/AktivasiMember';
-import Pelatihan from '../components/adminDashboard/Pelatihan';
-import Gallery from '../components/adminDashboard/Gallery';
-import FinanceReport from '../components/adminDashboard/FinanceReport';
-import Pemasukan from '../components/adminDashboard/Pemasukan';
-import Pengeluaran from '../components/adminDashboard/Pengeluaran';
-import Berita from '../components/adminDashboard/Berita'; // Import komponen Berita
-import { getPendapatanBulanan, getSaldoAkhir } from '../components/adminDashboard/FinanceReport';
-import { API_BASE_URL } from '../config';
-import MemberGrowthChart from '../components/MemberGrowthChart';
-import { FaUser, FaBook, FaMoneyBill, FaCamera, FaNewspaper } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+import AktivasiMember from "../components/adminDashboard/AktivasiMember";
+import Pelatihan from "../components/adminDashboard/Pelatihan";
+import Gallery from "../components/adminDashboard/Gallery";
+import FinanceReport from "../components/adminDashboard/FinanceReport";
+import Pemasukan from "../components/adminDashboard/Pemasukan";
+import Pengeluaran from "../components/adminDashboard/Pengeluaran";
+import Berita from "../components/adminDashboard/Berita";
+import { getPendapatanBulanan, getSaldoAkhir } from "../components/adminDashboard/FinanceReport";
+import { API_BASE_URL } from "../config";
+import MemberGrowthChart from "../components/MemberGrowthChart";
+import { FaUser, FaBook, FaMoneyBill, FaCamera, FaNewspaper } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 export default function AdminPanel() {
-    const [activeMenu, setActiveMenu] = useState('Dashboard');
+    const [activeMenu, setActiveMenu] = useState("Dashboard");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [dashboardData, setDashboardData] = useState({
         totalMember: 0,
@@ -24,60 +24,98 @@ export default function AdminPanel() {
         pendapatanBulanan: 0,
         aktivitasTerbaru: [],
         grafikMember: {},
-        saldoAkhir: 0
+        saldoAkhir: 0,
     });
     const [aktivitasTerbaru, setAktivitasTerbaru] = useState([]);
+    const navigate = useNavigate();
 
-    // Fetch data dashboard
     useEffect(() => {
-        const fetchDashboardData = async () => {
-            try {
-                const [membersRes, usersRes, pendapatanRes, saldoRes] = await Promise.all([
-                    fetch(`${API_BASE_URL}/admin/all-members`),
-                    fetch(`${API_BASE_URL}/admin/all-users`),
-                    getPendapatanBulanan(),
-                    getSaldoAkhir()
-                ]);
+        const token = localStorage.getItem("token");
+        const userRole = localStorage.getItem("role");
 
-                const members = await membersRes.json();
-                const users = await usersRes.json();
+        console.log("Token:", token);
+        console.log("Role:", userRole);
 
-                const memberPerBulan = members.reduce((acc, member) => {
-                    const date = new Date(member.tanggal_submit);
-                    const month = date.toLocaleString('default', { month: 'short' });
+        // Jika tidak ada token atau role bukan admin, redirect ke /home
+        if (!token || userRole !== "admin") {
+            console.log("Redirecting to /home");
+            navigate("/home");
+            return;
+        }
 
-                    if (!acc[month]) {
-                        acc[month] = 0;
-                    }
-                    acc[month]++;
-                    return acc;
-                }, {});
-
-                setDashboardData({
-                    totalMember: members.length,
-                    totalUser: users.length,
-                    pendapatanBulanan: pendapatanRes.pendapatanBulanan,
-                    saldoAkhir: saldoRes,
-                    aktivitasTerbaru: [
-                        `${members.slice(-5).length} Member Baru`
-                    ],
-                    grafikMember: memberPerBulan
-                });
-
-            } catch (error) {
-                console.error("Error fetching dashboard data:", error);
-            }
-        };
-
+        // Fetch data
+        fetchData();
         fetchDashboardData();
-    }, []);
+        fetchAktivitasTerbaru();
+    }, [navigate]);
+
+    const fetchData = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            return; // Hentikan proses jika tidak ada token
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/data`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch data");
+            }
+
+            const result = await response.json();
+            setData(result);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            // Hapus navigate agar tidak redirect ke /home saat error
+        }
+    };
+
+    const fetchDashboardData = async () => {
+        try {
+            const [membersRes, usersRes, pendapatanRes, saldoRes] = await Promise.all([
+                fetch(`${API_BASE_URL}/admin/all-members`),
+                fetch(`${API_BASE_URL}/admin/all-users`),
+                getPendapatanBulanan(),
+                getSaldoAkhir(),
+            ]);
+
+            const members = await membersRes.json();
+            const users = await usersRes.json();
+
+            const memberPerBulan = members.reduce((acc, member) => {
+                const date = new Date(member.tanggal_submit);
+                const month = date.toLocaleString("default", { month: "short" });
+
+                if (!acc[month]) {
+                    acc[month] = 0;
+                }
+                acc[month]++;
+                return acc;
+            }, {});
+
+            setDashboardData({
+                totalMember: members.length,
+                totalUser: users.length,
+                pendapatanBulanan: pendapatanRes.pendapatanBulanan,
+                saldoAkhir: saldoRes,
+                aktivitasTerbaru: [`${members.slice(-5).length} Member Baru`],
+                grafikMember: memberPerBulan,
+            });
+        } catch (error) {
+            console.error("Error fetching dashboard data:", error);
+        }
+    };
 
     const fetchAktivitasTerbaru = async () => {
         try {
             const [membersRes, keuanganRes, photosRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/admin/all-members`),
-                fetch(`${API_BASE_URL}/admin/keuangan`),
-                fetch(`${API_BASE_URL}/admin/gallery`)
+                // fetch(`${API_BASE_URL}/admin/keuangan`),
+                // fetch(`${API_BASE_URL}/admin/gallery`)
             ]);
 
             const members = await membersRes.json();
@@ -87,40 +125,40 @@ export default function AdminPanel() {
             const aktivitas = [];
 
             // Aktivitas Member Baru
-            const memberBaruHariIni = members.filter(member => {
+            const memberBaruHariIni = members.filter((member) => {
                 const tanggalDaftar = new Date(member.tanggal_submit).toDateString();
                 const hariIni = new Date().toDateString();
                 return tanggalDaftar === hariIni;
             });
             if (memberBaruHariIni.length > 0) {
                 aktivitas.push({
-                    type: 'member',
+                    type: "member",
                     description: `${memberBaruHariIni.length} member telah mendaftar hari ini`,
-                    timestamp: new Date().toLocaleString('id-ID') // Tanggal input real-time
+                    timestamp: new Date().toLocaleString("id-ID"),
                 });
             }
 
             // Aktivitas Keuangan (Pemasukan dan Pengeluaran)
-            keuangan.forEach(t => {
-                const tanggalTransaksi = new Date(t.tanggal_waktu).toLocaleDateString('id-ID'); // Tanggal transaksi dari database
+            keuangan.forEach((t) => {
+                const tanggalTransaksi = new Date(t.tanggal_waktu).toLocaleDateString("id-ID");
 
-                if (t.status === 'MASUK') {
+                if (t.status === "MASUK") {
                     aktivitas.push({
-                        type: 'uang',
-                        description: `Data pemasukan (${tanggalTransaksi}) sebesar Rp ${parseFloat(t.jumlah).toLocaleString('id-ID')} dari ${t.deskripsi}`,
-                        timestamp: new Date().toLocaleString('id-ID') // Tanggal input real-time
+                        type: "uang",
+                        description: `Data pemasukan (${tanggalTransaksi}) sebesar Rp ${parseFloat(t.jumlah).toLocaleString("id-ID")} dari ${t.deskripsi}`,
+                        timestamp: new Date().toLocaleString("id-ID"),
                     });
-                } else if (t.status === 'KELUAR') {
+                } else if (t.status === "KELUAR") {
                     aktivitas.push({
-                        type: 'uang',
-                        description: `Data pengeluaran (${tanggalTransaksi}) sebesar Rp ${parseFloat(t.jumlah).toLocaleString('id-ID')} untuk ${t.deskripsi}`,
-                        timestamp: new Date().toLocaleString('id-ID') // Tanggal input real-time
+                        type: "uang",
+                        description: `Data pengeluaran (${tanggalTransaksi}) sebesar Rp ${parseFloat(t.jumlah).toLocaleString("id-ID")} untuk ${t.deskripsi}`,
+                        timestamp: new Date().toLocaleString("id-ID"),
                     });
                 }
             });
 
             // Aktivitas Foto Baru
-            const fotoHariIni = photos.filter(photo => {
+            const fotoHariIni = photos.filter((photo) => {
                 const tanggalUpload = new Date(photo.created_at).toDateString();
                 const hariIni = new Date().toDateString();
                 return tanggalUpload === hariIni;
@@ -128,9 +166,9 @@ export default function AdminPanel() {
 
             if (fotoHariIni.length > 0) {
                 aktivitas.push({
-                    type: 'foto',
+                    type: "foto",
                     description: `Sebanyak ${fotoHariIni.length} foto telah ditambahkan hari ini`,
-                    timestamp: new Date().toLocaleString('id-ID') // Tanggal input real-time
+                    timestamp: new Date().toLocaleString("id-ID"),
                 });
             }
 
@@ -143,10 +181,6 @@ export default function AdminPanel() {
             console.error("Error fetching recent activities:", error);
         }
     };
-
-    useEffect(() => {
-        fetchAktivitasTerbaru();
-    }, []);
 
     return (
         <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
@@ -170,7 +204,7 @@ export default function AdminPanel() {
                 {/* Main Content Area */}
                 <div className="flex-1 overflow-auto p-6 bg-gray-50 dark:bg-gray-600">
                     {/* Dashboard */}
-                    {activeMenu === 'Dashboard' && (
+                    {activeMenu === "Dashboard" && (
                         <>
                             {/* Welcome Card */}
                             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md mb-6">
@@ -244,27 +278,27 @@ export default function AdminPanel() {
                                     <div className="space-y-4">
                                         {aktivitasTerbaru.length > 0 ? (
                                             aktivitasTerbaru.map((aktivitas, index) => {
-                                                let bgColor = '';
-                                                let icon = '';
+                                                let bgColor = "";
+                                                let icon = "";
 
                                                 // Tentukan warna dan ikon berdasarkan jenis aktivitas (DENGAN FIX CASE-INSENSITIVE)
-                                                if (aktivitas.type === 'uang') {
-                                                    if (aktivitas.description.toLowerCase().includes('pemasukan')) {
-                                                        bgColor = 'bg-green-200 dark:bg-green-800';
-                                                        icon = '💵';
-                                                    } else if (aktivitas.description.toLowerCase().includes('pengeluaran')) {
-                                                        bgColor = 'bg-red-200 dark:bg-red-800';
-                                                        icon = '💸';
+                                                if (aktivitas.type === "uang") {
+                                                    if (aktivitas.description.toLowerCase().includes("pemasukan")) {
+                                                        bgColor = "bg-green-200 dark:bg-green-800";
+                                                        icon = "💵";
+                                                    } else if (aktivitas.description.toLowerCase().includes("pengeluaran")) {
+                                                        bgColor = "bg-red-200 dark:bg-red-800";
+                                                        icon = "💸";
                                                     }
-                                                } else if (aktivitas.type === 'member') {
-                                                    bgColor = 'bg-blue-200 dark:bg-blue-800';
-                                                    icon = '👤';
-                                                } else if (aktivitas.type === 'foto') {
-                                                    bgColor = 'bg-purple-200 dark:bg-purple-800';
-                                                    icon = '📷';
+                                                } else if (aktivitas.type === "member") {
+                                                    bgColor = "bg-blue-200 dark:bg-blue-800";
+                                                    icon = "👤";
+                                                } else if (aktivitas.type === "foto") {
+                                                    bgColor = "bg-purple-200 dark:bg-purple-800";
+                                                    icon = "📷";
                                                 } else {
-                                                    bgColor = 'bg-gray-200 dark:bg-gray-800';
-                                                    icon = 'ℹ️';
+                                                    bgColor = "bg-gray-200 dark:bg-gray-800";
+                                                    icon = "ℹ️";
                                                 }
 
                                                 return (
@@ -293,31 +327,31 @@ export default function AdminPanel() {
                             {/* Quick Actions */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <button
-                                    onClick={() => setActiveMenu('Aktivasi Member')}
+                                    onClick={() => setActiveMenu("Aktivasi Member")}
                                     className="p-4 bg-blue-100 dark:bg-blue-600 text-blue-600 dark:text-white rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition flex items-center justify-center"
                                 >
                                     <FaUser className="mr-2" /> Aktivasi Member
                                 </button>
                                 <button
-                                    onClick={() => setActiveMenu('Kelola Pelatihan')}
+                                    onClick={() => setActiveMenu("Kelola Pelatihan")}
                                     className="p-4 bg-blue-100 dark:bg-blue-600 text-blue-600 dark:text-white rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition flex items-center justify-center"
                                 >
                                     <FaBook className="mr-2" /> Kelola Pelatihan
                                 </button>
                                 <button
-                                    onClick={() => setActiveMenu('Laporan Keuangan')}
+                                    onClick={() => setActiveMenu("Laporan Keuangan")}
                                     className="p-4 bg-blue-100 dark:bg-blue-600 text-blue-600 dark:text-white rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition flex items-center justify-center"
                                 >
                                     <FaMoneyBill className="mr-2" /> Kelola Keuangan
                                 </button>
                                 <button
-                                    onClick={() => setActiveMenu('Galeri Kegiatan')}
+                                    onClick={() => setActiveMenu("Galeri Kegiatan")}
                                     className="p-4 bg-blue-100 dark:bg-blue-600 text-blue-600 dark:text-white rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition flex items-center justify-center"
                                 >
                                     <FaCamera className="mr-2" /> Kelola Foto
                                 </button>
                                 <button
-                                    onClick={() => setActiveMenu('Kelola Berita')}
+                                    onClick={() => setActiveMenu("Kelola Berita")}
                                     className="p-4 bg-blue-100 dark:bg-blue-600 text-blue-600 dark:text-white rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition flex items-center justify-center"
                                 >
                                     <FaNewspaper className="mr-2" /> Kelola Berita
@@ -327,14 +361,13 @@ export default function AdminPanel() {
                     )}
 
                     {/* Menu Lainnya */}
-                    {activeMenu === 'Aktivasi Member' && <AktivasiMember />}
-                    {activeMenu === 'Kelola Pelatihan' && <Pelatihan />}
-                    {activeMenu === 'Galeri Kegiatan' && <Gallery />}
-                    {activeMenu === 'Kelola Berita' && <Berita />}
-                    {activeMenu === 'Laporan Keuangan' && <FinanceReport />}
-                    {activeMenu === 'Pengeluaran' && <Pengeluaran />}
-                    {activeMenu === 'Pemasukan' && <Pemasukan />}
-
+                    {activeMenu === "Aktivasi Member" && <AktivasiMember />}
+                    {activeMenu === "Kelola Pelatihan" && <Pelatihan />}
+                    {activeMenu === "Galeri Kegiatan" && <Gallery />}
+                    {activeMenu === "Kelola Berita" && <Berita />}
+                    {activeMenu === "Laporan Keuangan" && <FinanceReport />}
+                    {activeMenu === "Pengeluaran" && <Pengeluaran />}
+                    {activeMenu === "Pemasukan" && <Pemasukan />}
                 </div>
             </div>
         </div>

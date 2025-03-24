@@ -10,6 +10,7 @@ export default function Gallery() {
     const [isModalOpen, setIsModalOpen] = useState(false); // State untuk mengontrol tampilan modal
     const [uploadModalOpen, setUploadModalOpen] = useState(false); // State untuk mengontrol tampilan modal upload
     const [selectedFiles, setSelectedFiles] = useState([]); // State untuk menyimpan file yang dipilih
+    const [keterangan, setKeterangan] = useState(''); // State untuk menyimpan keterangan foto
 
     // Fungsi untuk memformat tanggal
     const formatDate = (dateString) => {
@@ -31,9 +32,12 @@ export default function Gallery() {
             }
             const data = await response.json();
 
-            // Pastikan data adalah array
+            // Pastikan data adalah array dan setiap item memiliki properti yang diperlukan
             if (Array.isArray(data)) {
-                setPhotos(data);
+                const validPhotos = data.filter(photo => 
+                    photo.id && photo.image_url && photo.created_at && photo.keterangan_foto
+                );
+                setPhotos(validPhotos);
             } else {
                 console.error("Data yang diterima bukan array:", data);
                 setPhotos([]); // Set ke array kosong jika data tidak valid
@@ -76,7 +80,7 @@ export default function Gallery() {
         });
     };
 
-    const handleAddPhoto = async (files) => {
+    const handleAddPhoto = async (files, keterangan) => {
         if (!files || files.length === 0) {
             Swal.fire("Error", "Tidak ada file yang dipilih", "error");
             return;
@@ -86,6 +90,7 @@ export default function Gallery() {
         files.forEach((file) => {
             formData.append("images", file); // Append setiap file ke FormData
         });
+        formData.append("keterangan", keterangan); // Append keterangan ke FormData
 
         try {
             const response = await fetch(`${API_BASE_URL}/admin/gallery/upload`, {
@@ -98,10 +103,15 @@ export default function Gallery() {
             }
 
             const data = await response.json();
-            setPhotos(prevPhotos => [...prevPhotos, ...data.data]); // Tambahkan foto baru ke state
-            Swal.fire("Berhasil!", "Foto baru telah ditambahkan.", "success");
-            setUploadModalOpen(false); // Tutup modal setelah upload
-            setSelectedFiles([]); // Reset selected files
+            if (data.data && Array.isArray(data.data)) {
+                setPhotos(prevPhotos => [...prevPhotos, ...data.data]); // Tambahkan foto baru ke state
+                Swal.fire("Berhasil!", "Foto baru telah ditambahkan.", "success");
+                setUploadModalOpen(false); // Tutup modal setelah upload
+                setSelectedFiles([]); // Reset selected files
+                setKeterangan(''); // Reset keterangan
+            } else {
+                throw new Error("Data yang diterima tidak valid");
+            }
         } catch (error) {
             console.error("Gagal mengunggah foto:", error);
             Swal.fire("Error", "Gagal mengunggah foto", "error");
@@ -147,8 +157,14 @@ export default function Gallery() {
 
     // Fungsi untuk membuka modal dan menyimpan foto yang dipilih
     const openModal = (photo) => {
-        setSelectedPhoto(photo);
-        setIsModalOpen(true);
+        console.log("Foto yang diklik:", photo); // Debugging
+        if (photo && photo.id && photo.image_url && photo.created_at && photo.keterangan_foto) {
+            setSelectedPhoto(photo);
+            setIsModalOpen(true);
+        } else {
+            console.error("Foto tidak valid:", photo);
+            Swal.fire("Error", "Foto tidak valid atau data tidak lengkap", "error");
+        }
     };
 
     // Fungsi untuk menutup modal
@@ -179,7 +195,6 @@ export default function Gallery() {
     const indexOfFirstPhoto = indexOfLastPhoto - photosPerPage;
     const currentPhotos = photos.slice(indexOfFirstPhoto, indexOfLastPhoto);
 
-
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
@@ -208,7 +223,9 @@ export default function Gallery() {
                             <FaTrash />
                         </button>
                         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <p className="text-sm">Foto Kegiatan ICCN ({formatDate(photo.created_at)})</p>
+                            <p className="text-sm">
+                                {photo.keterangan_foto} diposting pada {formatDate(photo.created_at)}
+                            </p>
                         </div>
                     </div>
                 ))}
@@ -231,7 +248,7 @@ export default function Gallery() {
                         />
                         <div className="mt-4 text-center">
                             <p className="text-sm text-gray-700 dark:text-gray-300">
-                                Foto Kegiatan ICCN ({formatDate(selectedPhoto.created_at)})
+                                {selectedPhoto.keterangan_foto} diposting pada {formatDate(selectedPhoto.created_at)}
                             </p>
                         </div>
                     </div>
@@ -290,16 +307,29 @@ export default function Gallery() {
                                                 className="hidden"
                                                 onChange={(e) => handleFileChange(e, index)}
                                                 accept="image/*"
-                                                multiple // Tambahkan atribut multiple di sini
+                                                multiple
                                             />
                                         </label>
                                     )}
                                 </div>
                             ))}
                         </div>
+                        {/* Tambahkan input untuk keterangan foto */}
+                        <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Keterangan Foto
+                            </label>
+                            <input
+                                type="text"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                                placeholder="Masukkan keterangan foto"
+                                value={keterangan}
+                                onChange={(e) => setKeterangan(e.target.value)}
+                            />
+                        </div>
                         <button
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition duration-300 cursor-pointer mt-4"
-                            onClick={() => handleAddPhoto(selectedFiles.filter(file => file))}
+                            onClick={() => handleAddPhoto(selectedFiles.filter(file => file), keterangan)}
                             disabled={selectedFiles.filter(file => file).length === 0}
                         >
                             Upload {selectedFiles.filter(file => file).length} Foto

@@ -81,7 +81,8 @@ const formatCurrency = (amount) => {
 };
 
 // Fungsi untuk mendapatkan format tanggal dalam format 'YYYY-MM'
-const getFormattedDate = (date) => {
+const getFormattedDate = (dateString) => {
+    const date = new Date(dateString);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     return `${year}-${month}`;
@@ -97,56 +98,36 @@ export default function FinanceReport() {
     const [currentTransactions, setCurrentTransactions] = useState([]);
     const [availableMonths, setAvailableMonths] = useState([]);
     const [selectedChartMonth, setSelectedChartMonth] = useState('');
-    const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false); // State untuk modal
+    const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true); // State untuk loading
     const itemsPerPage = 10;
-
-    // Ambil data awal
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    // Update transaksi yang ditampilkan dan bulan yang tersedia
-    useEffect(() => {
-        updateTransactions();
-        const months = [...new Set(filteredTransactions.map(t =>
-            getFormattedDate(new Date(t.tanggal_waktu))
-        ))].sort().reverse();
-
-        setAvailableMonths(months);
-        setSelectedChartMonth(months[0] || '');
-    }, [filteredTransactions, currentPage]);
 
     // Fungsi untuk mengambil data dari API
     const fetchData = async () => {
         try {
-            const [responseBulanIni, responseAll, responseSaldo] = await Promise.all([
-                fetch(`${API_BASE_URL}/admin/keuangan/bulan-ini`),
-                fetch(`${API_BASE_URL}/admin/keuangan`),
-                fetch(`${API_BASE_URL}/admin/keuangan/saldo-akhir`)
-            ]);
+            // Ambil data bulan ini
+            const responseBulanIni = await fetch(`${API_BASE_URL}/admin/keuangan/bulan-ini`);
+            const dataBulanIni = await responseBulanIni.json();
+            
+            // Ambil semua data
+            const responseAll = await fetch(`${API_BASE_URL}/admin/keuangan`);
+            const dataAll = await responseAll.json();
+            
+            // Ambil saldo akhir
+            const responseSaldo = await fetch(`${API_BASE_URL}/admin/keuangan/saldo-akhir`);
+            const dataSaldo = await responseSaldo.json();
 
-            const [dataBulanIni, dataAll, dataSaldo] = await Promise.all([
-                responseBulanIni.json(),
-                responseAll.json(),
-                responseSaldo.json()
-            ]);
-
-            setPendapatanBulanIni(parseFloat(dataBulanIni.total_pendapatan || "0"));
-            setPengeluaranBulanIni(parseFloat(dataBulanIni.total_pengeluaran || "0"));
-
-            const sortedTransactions = dataAll.sort((a, b) =>
+            // Update state
+            setPendapatanBulanIni(Number(dataBulanIni.total_pendapatan) || 0);
+            setPengeluaranBulanIni(Number(dataBulanIni.total_pengeluaran) || 0);
+            
+            const sortedTransactions = dataAll.sort((a, b) => 
                 new Date(b.tanggal_waktu) - new Date(a.tanggal_waktu)
             );
-
-            // Filter awal untuk bulan berjalan
-            const currentMonth = getFormattedDate(new Date());
-            const initialFiltered = sortedTransactions.filter(t =>
-                getFormattedDate(new Date(t.tanggal_waktu)) === currentMonth
-            );
-
+            
             setTransactions(sortedTransactions);
-            setFilteredTransactions(initialFiltered);
-            setSaldoAkhir(Number(dataSaldo.saldo_akhir || 0));
+            setFilteredTransactions(sortedTransactions); // Tampilkan semua data awal
+            setSaldoAkhir(Number(dataSaldo.saldo_akhir) || 0);
 
         } catch (error) {
             console.error('Gagal mengambil data:', error);
@@ -165,14 +146,55 @@ export default function FinanceReport() {
         }
     };
 
+    // Ambil data awal
+    useEffect(() => {
+        const loadData = async () => {
+            setIsLoading(true); // Set loading state ke true
+            try {
+                await fetchData(); // Ambil data dari API
+            } catch (error) {
+                console.error('Gagal memuat data:', error);
+                toast.error('Gagal memuat data keuangan');
+            } finally {
+                setIsLoading(false); // Set loading state ke false
+            }
+        };
+        loadData(); // Panggil fungsi loadData
+    }, []); // Jalankan hanya sekali saat komponen dimount
+
+    // Update transaksi yang ditampilkan dan bulan yang tersedia
+    useEffect(() => {
+        updateTransactions(); // Update transaksi yang ditampilkan di tabel
+    
+        // Ambil bulan yang tersedia dari data transaksi
+        const months = [
+            ...new Set(
+                filteredTransactions.map(t => getFormattedDate(new Date(t.tanggal_waktu)))
+            )
+        ].sort().reverse();
+    
+        setAvailableMonths(months); // Set state bulan yang tersedia
+        setSelectedChartMonth(months[0] || ''); // Set bulan terpilih ke bulan terbaru
+    }, [filteredTransactions, currentPage]); // Jalankan saat filteredTransactions atau currentPage berubah
+
+    // Tampilkan loading state
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                <span className="ml-4 text-gray-700 dark:text-gray-300">Memuat data...</span>
+            </div>
+        );
+    }
+
     // Fungsi pencarian
     const handleSearch = ({ month, description, amount }) => {
         let filtered = transactions;
 
         // Filter by month
         if (month) {
-            filtered = filtered.filter(t =>
-                getFormattedDate(new Date(t.tanggal_waktu)) === month
+            filtered = filtered.filter(t => 
+                getFormattedDate(t.tanggal_waktu) === month
             );
         }
 
@@ -431,16 +453,6 @@ export default function FinanceReport() {
                         nextPage={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                     />
                 </div>
-
-                {/* Grafik Saldo Harian */}
-                <DailyBalanceChart
-                    transactions={filteredTransactions.filter(t =>
-                        getFormattedDate(new Date(t.tanggal_waktu)) === selectedChartMonth
-                    )}
-                    availableMonths={availableMonths}
-                    selectedChartMonth={selectedChartMonth}
-                    onMonthChange={(month) => setSelectedChartMonth(month)}
-                />
             </div>
 
             {/* Modal Unduh Laporan */}
