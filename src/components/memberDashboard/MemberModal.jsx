@@ -64,6 +64,7 @@ const styles = `
 
 export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, memberId }) => {
     const [kode, setKode] = useState('');
+    const [kodeFinished, setKodeFinished] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
@@ -94,6 +95,56 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
         }
     };
 
+    const fetchKodePelatihan = async (idMember, idTraining) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/pelatihan/peserta-pelatihan/kode/${idMember}/${idTraining}`);
+            if (!response.ok) {
+                throw new Error('Gagal mengambil data kode pelatihan');
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('❌ Error:', error);
+            throw error; // Lempar error agar bisa ditangkap di tempat lain
+        }
+    };
+
+    useEffect(() => {
+        if (!idMember || !idTraining) {
+            console.log("⚠️ idMember atau idTraining tidak tersedia.");
+            return;
+        }
+    
+        const fetchData = async () => {
+            setLoading(true);
+            setError('');
+            try {
+                const kodeData = await fetchKodePelatihan(idMember, idTraining);
+                if (kodeData.kode) {
+                    setKode(kodeData.kode); // Set kode jika ditemukan
+                    setShowFinishedCode(true); // Tampilkan kode
+                } else if (kodeData.message) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Informasi',
+                        text: kodeData.message,
+                    });
+                }
+            } catch (error) {
+                setError(error.message || 'Terjadi kesalahan saat mengambil kode pelatihan');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Terjadi kesalahan saat mengambil kode pelatihan',
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+    
+        fetchData();
+    }, [idMember, idTraining]);
+
     useEffect(() => {
         if (!idMember || !idTraining) {
             console.log("⚠️ userId atau trainingId tidak tersedia.");
@@ -123,8 +174,15 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
     
 
     const handleSelesaikanPelatihan = async () => {
-        if (!kode) {
+        // Validasi: Cek apakah kodeFinished sudah diisi
+        if (!kodeFinished) {
             setError('Kode pelatihan harus diisi');
+            return;
+        }
+    
+        // Validasi: Cek apakah kodeFinished sama dengan kode yang didapat dari backend
+        if (kodeFinished !== kode) {
+            setError('Kode yang dimasukkan tidak valid');
             return;
         }
     
@@ -137,8 +195,8 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     pelatihan_id: selectedTraining.id,
-                    kode: kode,
-                    user_id: localStorage.getItem('user_id'),
+                    kode: kodeFinished,
+                    idMember: idMember
                 }),
             });
     
@@ -147,7 +205,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
             if (!response.ok) {
                 throw new Error(data.message || 'Gagal menyelesaikan pelatihan');
             }
-
+    
             setShowSuccess(true);
             
             // Mulai hitung mundur
@@ -160,15 +218,15 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     return prev - 1;
                 });
             }, 1000);
-
+    
             // Refresh setelah 5 detik
             setTimeout(() => {
                 onClose();
                 window.location.reload();
             }, 5000);
-
+    
             return () => clearInterval(countdownInterval);
-
+    
         } catch (err) {
             setError(err.message);
         } finally {
@@ -273,7 +331,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                         {textConfirmationModal}
                     </p>
 
-                    <div className="flex justify-between">
+                    <div className="flex justify-center">
                         <button
                         onClick={() => {
                             setShowConfirmationModal(false); // Tutup modal konfirmasi
@@ -283,13 +341,13 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                                 handleSelesaikanPelatihan(); // Selesaikan para
                             }
                         }}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 m-2"
                         >
                         Ya
                         </button>
                         <button
                         onClick={() => setShowConfirmationModal(false)} // Tutup modal konfirmasi
-                        className="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
+                        className="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 m-2"
                         >
                         Batal
                         </button>
@@ -316,8 +374,19 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                         </motion.div>
                         <h2 className="text-2xl font-bold mb-4">Selamat!</h2>
                         <p className="text-gray-600 dark:text-gray-300 mb-4">
-                            Anda telah mendaftar ke pelatihan{" "}
-                            <span className="font-semibold">{selectedTraining.judul_pelatihan}</span> dan jika selesai akan mendapatkan:
+                        {selectFinishOrRegister ? (
+                            <>
+                                Anda telah menyelesaikan pelatihan{" "}
+                                <span className="font-semibold">{selectedTraining.judul_pelatihan}</span> 
+                                dan mendapatkan:
+                            </>
+                        ) : (
+                            <>
+                                Anda telah mendaftar ke pelatihan{" "}
+                                <span className="font-semibold">{selectedTraining.judul_pelatihan}</span> 
+                                dan jika selesai akan mendapatkan:
+                            </>
+                        )}
                         </p>
                         <div className="flex items-center justify-center mb-4">
                             <div className="mr-2">
@@ -426,24 +495,36 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                 
                         {/* Kode Penyelesaian */}
                         <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Kode Penyelesaian
-                        </label>
-                        <div className="flex items-center">
-                            <input
-                            type={showFinishedCode ? "text" : "password"}
-                            value={'Belum Menerima Kode Penyelesaian'}
-                            readOnly
-                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
-                            />
-                            <button
-                            type="button"
-                            onClick={() => setShowFinishedCode(!showFinishedCode)}
-                            className="ml-2 p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
-                            >
-                            {showFinishedCode ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
-                            </button>
-                        </div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Kode Penyelesaian
+                            </label>
+                            <div className="flex items-center">
+                                <input
+                                    type={showFinishedCode ? "text" : "password"}
+                                    value={kode || 'Belum Menerima Kode Penyelesaian'}
+                                    readOnly
+                                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowFinishedCode(!showFinishedCode)}
+                                    className="ml-2 p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
+                                >
+                                    {showFinishedCode ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
+                                </button>
+                            </div>
+                            {loading && (
+                                <div className="flex justify-center items-center">
+                                    <FaHourglassHalf className="animate-spin text-2xl text-blue-500" />
+                                    <span className="ml-2">Memuat kode pelatihan...</span>
+                                </div>
+                            )}
+
+                            {error && (
+                                <div className="text-red-500 text-sm mt-2">
+                                    {error}
+                                </div>
+                            )}
                         </div>
                     </div>
                 
@@ -492,8 +573,8 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                                 buttonText === 'Daftar'
                             }
                             type="text"
-                            value={kode}
-                            onChange={(e) => setKode(e.target.value)}
+                            value={kodeFinished}
+                            onChange={(e) => setKodeFinished(e.target.value)}
                             placeholder="Masukkan kode peyelesaian..."
                             className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
                         />
@@ -664,8 +745,8 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                         </label>
                         <input
                             type="text"
-                            value={kode}
-                            onChange={(e) => setKode(e.target.value)}
+                            value={kodeFinished}
+                            onChange={(e) => setKodeFinished(e.target.value)}
                             placeholder="Masukkan kode pelatihan"
                             className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
                         />
