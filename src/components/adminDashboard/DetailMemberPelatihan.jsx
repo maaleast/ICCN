@@ -2,8 +2,9 @@ import React, { useMemo } from "react";
 import { useTable } from "react-table";
 import { API_BASE_URL } from '../../config';
 import Swal from "sweetalert2";
+import DownloadDataButton from "./DownloadDataButton";
 
-const DetailMemberPelatihan = ({ isOpen, onClose, data }) => {
+const DetailMemberPelatihan = ({ isOpen, onClose, data, id }) => {
 
     // Definisikan kolom tabel
     const columns = React.useMemo(
@@ -97,11 +98,10 @@ const DetailMemberPelatihan = ({ isOpen, onClose, data }) => {
             <div
                 className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-4xl max-h-h[90hv] overflow-y-auto"
             >
-                <h2
-                    className="text-xl font-semibold mb-6"
-                >   
-                    Detail Pendaftar
-                </h2>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-semibold">Detail Pendaftar</h2>
+                    <DownloadDataButton pelatihanId={id} />
+                </div>
 
                 <table {...getTableProps()} className="w-full">
                     <thead>
