@@ -431,28 +431,6 @@ const KelolaOrganisasi = () => {
         }
     };
 
-    const handleTambahAnggotaDirektorat = async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        formData.append('jenis', 'direktorat');
-        formData.append('position', addAnggotaModal.direktoratPosition);
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/organisasi`, {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) throw new Error('Gagal menambahkan anggota');
-
-            toast.success('Anggota berhasil ditambahkan');
-            await fetchData();
-            setAddAnggotaModal({ show: false, direktoratPosition: null });
-        } catch (error) {
-            toast.error(`Error: ${error.message}`);
-        }
-    };
-
     const OrganizationNode = ({ node, isRoot = false, isLast = false, hasSibling = false }) => {
         const isEmpty = !node.name && !node.affiliation;
         const hasPhoto = node.photo_url && node.photo_url !== '/default-avatar.png';
@@ -460,11 +438,11 @@ const KelolaOrganisasi = () => {
         return (
             <div className="flex flex-col items-center relative">
                 {!isRoot && hasSibling && (
-                    <div className="absolute top-0 w-0.5 h-8 bg-white/50 -translate-y-full"></div>
+                    <div className="absolute top-0 w-0.5 h-8 dark:bg-white/50 bg-black/50 -translate-y-full"></div>
                 )}
 
                 <div className={`bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-8 w-64 text-center relative z-10 shadow-lg ${isEmpty ? 'border-2 border-dashed border-white/30' : ''}`}>
-                    <div className="relative w-40 h-40 mx-auto mb-4 rounded-full overflow-hidden border-2 border-white group">
+                    <div className="relative w-40 h-40 mx-auto mb-4 rounded-full overflow-hidden border-2 border-black dark:border-white group">
                         <img
                             src={node.photo_url || '/default-avatar.png'}
                             alt={node.name}
@@ -475,9 +453,9 @@ const KelolaOrganisasi = () => {
                             className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity ${hasPhoto ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}
                         >
                             {hasPhoto ? (
-                                <FiEdit2 className="text-white text-2xl" />
+                                <FiEdit2 className="text-white dark:text-black text-2xl" />
                             ) : (
-                                <FiPlusCircle className="text-white text-2xl" />
+                                <FiPlusCircle className="text-black dark:text-white text-2xl" />
                             )}
                         </button>
                     </div>
@@ -486,12 +464,12 @@ const KelolaOrganisasi = () => {
                         {node.position}
                     </h3>
                     {node.subPosition && (
-                        <p className="text-sm text-gray-300 mb-2">{node.subPosition}</p>
+                        <p className="text-sm text-black dark:text-white mb-2">{node.subPosition}</p>
                     )}
 
                     <div className="relative flex items-center justify-center gap-1">
                         <p
-                            className={`text-white font-semibold ${isEmpty ? 'text-white/50 italic' : ''} cursor-pointer`}
+                            className={`text-black dark:text-white font-semibold ${isEmpty ? 'text-black dark:text-white/50 italic' : ''} cursor-pointer`}
                             onClick={() => setEditModal({ show: true, type: 'name', current: node })}
                         >
                             {node.name || 'Klik untuk mengisi nama'}
@@ -500,16 +478,16 @@ const KelolaOrganisasi = () => {
                             onClick={() => setEditModal({ show: true, type: 'name', current: node })}
                         >
                             {node.name ? (
-                                <FiEdit2 className="text-white text-sm" />
+                                <FiEdit2 className="text-black dark:text-white text-sm" />
                             ) : (
-                                <FiPlusCircle className="text-white text-sm" />
+                                <FiPlusCircle className="text-black dark:text-white text-sm" />
                             )}
                         </button>
                     </div>
 
-                    <div className="relative flex items-center justify-center gap-1 mt-2">
+                    <div className="relative flex items-center justify-center gap-1 mt-2 dark:text-gray-200">
                         <p
-                            className={`text-sm text-gray-200 ${isEmpty ? 'text-gray-400 italic' : ''} cursor-pointer`}
+                            className={`text-sm ${isEmpty ? 'text-gray-400 italic' : ''} cursor-pointer`}
                             onClick={() => setEditModal({ show: true, type: 'affiliation', current: node })}
                         >
                             {node.affiliation || 'Klik untuk mengisi afiliasi'}
@@ -518,9 +496,9 @@ const KelolaOrganisasi = () => {
                             onClick={() => setEditModal({ show: true, type: 'affiliation', current: node })}
                         >
                             {node.affiliation ? (
-                                <FiEdit2 className="text-gray-300 text-sm" />
+                                <FiEdit2 className="text-black dark:text-white text-sm" />
                             ) : (
-                                <FiPlusCircle className="text-gray-300 text-sm" />
+                                <FiPlusCircle className="text-black dark:text-white text-sm" />
                             )}
                         </button>
                     </div>
@@ -535,8 +513,8 @@ const KelolaOrganisasi = () => {
                         <div className="flex relative pt-16">
                             {node.children.length > 1 && (
                                 <>
-                                    <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[calc(89%-12rem)] h-0.5 bg-white/50"></div>
-                                    <div className="absolute top-[-2rem] left-1/2 -translate-x-1/2 w-0.5 h-[4rem] bg-white/50"></div>
+                                    <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[calc(89%-12rem)] h-0.5 dark:bg-white/50 bg-black/50"></div>
+                                    <div className="absolute top-[-2rem] left-1/2 -translate-x-1/2 w-0.5 h-[4rem] dark:bg-white/50 bg-black/50"></div>
                                 </>
                             )}
 
@@ -572,7 +550,7 @@ const KelolaOrganisasi = () => {
                 >
                     <FiTrash2 />
                 </button>
-                <div className="relative w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden border-2 border-white">
+                <div className="relative w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden border-2 border-black dark:border-white">
                     <img
                         src={item.photo_url || '/default-avatar.png'}
                         alt={item.name}
@@ -583,15 +561,15 @@ const KelolaOrganisasi = () => {
                         className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity ${hasPhoto ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}
                     >
                         {hasPhoto ? (
-                            <FiEdit2 className="text-white text-xl" />
+                            <FiEdit2 className="text-white dark:text-black text-xl" />
                         ) : (
-                            <FiPlusCircle className="text-white text-xl" />
+                            <FiPlusCircle className="text-black dark:text-white text-xl" />
                         )}
                     </button>
                 </div>
                 <div className="flex items-center justify-center gap-1">
                     <p
-                        className="text-white font-semibold cursor-pointer"
+                        className="text-black dark:text-white font-semibold cursor-pointer"
                         onClick={() => setEditModal({ show: true, type: 'name', current: item })}
                     >
                         {item.name}
@@ -600,15 +578,15 @@ const KelolaOrganisasi = () => {
                         onClick={() => setEditModal({ show: true, type: 'name', current: item })}
                     >
                         {item.name ? (
-                            <FiEdit2 className="text-white text-sm" />
+                            <FiEdit2 className="text-black dark:text-white text-sm" />
                         ) : (
-                            <FiPlusCircle className="text-white text-sm" />
+                            <FiPlusCircle className="text-black dark:text-white text-sm" />
                         )}
                     </button>
                 </div>
                 <div className="flex items-center justify-center gap-1">
                     <p
-                        className="text-gray-300 text-sm cursor-pointer"
+                        className="text-black dark:text-white text-sm cursor-pointer"
                         onClick={() => setEditModal({ show: true, type: 'affiliation', current: item })}
                     >
                         {item.affiliation}
@@ -617,9 +595,9 @@ const KelolaOrganisasi = () => {
                         onClick={() => setEditModal({ show: true, type: 'affiliation', current: item })}
                     >
                         {item.affiliation ? (
-                            <FiEdit2 className="text-gray-300 text-sm" />
+                            <FiEdit2 className="text-black dark:text-white text-sm" />
                         ) : (
-                            <FiPlusCircle className="text-gray-300 text-sm" />
+                            <FiPlusCircle className="text-black dark:text-white text-sm" />
                         )}
                     </button>
                 </div>
@@ -627,58 +605,6 @@ const KelolaOrganisasi = () => {
         );
     };
 
-    const DirektoratNode = ({ item }) => {
-        const hasPhoto = item.photo_url && item.photo_url !== '/default-avatar.png';
-        return (
-            <div key={item.id} className="bg-white/10 p-4 rounded-lg relative group">
-                <button
-                    onClick={() => handleDelete(item.id)}
-                    className="absolute top-2 right-2 text-red-400"
-                >
-                    <FiTrash2 />
-                </button>
-                <div className="relative w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden border-2 border-white">
-                    <img
-                        src={item.photo_url || '/default-avatar.png'}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                    />
-                    <button
-                        onClick={() => setEditModal({ show: true, type: 'photo', current: item })}
-                        className={`absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity ${hasPhoto ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}
-                    >
-                        {hasPhoto ? <FiEdit2 className="text-white text-xl" /> : <FiPlusCircle className="text-white text-xl" />}
-                    </button>
-                </div>
-                <div className="flex items-center justify-center gap-1">
-                    <p
-                        className="text-white font-semibold cursor-pointer"
-                        onClick={() => setEditModal({ show: true, type: 'name', current: item })}
-                    >
-                        {item.name || 'Klik untuk mengisi nama'}
-                    </p>
-                    <button
-                        onClick={() => setEditModal({ show: true, type: 'name', current: item })}
-                    >
-                        {item.name ? <FiEdit2 className="text-white text-sm" /> : <FiPlusCircle className="text-white text-sm" />}
-                    </button>
-                </div>
-                <div className="flex items-center justify-center gap-1">
-                    <p
-                        className="text-gray-300 text-sm cursor-pointer"
-                        onClick={() => setEditModal({ show: true, type: 'affiliation', current: item })}
-                    >
-                        {item.affiliation || 'Klik untuk mengisi afiliasi'}
-                    </p>
-                    <button
-                        onClick={() => setEditModal({ show: true, type: 'affiliation', current: item })}
-                    >
-                        {item.affiliation ? <FiEdit2 className="text-gray-300 text-sm" /> : <FiPlusCircle className="text-gray-300 text-sm" />}
-                    </button>
-                </div>
-            </div>
-        );
-    };
 
     const DirectorateSection = ({ directorate }) => {
         const { position, children } = directorate;
@@ -689,7 +615,7 @@ const KelolaOrganisasi = () => {
                 <div className="space-y-4">
                     {children.map((child, index) => (
                         <div key={index} className="flex items-center space-x-4">
-                            <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white">
+                            <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-black dark:border-white">
                                 <img
                                     src={child.photo_url || '/default-avatar.png'}
                                     alt={child.name}
@@ -699,13 +625,17 @@ const KelolaOrganisasi = () => {
                                     onClick={() => setEditModal({ show: true, type: 'photo', current: child })}
                                     className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity"
                                 >
-                                    <FiEdit2 className="text-white text-xl" />
+                                    <FiEdit2 className="text-black dark:text-white text-xl" />
                                 </button>
                             </div>
                             <div className="flex-1">
+                                {/* Tambahkan position dari children di sini */}
+                                <p className="text-sm text-black dark:text-white font-bold mb-1">
+                                    {child.position} {/* Menampilkan position dari children */}
+                                </p>
                                 <div className="flex items-center gap-1">
                                     <p
-                                        className="text-white font-semibold cursor-pointer"
+                                        className="text-black dark:text-white cursor-pointer"
                                         onClick={() => setEditModal({ show: true, type: 'name', current: child })}
                                     >
                                         {child.name || 'Klik untuk mengisi nama'}
@@ -714,15 +644,15 @@ const KelolaOrganisasi = () => {
                                         onClick={() => setEditModal({ show: true, type: 'name', current: child })}
                                     >
                                         {child.name ? (
-                                            <FiEdit2 className="text-white text-sm" />
+                                            <FiEdit2 className="text-black dark:text-white text-sm" />
                                         ) : (
-                                            <FiPlusCircle className="text-white text-sm" />
+                                            <FiPlusCircle className="text-black dark:text-white text-sm" />
                                         )}
                                     </button>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <p
-                                        className="text-gray-300 text-sm cursor-pointer"
+                                        className="text-black dark:text-white text-sm cursor-pointer"
                                         onClick={() => setEditModal({ show: true, type: 'affiliation', current: child })}
                                     >
                                         {child.affiliation || 'Klik untuk mengisi afiliasi'}
@@ -731,9 +661,9 @@ const KelolaOrganisasi = () => {
                                         onClick={() => setEditModal({ show: true, type: 'affiliation', current: child })}
                                     >
                                         {child.affiliation ? (
-                                            <FiEdit2 className="text-gray-300 text-sm" />
+                                            <FiEdit2 className="text-black dark:text-white text-sm" />
                                         ) : (
-                                            <FiPlusCircle className="text-gray-300 text-sm" />
+                                            <FiPlusCircle className="text-black dark:text-white text-sm" />
                                         )}
                                     </button>
                                 </div>
@@ -745,22 +675,12 @@ const KelolaOrganisasi = () => {
         );
     };
 
-    // Kelompokkan Direktorat berdasarkan posisi
-    const groupedDirektorat = data.direktorat.reduce((acc, item) => {
-        const key = item.position;
-        if (!acc[key]) {
-            acc[key] = [];
-        }
-        acc[key].push(item);
-        return acc;
-    }, {});
-
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500">
+        <div className="bg-white dark:bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500 p-6 rounded-lg shadow-md mb-6 ">
             <main className="pt-32 pb-12 px-4 md:px-8">
                 {/* Struktur Organisasi */}
                 <div className="max-w-7xl mx-auto mb-16">
-                    <h1 className="text-4xl font-bold text-white mb-8 text-center">Struktur Organisasi</h1>
+                    <h1 className="text-4xl font-bold text-black dark:text-white mb-8 text-center">Struktur Organisasi</h1>
                     <div className="flex justify-center">
                         {data.struktur.map((node) => (
                             <OrganizationNode key={node.id} node={node} isRoot={true} />
@@ -771,10 +691,10 @@ const KelolaOrganisasi = () => {
                 {/* Badan Pengawas */}
                 <div className="max-w-7xl mx-auto mb-16">
                     <div className="flex items-center gap-4 mb-6">
-                        <h2 className="text-2xl font-bold text-white">Badan Pengawas</h2>
+                        <h2 className="text-2xl font-bold text-black dark:text-white">Badan Pengawas</h2>
                         <button
                             onClick={() => setAddModal({ show: true, type: 'badanPengawas' })}
-                            className="text-white flex items-center gap-1"
+                            className="text-black dark:text-white flex items-center gap-1"
                         >
                             <FiPlusCircle className="text-xl" />
                             <span>Tambah</span>
@@ -790,14 +710,7 @@ const KelolaOrganisasi = () => {
                 {/* Direktorat */}
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-center gap-4 mb-6">
-                        <h2 className="text-2xl font-bold text-white">Direktorat</h2>
-                        <button
-                            onClick={() => setAddModal({ show: true, type: 'direktorat' })}
-                            className="text-white flex items-center gap-1"
-                        >
-                            <FiPlusCircle className="text-xl" />
-                            <span>Tambah Direktorat</span>
-                        </button>
+                        <h2 className="text-2xl font-bold text-black dark:text-white">Direktorat</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {data.direktorat.map((directorate) => (
@@ -810,7 +723,7 @@ const KelolaOrganisasi = () => {
                 <Modal
                     isOpen={editModal.show}
                     onRequestClose={() => setEditModal({ show: false, type: '', current: null })}
-                    className="bg-white rounded-lg p-6 max-w-md mx-auto"
+                    className="bg-white dark:bg-gradient-to-br from-gray-800 via-gray-700 to-gray-600 rounded-lg p-6 max-w-md mx-auto"
                     overlayClassName="fixed inset-0 bg-black/50 z-[1000]"
                 >
                     <h2 className="text-xl font-bold mb-4">
@@ -855,7 +768,7 @@ const KelolaOrganisasi = () => {
                                 type="text"
                                 name="name"
                                 defaultValue={editModal.current?.name || ''}
-                                className="w-full p-2 border rounded mb-4"
+                                className="w-full p-2 border rounded mb-4 dark:text-black"
                                 placeholder="Masukkan nama"
                                 required
                             />
@@ -866,7 +779,7 @@ const KelolaOrganisasi = () => {
                                 type="text"
                                 name="affiliation"
                                 defaultValue={editModal.current?.affiliation || ''}
-                                className="w-full p-2 border rounded mb-4"
+                                className="w-full p-2 border rounded mb-4 dark:text-black"
                                 placeholder="Masukkan afiliasi"
                                 required
                             />
@@ -876,7 +789,7 @@ const KelolaOrganisasi = () => {
                             <button
                                 type="button"
                                 onClick={() => setEditModal({ show: false, type: '', current: null })}
-                                className="px-4 py-2 text-gray-500"
+                                className="px-4 py-2 text-gray-300 bg-gray-800 rounded"
                             >
                                 Batal
                             </button>
@@ -963,48 +876,7 @@ const KelolaOrganisasi = () => {
                             >
                                 Batal
                             </button>
-                            <button type="submit" className="px-4 py-2 bg-green-500 text-white rounded">
-                                Tambah
-                            </button>
-                        </div>
-                    </form>
-                </Modal>
-
-                {/* Modal untuk Tambah Anggota Direktorat */}
-                <Modal
-                    isOpen={addAnggotaModal.show}
-                    onRequestClose={() => setAddAnggotaModal({ show: false, direktoratPosition: null })}
-                    className="bg-white rounded-lg p-6 max-w-md mx-auto"
-                    overlayClassName="fixed inset-0 bg-black/50 z-[1000]"
-                >
-                    <h2 className="text-xl font-bold mb-4">
-                        Tambah Anggota {addAnggotaModal.direktoratPosition}
-                    </h2>
-                    <form onSubmit={handleTambahAnggotaDirektorat}>
-                        <input type="file" name="photo" accept="image/*" className="w-full mb-4" required />
-                        <input
-                            type="text"
-                            name="name"
-                            placeholder="Nama Lengkap"
-                            className="w-full p-2 mb-4 border rounded"
-                            required
-                        />
-                        <input
-                            type="text"
-                            name="affiliation"
-                            placeholder="Asal Universitas/Afiliasi"
-                            className="w-full p-2 mb-4 border rounded"
-                            required
-                        />
-                        <div className="flex justify-end gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setAddAnggotaModal({ show: false, direktoratPosition: null })}
-                                className="px-4 py-2 text-gray-500"
-                            >
-                                Batal
-                            </button>
-                            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
+                            <button type="submit" className="px-4 py-2 bg-green-500 text-black dark:text-white rounded">
                                 Tambah
                             </button>
                         </div>

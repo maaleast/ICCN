@@ -1,252 +1,569 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
-import userImg from "../assets/user.png";
+import { API_BASE_URL } from "../config";
 
-const PageTeam = () => {
-    // Data lengkap dengan foto
-    const organizationData = {
-        badanPengawas: [
-            { name: "Dr. Eng Bambang Setia Budi, ST., MT", affiliation: "ITB", photo: userImg },
-            { name: "Prof. Dr. Ir. Nuni Gofar, MS", affiliation: "Unsri", photo: userImg },
-            { name: "Ir. Wiratno Argo Asmoro, MS", affiliation: "ITS", photo: userImg },
-            { name: "Dr. Ayi Ahadiat, SE, MBA", affiliation: "Unila", photo: userImg },
-            { name: "Dr. Syarifah Iis Aisyah, M.Agr. Sc", affiliation: "IPB", photo: userImg },
-            { name: "Nurhadi Irbath, ST, CEC, LCCC", affiliation: "UGM", photo: userImg },
-            { name: "Dr. Widyastuti", affiliation: "ITS", photo: userImg },
-            { name: "Ary Tamtama, S.Pi", affiliation: "UM Kendari", photo: userImg },
-            { name: "Dewiyani, S.Psi, Psikolog, CGA", affiliation: "Unpar", photo: userImg },
-            { name: "Dr. Epy Muhammad Luqman, Drh.", affiliation: "Unair", photo: userImg },
-            { name: "Prof. Dr. Kusnandar", affiliation: "UNS", photo: userImg }
-        ],
-
-        strukturUtama: {
-            position: "Presiden",
-            name: "Dr. Rosaria Mita Amalia, S.S., S.IP., M.Hum",
-            affiliation: "Universitas Padjadjaran",
-            photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-21-at-12.36.51-e1663803429823-256x256.jpeg",
-            children: [
-                {
-                    position: "Wakil Presiden",
-                    name: "Prof. Dr. Elly Munadziroh, drg. MS",
-                    affiliation: "Universitas Airlangga",
-                    photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-20-at-12.29.34-278x278.jpeg",
-                    children: [
-                        {
-                            position: "Bendahara Umum",
-                            name: "Dr. Tiara Nirmala, SE., M.Sc.",
-                            affiliation: "Universitas Lampung",
-                            photo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkTp_Hk6d7FXDJkFFt1fS88yf4yBG7Q7Lw0A&s",
-                        },
-                        {
-                            position: "Wakil Bendahara Umum",
-                            name: "Lia Marlia, S.Sos., M.I.Kom.",
-                            affiliation: "Universitas Telkom",
-                            photo: userImg
-                        }
-                    ]
-                },
-                {
-                    position: "Sekretaris Jendral",
-                    name: "Dr. Teddy Indira Budiwan, S.Psi., M.M",
-                    affiliation: "Universitas Bina Nusantara",
-                    photo: "https://indonesiacareercenter.id/wp-content/uploads/2024/06/teddy-removebg-preview-295x300.png",
-                    children: [
-                        {
-                            position: "Wakil Sekretaris Jendral",
-                            subPosition: "Bidang Keuangan, Sistem Informasi dan Tata Kelola",
-                            name: "Dessy Dwi Nurhandayani, S.T., M.M",
-                            affiliation: "Universitas Telkom",
-                            photo: userImg
-                        },
-                        {
-                            position: "Wakil Sekretaris Jendral",
-                            subPosition: "Bidang Komunikasi Publik, Pendampingan Dan Kerjasama",
-                            name: "Ir. Petiana Indriati, M.M",
-                            affiliation: "Universitas Pancasila",
-                            photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/01/0c23d3b5-43a0-4b24-8b46-557097d0ed56-Pramono-Aji-1-255x255.jpg",
-                        }
-                    ]
-                }
-            ]
-        },
-
-        direktorat: [
+const DEFAULT_STRUCTURE = [
+    {
+        id: 1, // ID Presiden
+        position: 'Presiden',
+        role: null,
+        children: [
             {
-                name: "Organisasi dan Keanggotaan",
-                direktur: { name: "Dr. Usep Syaipudin, S.E., M.S.Ak.", affiliation: "Universitas Lampung", photo: userImg },
-                wakil: { name: "Yuliana Sri Wulandari, S.E", affiliation: "Universitas Katolik Soegijapranata", photo: userImg }
+                id: 2, // ID Wakil Presiden
+                position: "Wakil Presiden",
+                role: "Presiden",
+                children: [
+                    {
+                        id: 3, // ID Bendahara Umum
+                        position: "Bendahara Umum",
+                        role: "Wakil Presiden"
+                    },
+                    {
+                        id: 4, // ID Wakil Bendahara
+                        position: "Wakil Bendahara Umum",
+                        role: "Wakil Presiden"
+                    }
+                ]
             },
             {
-                name: "Komunikasi Publik",
-                direktur: { name: "Rici Tri Harpin Pranata, S.KPm., M.Si", affiliation: "Institut Pertanian Bogor", photo: userImg },
-                wakil: { name: "Nasty Ramadhania, S.T.", affiliation: "Universitas Al-Azhar Indonesia", photo: userImg }
-            },
-            {
-                name: "Sistem Informasi",
-                direktur: { name: "Kusnawi, S.Kom, M.Eng", affiliation: "Universitas Amikom Yogyakarta", photo: userImg },
-                wakil: { name: "Dr. Sendi Novianto, S.Kom., M.T.", affiliation: "Universitas Dian Nuswantoro", photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-23-at-07.20.36-e1663895747140-166x166.jpeg" }
-            },
-            {
-                name: "Kajian Ilmiah",
-                direktur: { name: "Dr. Arifudin, S.P., M.P", affiliation: "Universitas Riau", photo: userImg },
-                wakil: { name: "Dr.Ir. Nofialdi, M.Si", affiliation: "Universitas Andalas", photo: userImg }
-            },
-            {
-                name: "Pendampingan Pusat Karir",
-                direktur: { name: "Salamah Agung M.A., Ph.D.", affiliation: "UIN Syarif Hidayatullah Jakarta", photo: "https://indonesiacareercenter.id/wp-content/uploads/2022/09/WhatsApp-Image-2022-09-23-at-11.31.54-288x288.jpeg" },
-                wakil: { name: "Rusliansyah, SE, M.Si.", affiliation: "Universitas Mulawarman", photo: userImg }
-            },
-            {
-                name: "Sertifikasi dan Akreditasi Pusat Karir",
-                direktur: { name: "Sukma Lesmana,SE,MSi,Ph.D", affiliation: "Universitas Muhammadiyah Sumatera Utara", photo: userImg },
-                wakil: { name: "Puji Andayani, S.Si., M.Si., M.Sc., MCE", affiliation: "Universitas Internasional Semen Indonesia", photo: userImg }
-            },
-            {
-                name: "Kerjasama Industri dan Pemerintahan",
-                direktur: { name: "Lastiko Endi Rahmantyo M.Hum", affiliation: "Universitas Airlangga", photo: userImg },
-                wakil: { name: "Dr. Heri Gunawan, S.Pd.I., M.Ag", affiliation: "UIN Sunan Gunung Djati Bandung", photo: userImg }
-            },
-            {
-                name: "Kerjasama Internasional",
-                direktur: { name: "Karuniawan Puji Wicaksono, PhD", affiliation: "Universitas Brawijaya", photo: userImg },
-                wakil: { name: "Siska, S.Psi.", affiliation: "Praktisi", photo: userImg }
-            },
-            {
-                name: "Pendampingan Konseling Karir",
-                direktur: { name: "Dr. Yusi Riksa Yustiana, M.Pd.", affiliation: "Universitas Pendidikan Indonesia", photo: userImg },
-                wakil: { name: "Rahma Kusumandari, M.Psi., Psikolog", affiliation: "Universitas 17 Agustus 1945 Surabaya", photo: userImg }
-            },
-            {
-                name: "Pendampingan Kewirausahaan",
-                direktur: { name: "Dr. Dwi Prasetyani, SE, M, Si", affiliation: "Universitas Sebelas Maret", photo: userImg },
-                wakil: { name: "Atanasius Emillio Gary Waluyohadi, S.Psi., M.Si.", affiliation: "Universitas Ciputra", photo: userImg }
-            },
-            {
-                name: "Pendampingan Tracer Study",
-                direktur: { name: "Muchammad Nurif S.E., M.T.", affiliation: "Institut Teknologi Sepuluh Nopember", photo: userImg },
-                wakil: { name: "Danial, S.Si., M.T", affiliation: "Institut Teknologi Bandung", photo: userImg }
+                id: 5, // ID Sekretaris Jendral
+                position: "Sekretaris Jendral",
+                role: "Presiden",
+                children: [
+                    {
+                        id: 6, // ID Wakil Sekretaris 1
+                        position: "Wakil Sekretaris Jendral",
+                        subPosition: "Bidang Keuangan, Sistem Informasi dan Tata Kelola", // Pembeda
+                        role: "Sekretaris Jendral"
+                    },
+                    {
+                        id: 7, // ID Wakil Sekretaris 2
+                        position: "Wakil Sekretaris Jendral",
+                        subPosition: "Bidang Komunikasi Publik, Pendampingan Dan Kerjasama", // Pembeda
+                        role: "Sekretaris Jendral"
+                    }
+                ]
             }
         ]
+    }
+];
+
+const DEFAULT_DIRECTORATE_STRUCTURE = [
+    {
+        id: 100,
+        position: "Direktorat Organisasi dan Keanggotaan",
+        role: null,
+        children: [
+            {
+                id: 101,
+                position: "Direktur",
+                role: "Direktorat Organisasi dan Keanggotaan",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+            {
+                id: 102,
+                position: "Wakil Direktur",
+                role: "Direktorat Organisasi dan Keanggotaan",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+        ],
+    },
+    {
+        id: 200,
+        position: "Direktorat Komunikasi Publik",
+        role: null,
+        children: [
+            {
+                id: 201,
+                position: "Direktur",
+                role: "Direktorat Komunikasi Publik",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+            {
+                id: 202,
+                position: "Wakil Direktur",
+                role: "Direktorat Komunikasi Publik",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+        ],
+    },
+    {
+        id: 300,
+        position: "Direktorat Sistem Informasi",
+        role: null,
+        children: [
+            {
+                id: 301,
+                position: "Direktur",
+                role: "Direktorat Sistem Informasi",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+            {
+                id: 302,
+                position: "Wakil Direktur",
+                role: "Direktorat Sistem Informasi",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+        ],
+    },
+    {
+        id: 400,
+        position: "Direktorat Kajian Ilmiah",
+        role: null,
+        children: [
+            {
+                id: 401,
+                position: "Direktur",
+                role: "Direktorat Kajian Ilmiah",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+            {
+                id: 402,
+                position: "Wakil Direktur",
+                role: "Direktorat Kajian Ilmiah",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+        ],
+    },
+    {
+        id: 500,
+        position: "Direktorat Pendampingan Pusat Karir",
+        role: null,
+        children: [
+            {
+                id: 501,
+                position: "Direktur",
+                role: "Direktorat Pendampingan Pusat Karir",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+            {
+                id: 502,
+                position: "Wakil Direktur",
+                role: "Direktorat Pendampingan Pusat Karir",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+        ],
+    },
+    {
+        id: 600,
+        position: "Direktorat Sertifikasi dan Akreditasi Pusat Karir",
+        role: null,
+        children: [
+            {
+                id: 601,
+                position: "Direktur",
+                role: "Direktorat Sertifikasi dan Akreditasi Pusat Karir",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+            {
+                id: 602,
+                position: "Wakil Direktur",
+                role: "Direktorat Sertifikasi dan Akreditasi Pusat Karir",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+        ],
+    },
+    {
+        id: 700,
+        position: "Direktorat Kerjasama Industri dan Pemerintahan",
+        role: null,
+        children: [
+            {
+                id: 701,
+                position: "Direktur",
+                role: "Direktorat Kerjasama Industri dan Pemerintahan",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+            {
+                id: 702,
+                position: "Wakil Direktur",
+                role: "Direktorat Kerjasama Industri dan Pemerintahan",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+        ],
+    },
+    {
+        id: 800,
+        position: "Direktorat Kerjasama Internasional",
+        role: null,
+        children: [
+            {
+                id: 801,
+                position: "Direktur",
+                role: "Direktorat Kerjasama Internasional",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+            {
+                id: 802,
+                position: "Wakil Direktur",
+                role: "Direktorat Kerjasama Internasional",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+        ],
+    },
+    {
+        id: 900,
+        position: "Direktorat Pendampingan Konseling Karir",
+        role: null,
+        children: [
+            {
+                id: 901,
+                position: "Direktur",
+                role: "Direktorat Pendampingan Konseling Karir",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+            {
+                id: 902,
+                position: "Wakil Direktur",
+                role: "Direktorat Pendampingan Konseling Karir",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+        ],
+    },
+    {
+        id: 1000,
+        position: "Direktorat Pendampingan Kewirausahaan",
+        role: null,
+        children: [
+            {
+                id: 1001,
+                position: "Direktur",
+                role: "Direktorat Pendampingan Kewirausahaan",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+            {
+                id: 1002,
+                position: "Wakil Direktur",
+                role: "Direktorat Pendampingan Kewirausahaan",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+        ],
+    },
+    {
+        id: 1100,
+        position: "Direktorat Pendampingan Tracer Study",
+        role: null,
+        children: [
+            {
+                id: 1101,
+                position: "Direktur",
+                role: "Direktorat Pendampingan Tracer Study",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+            {
+                id: 1102,
+                position: "Wakil Direktur",
+                role: "Direktorat Pendampingan Tracer Study",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
+        ],
+    }
+];
+
+const PageTeam = () => {
+    const [organizationData, setOrganizationData] = useState({
+        struktur: DEFAULT_STRUCTURE,
+        badanPengawas: [],
+        direktorat: DEFAULT_DIRECTORATE_STRUCTURE,
+    });
+
+    const [loading, setLoading] = useState(true);
+    const [selectedImage, setSelectedImage] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/organisasi?ts=${Date.now()}`);
+                const result = await response.json();
+
+                if (!result.success) throw new Error('Gagal memuat data');
+
+                // Format data sesuai struktur default
+                const mapStructure = (defaultNode) => {
+                    const savedData = result.data.find(item =>
+                        item.id === defaultNode.id
+                    );
+
+                    return {
+                        ...defaultNode,
+                        ...(savedData || {}),
+                        children: defaultNode.children ?
+                            defaultNode.children.map(mapStructure) :
+                            undefined
+                    };
+                };
+
+                const struktur = DEFAULT_STRUCTURE.map(mapStructure);
+                const badanPengawas = result.data.filter(item => item.jenis === 'badanpengawas');
+                const direktorat = DEFAULT_DIRECTORATE_STRUCTURE.map(mapStructure);
+
+                setOrganizationData({
+                    struktur,
+                    badanPengawas,
+                    direktorat,
+                });
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // Fungsi untuk menampilkan gambar dalam modal
+    const handleImageClick = (imageUrl) => {
+        if (imageUrl && imageUrl !== '/default-avatar.png') {
+            setSelectedImage(imageUrl);
+        }
     };
 
-    const OrganizationNode = ({ node, isRoot = false, isLast = false, hasSibling = false }) => (
-        <div className="flex flex-col items-center relative">
-            {/* Garis vertikal ke atas hanya jika memiliki saudara */}
-            {!isRoot && hasSibling && (
-                <div className="absolute top-0 w-0.5 h-8 bg-white/50 -translate-y-full"></div>
-            )}
+    // Fungsi untuk menutup modal
+    const closeModal = () => {
+        setSelectedImage(null);
+    };
 
-            {/* Node */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-8 w-64 text-center relative z-10 shadow-lg">
-                <div className="w-40 h-40 mx-auto mb-4 rounded-full overflow-hidden border-2 border-white">
-                    <img src={node.photo} alt={node.name} className="w-full h-full object-cover" />
-                </div>
-                <h3 className="text-lg font-bold text-blue-400 mb-2">{node.position}</h3>
-                <p className="text-white font-semibold">{node.name}</p>
-                <p className="text-sm text-gray-200 mt-2">{node.affiliation}</p>
-            </div>
+    const OrganizationNode = ({ node, isRoot = false, isLast = false, hasSibling = false }) => {
+        const isEmpty = !node.name && !node.affiliation;
+        const hasPhoto = node.photo_url && node.photo_url !== '/default-avatar.png';
 
-            {/* Garis dan children */}
-            {node.children && (
-                <div className="relative">
-                    {/* Garis vertikal ke bawah hanya jika ada grandchildren */}
-                    {node.children.some(child => child.children) && !isLast && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-0.5 h-8"></div>
+        return (
+            <div className="flex flex-col items-center relative">
+                {!isRoot && hasSibling && (
+                    <div className="absolute top-0 w-0.5 h-8 bg-white/50 -translate-y-full"></div>
+                )}
+
+                <div className={`bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-8 w-64 text-center relative z-10 shadow-lg ${isEmpty ? 'border-2 border-dashed border-white/30' : ''}`}>
+                    <div className="relative w-40 h-40 mx-auto mb-4 rounded-full overflow-hidden border-2 border-white">
+                        <img
+                            src={node.photo_url || '/default-avatar.png'}
+                            alt={node.name}
+                            className="w-full h-full object-cover cursor-pointer"
+                            onClick={() => handleImageClick(node.photo_url)}
+                        />
+                    </div>
+
+                    <h3 className="text-lg font-bold text-blue-400 mb-2">
+                        {node.position}
+                    </h3>
+                    {node.subPosition && (
+                        <p className="text-sm text-white mb-2">{node.subPosition}</p>
                     )}
 
-                    <div className="flex relative pt-16">
-                        {/* Garis horizontal penghubung */}
-                        {node.children.length > 1 && (
-                            <>
-                                {/* Garis horizontal */}
-                                <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[calc(89%-12rem)] h-0.5 bg-white/50"></div>
+                    <div className="relative flex items-center justify-center gap-1">
+                        <p className={`text-white font-semibold ${isEmpty ? 'text-white/50 italic' : ''}`}>
+                            {node.name || 'Nama belum diisi'}
+                        </p>
+                    </div>
 
-                                {/* Garis vertikal tengah yang diperpanjang */}
-                                <div className="absolute top-[-2rem] left-1/2 -translate-x-1/2 w-0.5 h-[4rem] bg-white/50"></div>
-                            </>
-                        )}
-
-                        <div className="flex space-x-16">
-                            {node.children.map((child, index) => (
-                                <div key={index} className="relative">
-                                    {/* Garis vertikal antar child */}
-                                    {index !== node.children.length - 1 && (
-                                        <div ></div>
-                                    )}
-                                    <OrganizationNode
-                                        node={child}
-                                        isLast={index === node.children.length - 1}
-                                        hasSibling={node.children.length > 1}
-                                    />
-                                </div>
-                            ))}
-                        </div>
+                    <div className="relative flex items-center justify-center gap-1 mt-2">
+                        <p className={`text-sm ${isEmpty ? 'text-gray-400 italic' : 'text-white'}`}>
+                            {node.affiliation || 'Afiliasi belum diisi'}
+                        </p>
                     </div>
                 </div>
-            )}
-        </div>
-    );
+
+                {node.children && (
+                    <div className="relative">
+                        {node.children.some(child => child.children) && !isLast && (
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 w-0.5 h-8"></div>
+                        )}
+
+                        <div className="flex relative pt-16">
+                            {node.children.length > 1 && (
+                                <>
+                                    <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[calc(89%-12rem)] h-0.5 bg-white/50"></div>
+                                    <div className="absolute top-[-2rem] left-1/2 -translate-x-1/2 w-0.5 h-[4rem] bg-white/50"></div>
+                                </>
+                            )}
+
+                            <div className="flex space-x-16">
+                                {node.children.map((child, index) => (
+                                    <div key={index} className="relative">
+                                        {index !== node.children.length - 1 && (
+                                            <div className="absolute right-0 top-1/2 w-8 h-0.5"></div>
+                                        )}
+                                        <OrganizationNode
+                                            node={child}
+                                            isLast={index === node.children.length - 1}
+                                            hasSibling={node.children.length > 1}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const BadanPengawasNode = ({ item }) => {
+        return (
+            <div className="bg-white/10 p-4 rounded-lg relative group">
+                <div className="relative w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden border-2 border-white">
+                    <img
+                        src={item.photo_url || '/default-avatar.png'}
+                        alt={item.name}
+                        className="w-full h-full object-cover cursor-pointer"
+                        onClick={() => handleImageClick(item.photo_url)}
+                    />
+                </div>
+                <div className="flex flex-col items-center">
+                    <p className="text-white font-semibold">
+                        {item.name}
+                    </p>
+                    <p className="text-white text-sm">
+                        {item.affiliation}
+                    </p>
+                </div>
+            </div>
+        );
+    };
+
+    const DirectorateSection = ({ directorate }) => {
+        const { position, children = [] } = directorate;
+
+        return (
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 w-full text-left shadow-lg">
+                <h2 className="text-2xl font-bold text-blue-400 mb-4">{position}</h2>
+                <div className="space-y-4">
+                    {children.map((child, index) => (
+                        <div key={index} className="flex items-center space-x-4">
+                            <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white">
+                                <img
+                                    src={child.photo_url || '/default-avatar.png'}
+                                    alt={child.name}
+                                    className="w-full h-full object-cover cursor-pointer"
+                                    onClick={() => handleImageClick(child.photo_url)}
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm text-white font-bold mb-1">
+                                    {child.position}
+                                </p>
+                                <p className="text-white">
+                                    {child.name || 'Nama belum diisi'}
+                                </p>
+                                <p className="text-white text-sm">
+                                    {child.affiliation || 'Afiliasi belum diisi'}
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500 flex items-center justify-center">
+                <p className="text-white">Loading...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500">
             <Navbar />
             <main className="pt-32 pb-12 px-4 md:px-8">
-                <div className="max-w-7xl mx-auto">
-                    <h1 className="text-4xl md:text-5xl font-bold text-center text-white mb-12">Struktur Organisasi</h1>
-
-                    {/* Struktur Utama */}
-                    <div className="flex justify-center mb-16">
-                        <OrganizationNode node={organizationData.strukturUtama} isRoot={true} />
-                    </div>
-
-                    {/* Badan Pengawas */}
-                    <div className="mb-16">
-                        <h2 className="text-2xl font-bold text-white mb-6">Badan Pengawas</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {organizationData.badanPengawas.map((member, index) => (
-                                <div key={index} className="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-colors">
-                                    <div className="w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden border-2 border-white">
-                                        <img src={member.photo} alt={member.name} className="w-full h-full object-cover" />
-                                    </div>
-                                    <p className="text-white text-center font-semibold text-sm">{member.name}</p>
-                                    <p className="text-xs text-center text-gray-300 mt-1">{member.affiliation}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Direktorat */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {organizationData.direktorat.map((direktorat, index) => (
-                            <div key={index} className="bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition-colors">
-                                <h3 className="text-lg font-bold text-blue-400 mb-4">Direktorat {direktorat.name}</h3>
-                                <div className="space-y-6">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="w-16 h-16 flex-shrink-0 rounded-full overflow-hidden border-2 border-white">
-                                            <img src={direktorat.direktur.photo} alt={direktorat.direktur.name} className="w-full h-full object-cover" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-white">Direktur</p>
-                                            <p className="text-xs text-gray-200">{direktorat.direktur.name}</p>
-                                            <p className="text-xs text-gray-400">{direktorat.direktur.affiliation}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center space-x-4">
-                                        <div className="w-16 h-16 flex-shrink-0 rounded-full overflow-hidden border-2 border-white">
-                                            <img src={direktorat.wakil.photo} alt={direktorat.wakil.name} className="w-full h-full object-cover" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-white">Wakil Direktur</p>
-                                            <p className="text-xs text-gray-200">{direktorat.wakil.name}</p>
-                                            <p className="text-xs text-gray-400">{direktorat.wakil.affiliation}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                {/* Struktur Organisasi */}
+                <div className="max-w-7xl mx-auto mb-16">
+                    <h1 className="text-4xl font-bold text-white mb-8 text-center">Struktur Organisasi</h1>
+                    <div className="flex justify-center">
+                        {organizationData.struktur.map((node) => (
+                            <OrganizationNode key={node.id} node={node} isRoot={true} />
                         ))}
                     </div>
                 </div>
+
+                {/* Badan Pengawas */}
+                <div className="max-w-7xl mx-auto mb-16">
+                    <h2 className="text-2xl font-bold text-white mb-6">Badan Pengawas</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {organizationData.badanPengawas.map((item) => (
+                            <BadanPengawasNode key={item.id} item={item} />
+                        ))}
+                    </div>
+                </div>
+
+                {/* Direktorat */}
+                <div className="max-w-7xl mx-auto">
+                    <h2 className="text-2xl font-bold text-white mb-6">Direktorat</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {organizationData.direktorat.map((directorate) => (
+                            <DirectorateSection key={directorate.id} directorate={directorate} />
+                        ))}
+                    </div>
+                </div>
+
+                {/* Modal untuk menampilkan gambar */}
+                {selectedImage && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90" onClick={closeModal}>
+                        <div className="relative max-w-full max-h-full">
+                            <img
+                                src={selectedImage}
+                                alt="Selected"
+                                className="max-w-[90vw] max-h-[90vh]"
+                            />
+                            <button
+                                className="absolute top-4 right-4 text-red-800 font-bold text-4xl"
+                                onClick={closeModal}
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+                )}
             </main>
         </div>
     );
 };
+
 export default PageTeam;
