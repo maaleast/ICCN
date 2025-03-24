@@ -4,6 +4,7 @@ import Modal from 'react-modal';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { API_BASE_URL } from '../../config';
+import userIcon from "../../assets/user.png";
 
 Modal.setAppElement('#root');
 Modal.defaultStyles.overlay.zIndex = 1000;
@@ -433,7 +434,7 @@ const KelolaOrganisasi = () => {
 
     const OrganizationNode = ({ node, isRoot = false, isLast = false, hasSibling = false }) => {
         const isEmpty = !node.name && !node.affiliation;
-        const hasPhoto = node.photo_url && node.photo_url !== '/default-avatar.png';
+        const hasPhoto = node.photo_url && node.photo_url !== userIcon;
 
         return (
             <div className="flex flex-col items-center relative">
@@ -444,7 +445,7 @@ const KelolaOrganisasi = () => {
                 <div className={`bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-8 w-64 text-center relative z-10 shadow-lg ${isEmpty ? 'border-2 border-dashed border-white/30' : ''}`}>
                     <div className="relative w-40 h-40 mx-auto mb-4 rounded-full overflow-hidden border-2 border-black dark:border-white group">
                         <img
-                            src={node.photo_url || '/default-avatar.png'}
+                            src={node.photo_url || userIcon}
                             alt={node.name}
                             className="w-full h-full object-cover"
                         />
@@ -540,7 +541,7 @@ const KelolaOrganisasi = () => {
     };
 
     const BadanPengawasNode = ({ item }) => {
-        const hasPhoto = item.photo_url && item.photo_url !== '/default-avatar.png';
+        const hasPhoto = item.photo_url && item.photo_url !== userIcon;
 
         return (
             <div key={item.id} className="bg-white/10 p-4 rounded-lg relative group">
@@ -552,7 +553,7 @@ const KelolaOrganisasi = () => {
                 </button>
                 <div className="relative w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden border-2 border-black dark:border-white">
                     <img
-                        src={item.photo_url || '/default-avatar.png'}
+                        src={item.photo_url || userIcon}
                         alt={item.name}
                         className="w-full h-full object-cover"
                     />
@@ -617,7 +618,7 @@ const KelolaOrganisasi = () => {
                         <div key={index} className="flex items-center space-x-4">
                             <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-black dark:border-white">
                                 <img
-                                    src={child.photo_url || '/default-avatar.png'}
+                                    src={child.photo_url || userIcon}
                                     alt={child.name}
                                     className="w-full h-full object-cover"
                                 />
@@ -804,7 +805,7 @@ const KelolaOrganisasi = () => {
                 <Modal
                     isOpen={addModal.show}
                     onRequestClose={() => setAddModal({ show: false, type: '' })}
-                    className="bg-white rounded-lg p-6 max-w-md mx-auto"
+                    className="bg-white dark:bg-gradient-to-br from-gray-800 via-gray-700 to-gray-600 rounded-lg p-6 max-w-md mx-auto"
                     overlayClassName="fixed inset-0 bg-black/50 z-[1000]"
                 >
                     <h2 className="text-xl font-bold mb-4">
@@ -848,14 +849,14 @@ const KelolaOrganisasi = () => {
                             type="text"
                             name="name"
                             placeholder="Nama lengkap"
-                            className="w-full p-2 border rounded mb-2"
+                            className="w-full p-2 border rounded mb-2 dark:text-black"
                             required
                         />
                         <input
                             type="text"
                             name="affiliation"
                             placeholder="Afiliasi/Universitas"
-                            className="w-full p-2 border rounded mb-2"
+                            className="w-full p-2 border rounded mb-2 dark:text-black"
                             required
                         />
                         {addModal.type === "direktorat" && (
@@ -872,7 +873,7 @@ const KelolaOrganisasi = () => {
                             <button
                                 type="button"
                                 onClick={() => setAddModal({ show: false, type: "" })}
-                                className="px-4 py-2 text-gray-500"
+                                className="px-4 py-2 text-gray-300 bg-gray-800 rounded"
                             >
                                 Batal
                             </button>
