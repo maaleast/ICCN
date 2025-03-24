@@ -27,6 +27,40 @@ export default function MemberDashboard() {
     const [memberId, setMemberId] = useState(null);
     const [status, setStatus] = useState(false);
     const navigate = useNavigate();
+    const [userInfo, setUserInfo] = useState({
+        no_identitas: "",
+        tipe_keanggotaan: "",
+        institusi: "",
+        nama: "",
+        nomor_wa: "",
+    });
+
+    // Fetch data member saat komponen mount
+    useEffect(() => {
+        const fetchMemberInfo = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/members/member-info?user_id=${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Gagal mengambil data member");
+                }
+
+                setUserInfo(data);
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        };
+
+        fetchMemberInfo();
+    }, [userId]); // Gunakan userId sebagai dependency
 
     useEffect(() => {
         if (!userId) return; // Cegah request jika userId belum tersedia
@@ -223,7 +257,17 @@ export default function MemberDashboard() {
                                 {/* Welcome Card */}
                                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md">
                                     <h1 className="text-2xl font-bold">Selamat Datang, Member ICCN! 👋</h1>
-                                    <p className="text-gray-600 dark:text-gray-300 mt-2">
+
+                                    {/* Nama dan No Identitas dengan Background Biru */}
+                                    <div className="mt-4 bg-blue-600 text-white py-3 px-4 rounded-lg 
+                                                    w-10/12 md:w-7/12 lg:w-5/12 
+                                                    text-center md:text-left lg:text-left 
+                                                    mx-auto md:ml-0 lg:ml-0">
+                                        <p className="text-lg font-semibold">{userInfo.nama}</p>
+                                        <p className="text-sm opacity-90">{userInfo.no_identitas}</p>
+                                    </div>
+
+                                    <p className="text-gray-600 dark:text-gray-300 mt-4">
                                         Selamat belajar semangat jangan pernah menyerah!
                                     </p>
                                 </div>
