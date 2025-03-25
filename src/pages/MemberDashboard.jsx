@@ -255,21 +255,19 @@ export default function MemberDashboard() {
                                 className="space-y-8"
                             >
                                 {/* Welcome Card */}
-                                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md">
-                                    <h1 className="text-2xl font-bold">Selamat Datang, Member ICCN! 👋</h1>
+                                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md flex flex-col md:flex-row items-center md:items-start justify-between">
+                                    <div className="md:w-6/12">
+                                        <h1 className="text-2xl font-bold text-center md:text-left">Selamat Datang, Member ICCN! 👋</h1>
+                                        <p className="text-gray-600 dark:text-gray-300 mt-4 text-center md:text-left">
+                                            Selamat belajar semangat jangan pernah menyerah!
+                                        </p>
+                                    </div>
 
                                     {/* Nama dan No Identitas dengan Background Biru */}
-                                    <div className="mt-4 bg-blue-600 text-white py-3 px-4 rounded-lg 
-                                                    w-10/12 md:w-7/12 lg:w-5/12 
-                                                    text-center md:text-left lg:text-left 
-                                                    mx-auto md:ml-0 lg:ml-0">
+                                    <div className="mt-4 bg-gradient-to-r from-blue-700 via-blue-400 text-white py-7 px-5 rounded-lg flex flex-col w-10/12 md:w-5/12 text-center md:text-left mx-auto md:mx-0">
                                         <p className="text-lg font-semibold">{userInfo.nama}</p>
                                         <p className="text-sm opacity-90">{userInfo.no_identitas}</p>
                                     </div>
-
-                                    <p className="text-gray-600 dark:text-gray-300 mt-4">
-                                        Selamat belajar semangat jangan pernah menyerah!
-                                    </p>
                                 </div>
 
                                 {/* Statistik Pelatihan */}
@@ -311,7 +309,7 @@ export default function MemberDashboard() {
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={handleNavigateToTraining}
-                                        className="bg-yellow-600 text-white p-6 rounded-xl shadow-md cursor-pointer"
+                                        className="bg-yellow-500 text-white p-6 rounded-xl shadow-md cursor-pointer"
                                     >
                                         <h3 className="text-sm font-semibold">Pelatihan yang Akan Datang</h3>
                                         <p className="text-3xl font-bold mt-2">{upcomingTrainingsCount} Program</p>

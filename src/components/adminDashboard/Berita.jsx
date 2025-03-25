@@ -564,6 +564,84 @@ const Berita = () => {
                 />
             </div>
 
+            {/* Modal Tambah Berita */}
+            {showAddForm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <h3 className="text-xl font-bold mb-4">Tambah Berita Baru</h3>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Judul Berita (untuk preview)</label>
+                                <input
+                                    type="text"
+                                    value={newBerita.judul}
+                                    onChange={(e) => setNewBerita({...newBerita, judul: e.target.value})}
+                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                                    placeholder="Masukkan judul berita"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Deskripsi (untuk preview)</label>
+                                <textarea
+                                    value={newBerita.deskripsi}
+                                    onChange={(e) => setNewBerita({...newBerita, deskripsi: e.target.value})}
+                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                                    placeholder="Masukkan deskripsi berita"
+                                    rows="5"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Waktu Tayang</label>
+                                <input
+                                    type="datetime-local"
+                                    value={newBerita.waktu_tayang}
+                                    onChange={(e) => setNewBerita({...newBerita, waktu_tayang: e.target.value})}
+                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Gambar Berita</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setNewBerita({...newBerita, gambar: e.target.files[0]})}
+                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Dokumen (Word)</label>
+                                <input
+                                    type="file"
+                                    accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    onChange={(e) => setNewBerita({...newBerita, dokumen: e.target.files[0]})}
+                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-2 mt-6">
+                            <button
+                                onClick={() => setShowAddForm(false)}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleAddBerita}
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                            >
+                                Simpan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Modal detail berita */}
             {showDetailModal && selectedBerita && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
