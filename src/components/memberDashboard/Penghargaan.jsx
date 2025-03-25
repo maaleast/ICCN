@@ -22,6 +22,8 @@ export default function Penghargaan({ badges }) {
     const completedBadges = badges.filter(badge => badge.status === "completed");
     completedBadges.sort((a, b) => new Date(a.waktu_selesai) - new Date(b.waktu_selesai));
 
+    console.log('completedBadges', completedBadges)
+
     // Filter badge berdasarkan search term dan urutkan dari yang terbaru dan yang statusnya completed
     const filteredBadges = badges
     .filter(badge => badge.status === "completed") // Hanya ambil yang selesai

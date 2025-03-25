@@ -49,6 +49,10 @@ export default function TrainingList({ trainings, badges, onRegister, endTrainin
         //     console.log('training', training.judul_pelatihan, 'isRegistered: ', isRegistered, 'badge: ', badgesArray.filter(badge => badge.pelatihan_id === training.id));
         // }
         // console.log('training', training.judul_pelatihan, 'isRegistered: ', isRegistered, 'badge: ', badgesArray.filter(badge => badge.pelatihan_id === training.id));
+        if (currentDate > trainingEndDate && !isRegistered && !isCompleted && !isUncompleted) {
+            return 'abandoned';
+        }
+        
         if (isRegistered && currentDate <= trainingEndDate) {
             return 'ongoing'; // Status ongoing jika terdaftar
         } else if (isCompleted) {
@@ -83,8 +87,8 @@ export default function TrainingList({ trainings, badges, onRegister, endTrainin
 
     const completedTrainings = trainings
         .filter(training => {
-            const status = getTrainingStatus(training);
-            return status === 'completed' || status === 'uncompleted';
+          const status = getTrainingStatus(training);
+          return status === 'completed' || status === 'uncompleted' || status === 'abandoned';
         })
         .sort((a, b) => new Date(b.tanggal_berakhir) - new Date(a.tanggal_berakhir));
 
