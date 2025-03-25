@@ -180,8 +180,8 @@ export default function Pelatihan() {
 
         const formData = new FormData();
         formData.append("judul_pelatihan", judul_pelatihan);
-        formData.append("tanggal_pelatihan", formatTanggal(new Date(tanggal_pelatihan)));
-        formData.append("tanggal_berakhir", formatTanggal(new Date(tanggal_berakhir)));
+        formData.append("tanggal_pelatihan", formatTanggal(selectedPelatihan.tanggal_pelatihan));
+        formData.append("tanggal_berakhir", formatTanggal(selectedPelatihan.tanggal_berakhir));
         formData.append("deskripsi_pelatihan", deskripsi_pelatihan);
         formData.append("link", link);
         formData.append("narasumber", narasumber);
