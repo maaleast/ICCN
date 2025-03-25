@@ -96,7 +96,7 @@ const DetailMemberPelatihan = ({ isOpen, onClose, data, id }) => {
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
         >
             <div
-                className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-4xl max-h-h[90hv] overflow-y-auto"
+                className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-4xl max-h-h[90hv] overflow-y-auto dark:bg-gray-800"
             >
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-semibold">Detail Pendaftar</h2>
@@ -110,7 +110,7 @@ const DetailMemberPelatihan = ({ isOpen, onClose, data, id }) => {
                                 {headerGroup.headers.map((column) => (
                                     <th
                                         {...column.getHeaderProps()}
-                                        className="py-2 px-4 bg-gray-100 text-center"
+                                        className="py-2 px-4 bg-gray-100 text-center dark:bg-gray-700"
                                     >
                                         {column.render("Header")}
                                     </th>

@@ -7,6 +7,50 @@ import { FaEye, FaEdit, FaTrash, FaArchive, FaCertificate } from "react-icons/fa
 import Pagination from "../Pagination";
 import Select from 'react-select';
 
+    // Fungsi helper untuk memformat tanggal
+    const formatDate = (dateString) => {
+        if (!dateString) return '--/--/---- --:--';
+        
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '--/--/---- --:--';
+            
+            // Format: DD/MM/YYYY HH:MM
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            
+            return `${day}/${month}/${year} ${hours}:${minutes}`;
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return '--/--/---- --:--';
+        }
+    };
+    
+    // Fungsi untuk mengkonversi ke format yang bisa diterima input datetime-local
+    const toDateTimeLocal = (dateString) => {
+        if (!dateString) return '';
+        
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '';
+            
+            // Format: YYYY-MM-DDTHH:MM
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        } catch (error) {
+            console.error('Error converting to datetime-local:', error);
+            return '';
+        }
+    };
+
 const Berita = () => {
     const [berita, setBerita] = useState([]);
     const [filter, setFilter] = useState({ value: 'all', label: 'Semua' });
@@ -45,6 +89,8 @@ const Berita = () => {
         { value: 'archived', label: 'Archived' },
         { value: 'branding', label: 'Branding' },
     ];
+
+
 
     // Fetch semua berita
     const fetchBerita = async () => {
@@ -127,54 +173,104 @@ const Berita = () => {
         }
     };
 
-    // Handle edit berita
-    const handleEditBerita = async () => {
-        const formData = new FormData();
-        formData.append('judul', editBerita.judul);
-        formData.append('deskripsi', editBerita.deskripsi);
-        formData.append('waktu_tayang', editBerita.waktu_tayang);
-        formData.append('status', editBerita.status);
-        if (editBerita.gambar) {
-            formData.append('gambar', editBerita.gambar);
-        } else {
-            formData.append('gambar_lama', editBerita.gambar_lama);
-        }
-        if (editBerita.dokumen) {
-            formData.append('dokumen', editBerita.dokumen);
-        } else {
-            formData.append('dokumen_lama', editBerita.dokumen_lama);
+    // Fungsi handleEditBerita yang sudah diperbaiki
+const handleEditBerita = async () => {
+    // Validasi input terlebih dahulu
+    if (!editBerita.judul || !editBerita.deskripsi || !editBerita.waktu_tayang) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: 'Judul, deskripsi, dan waktu tayang harus diisi',
+        });
+        return;
+    }
+
+    // Buat objek FormData untuk mengirim data
+    const formData = new FormData();
+    
+    // Tambahkan field teks
+    formData.append('judul', editBerita.judul);
+    formData.append('deskripsi', editBerita.deskripsi);
+    formData.append('waktu_tayang', editBerita.waktu_tayang);
+    formData.append('status', editBerita.status);
+
+    // Handle gambar
+    if (editBerita.gambar) {
+        formData.append('gambar', editBerita.gambar);
+    } else {
+        formData.append('gambar_lama', editBerita.gambar_lama || '');
+    }
+
+    // Handle dokumen
+    if (editBerita.dokumen) {
+        formData.append('dokumen', editBerita.dokumen);
+    } else {
+        formData.append('dokumen_lama', editBerita.dokumen_lama || '');
+    }
+
+    try {
+        // Debug: Lihat isi FormData sebelum dikirim
+        console.log('Data yang akan dikirim:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
         }
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/berita/edit/${editBerita.id}`, {
-                method: 'PUT',
-                body: formData,
-            });
-            const data = await response.json();
-            if (data.success) {
-                await fetchBerita(); // Refresh data
-                setShowEditForm(false);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'Berita berhasil diperbarui',
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: data.message,
-                });
-            }
-        } catch (error) {
-            console.error('Error updating berita:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: 'Terjadi kesalahan pada server',
-            });
+        const response = await fetch(`${API_BASE_URL}/berita/edit/${editBerita.id}`, {
+            method: 'PUT',
+            body: formData,
+            // Jangan set header Content-Type, biarkan browser yang mengaturnya
+        });
+
+        // Tangani response
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Terjadi kesalahan pada server');
         }
-    };
+
+        const data = await response.json();
+
+        if (data.success) {
+            await fetchBerita(); // Refresh data
+            setShowEditForm(false);
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: 'Berita berhasil diperbarui',
+            });
+        } else {
+            throw new Error(data.message || 'Gagal memperbarui berita');
+        }
+    } catch (error) {
+        console.error('Error updating berita:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: error.message || 'Terjadi kesalahan pada server',
+        });
+    }
+};
+
+// Fungsi handleOpenEditModal yang diperbaiki
+const handleOpenEditModal = (berita) => {
+    // Pastikan waktu_tayang dalam format yang benar
+    let waktuTayang = berita.waktu_tayang;
+    if (waktuTayang && !waktuTayang.endsWith('Z')) {
+        waktuTayang += 'Z'; // Tambahkan Z jika belum ada (UTC)
+    }
+
+    setEditBerita({
+        id: berita.id,
+        judul: berita.judul || '',
+        deskripsi: berita.deskripsi || '',
+        waktu_tayang: waktuTayang || '',
+        gambar: null,
+        gambar_lama: berita.gambar || '',
+        dokumen: null,
+        dokumen_lama: berita.dokumen || '',
+        status: berita.status || 'latest',
+    });
+    setShowEditForm(true);
+};
 
     // Handle hapus berita
     const handleDeleteBerita = async (id) => {
@@ -321,22 +417,6 @@ const Berita = () => {
     const handleShowDetail = (berita) => {
         setSelectedBerita(berita);
         setShowDetailModal(true);
-    };
-
-    // Handle buka modal edit
-    const handleOpenEditModal = (berita) => {
-        setEditBerita({
-            id: berita.id,
-            judul: berita.judul,
-            deskripsi: berita.deskripsi,
-            waktu_tayang: berita.waktu_tayang,
-            gambar: null,
-            gambar_lama: berita.gambar,
-            dokumen: null,
-            dokumen_lama: berita.dokumen,
-            status: berita.status,
-        });
-        setShowEditForm(true);
     };
 
     // Pagination functions
@@ -641,6 +721,154 @@ const Berita = () => {
                     </div>
                 </div>
             )}
+
+            {/* Modal Edit Berita */}
+            {showEditForm && (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold mb-4">Edit Berita</h3>
+            
+            <div className="space-y-4">
+                {/* Input Judul */}
+                <div>
+                    <label className="block text-sm font-medium mb-1">Judul Berita</label>
+                    <input
+                        type="text"
+                        value={editBerita.judul}
+                        onChange={(e) => setEditBerita({...editBerita, judul: e.target.value})}
+                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                        placeholder="Masukkan judul berita"
+                        required
+                    />
+                </div>
+                
+                {/* Input Deskripsi */}
+                <div>
+                    <label className="block text-sm font-medium mb-1">Deskripsi</label>
+                    <textarea
+                        value={editBerita.deskripsi}
+                        onChange={(e) => setEditBerita({...editBerita, deskripsi: e.target.value})}
+                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                        placeholder="Masukkan deskripsi berita"
+                        rows="5"
+                        required
+                    />
+                </div>
+                
+                {/* Input Waktu Tayang */}
+                <div>
+                    <label className="block text-sm font-medium mb-1">Waktu Tayang</label>
+                    <input
+                        type="datetime-local"
+                        value={editBerita.waktu_tayang ? toDateTimeLocal(editBerita.waktu_tayang) : ''}
+                        onChange={(e) => {
+                            const newValue = e.target.value;
+                            // Konversi ke format ISO jika perlu
+                            const isoDate = newValue ? new Date(newValue).toISOString() : '';
+                            setEditBerita({...editBerita, waktu_tayang: isoDate});
+                        }}
+                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                        required
+                    />
+                </div>
+                
+                {/* Input Status */}
+                <div>
+                    <label className="block text-sm font-medium mb-1">Status</label>
+                    <select
+                        value={editBerita.status}
+                        onChange={(e) => setEditBerita({...editBerita, status: e.target.value})}
+                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                        required
+                    >
+                        <option value="latest">Latest</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="archived">Archived</option>
+                        <option value="branding">Branding</option>
+                    </select>
+                </div>
+                
+                {/* Input Gambar */}
+                <div>
+                    <label className="block text-sm font-medium mb-1">Gambar Berita</label>
+                    {editBerita.gambar_lama && (
+                        <div className="mb-2">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Gambar saat ini:</p>
+                            <img 
+                                src={`${API_BASE_URL}/uploads/berita/${editBerita.gambar_lama}`} 
+                                alt="Current" 
+                                className="w-32 h-32 object-cover rounded-lg"
+                            />
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                setEditBerita({...editBerita, gambar: file});
+                            }
+                        }}
+                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Kosongkan jika tidak ingin mengubah gambar
+                    </p>
+                </div>
+                
+                {/* Input Dokumen */}
+                <div>
+                    <label className="block text-sm font-medium mb-1">Dokumen (Word)</label>
+                    {editBerita.dokumen_lama && (
+                        <div className="mb-2">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Dokumen saat ini: {editBerita.dokumen_lama}</p>
+                            <a 
+                                href={`${API_BASE_URL}/berita/dokumen/${editBerita.dokumen_lama}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:underline"
+                            >
+                                Lihat Dokumen
+                            </a>
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                setEditBerita({...editBerita, dokumen: file});
+                            }
+                        }}
+                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Kosongkan jika tidak ingin mengubah dokumen
+                    </p>
+                </div>
+            </div>
+            
+            {/* Tombol Aksi */}
+            <div className="flex justify-end space-x-2 mt-6">
+                <button
+                    onClick={() => setShowEditForm(false)}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                >
+                    Batal
+                </button>
+                <button
+                    onClick={handleEditBerita}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    disabled={!editBerita.judul || !editBerita.deskripsi || !editBerita.waktu_tayang}
+                >
+                    Simpan Perubahan
+                </button>
+            </div>
+        </div>
+    </div>
+)}
 
             {/* Modal detail berita */}
             {showDetailModal && selectedBerita && (
