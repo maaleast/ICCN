@@ -1116,9 +1116,9 @@ const LandingPage = () => {
                                 >
                                     {/* Gambar Gallery */}
                                     <img
-                                        src={item.image_url.startsWith('http') ? item.image_url : `${API_BASE_URL}${item.image_url}`}
-                                        alt={`Gallery ${index + 1}`}
-                                        className="w-full h-48 object-cover"
+                                    src={item.gallery?.startsWith('http') ? item.gallery : `${API_BASE_URL}/uploads/gallery/${item.gallery}`}
+                                    alt={`Gallery ${index + 1}`}
+                                    className="w-full h-48 object-cover"
                                     />
                                     {/* Keterangan Foto */}
                                     <div className="p-4 bg-white">
