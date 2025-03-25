@@ -11,6 +11,8 @@ import Logo from "../assets/iccn.png";
 import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes } from "react-icons/fa";
 import uk from "../assets/uk.png";
 import ina from "../assets/ina.png";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClock } from '@fortawesome/free-solid-svg-icons';
 
 // Dummy data untuk semua section
 const dummyServices = [
@@ -548,12 +550,12 @@ const LoggedInPage = () => {
                             </li>
                             <li>
                                 <ScrollLink
-                                    to="contact"
+                                    to="berita"
                                     smooth={true}
                                     duration={500}
                                     className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                                 >
-                                    Contact
+                                    Berita
                                 </ScrollLink>
                             </li>
                             <li>
@@ -568,14 +570,16 @@ const LoggedInPage = () => {
                             </li>
                             <li>
                                 <ScrollLink
-                                    to="berita"
+                                    to="contact"
                                     smooth={true}
                                     duration={500}
                                     className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                                 >
-                                    Berita
+                                    Contact
                                 </ScrollLink>
                             </li>
+                            
+                            
                         </ul>
 
                         {/* Bagian Kanan (Desktop) */}
@@ -1205,36 +1209,46 @@ const LoggedInPage = () => {
             )}
 
                 {/* Modal Detail Berita */}
-                {showDetailModal && selectedBerita && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-lg p-6 w-full max-w-3xl">
-                            <h3 className="text-2xl font-bold mb-4">{selectedBerita.judul}</h3>
-                            {selectedBerita.gambar && (
-                                <img
-                                    src={selectedBerita.gambar}
-                                    alt={selectedBerita.judul}
-                                    className="w-full h-64 object-cover rounded-lg mb-4"
-                                />
-                            )}
-                            <div className="max-h-96 overflow-y-auto">
-                                <p className="text-sm text-gray-600 whitespace-pre-line">
-                                    {selectedBerita.deskripsi}
-                                </p>
-                            </div>
-                            <p className="text-sm text-gray-500 mt-4">
-                                {new Date(selectedBerita.waktu_tayang).toLocaleDateString()}
-                            </p>
-                            <div className="flex justify-end mt-4">
-                                <button
-                                    onClick={() => setShowDetailModal(false)}
-                                    className="px-4 py-2 bg-gray-500 text-white rounded-lg"
-                                >
-                                    Tutup
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+{showDetailModal && selectedBerita && (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl">
+            <h3 className="text-xl font-bold mb-4">{selectedBerita.judul}</h3>
+            {selectedBerita.gambar && (
+                <img
+                    src={selectedBerita.gambar.startsWith('http') ? selectedBerita.gambar : `${API_BASE_URL}/uploads/berita/${selectedBerita.gambar}`}
+                    alt={selectedBerita.judul}
+                    className="w-full rounded-lg mb-4"
+                />
+            )}
+            {/* Container untuk deskripsi dengan scroll */}
+            <div className="mb-4 max-h-48 overflow-y-auto">
+                <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap break-words">
+                    {selectedBerita.deskripsi}
+                </p>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                <FontAwesomeIcon icon={faClock} className="mr-1" />
+                {new Date(selectedBerita.waktu_tayang).toLocaleString()}
+            </p>
+            <div className="flex justify-end space-x-2">
+                {selectedBerita.dokumen && (
+                    <button
+                        onClick={() => window.open(`${API_BASE_URL}/berita/dokumen/${selectedBerita.dokumen}`, '_blank')}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                    >
+                        Lihat Berita
+                    </button>
                 )}
+                <button
+                    onClick={() => setShowDetailModal(false)}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg"
+                >
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+)}
 
                 {/* Contact Section */}
                 <section id="contact" className="py-12 bg-gray-100">
