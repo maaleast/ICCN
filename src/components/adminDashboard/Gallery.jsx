@@ -1,22 +1,33 @@
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { API_BASE_URL } from '../../config'; // Import API_BASE_URL dari config.js
-import { FaTrash, FaPlus, FaTimes } from "react-icons/fa"; // Import ikon sampah, plus, dan close dari FontAwesome
+import { API_BASE_URL } from '../../config';
+import { FaTrash, FaPlus, FaTimes } from "react-icons/fa";
 import Pagination from "../Pagination";
 
 export default function Gallery() {
-    const [photos, setPhotos] = useState([]); // Inisialisasi dengan array kosong
-    const [selectedPhoto, setSelectedPhoto] = useState(null); // State untuk menyimpan foto yang dipilih
-    const [isModalOpen, setIsModalOpen] = useState(false); // State untuk mengontrol tampilan modal
-    const [uploadModalOpen, setUploadModalOpen] = useState(false); // State untuk mengontrol tampilan modal upload
-    const [selectedFiles, setSelectedFiles] = useState([]); // State untuk menyimpan file yang dipilih
-    const [keterangan, setKeterangan] = useState(''); // State untuk menyimpan keterangan foto
+    const [photos, setPhotos] = useState([]);
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [uploadModalOpen, setUploadModalOpen] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [keterangan, setKeterangan] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const photosPerPage = 8;
+
+    // Fungsi untuk membangun URL gambar lengkap
+    const getImageUrl = (filename) => {
+        if (!filename) return '';
+        // Jika sudah URL lengkap (untuk kompatibilitas dengan data lama)
+        if (filename.startsWith('http')) return filename;
+        // Bangun URL baru
+        return `${API_BASE_URL}/uploads/gallery/${filename}`;
+    };
 
     // Fungsi untuk memformat tanggal
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return date.toLocaleDateString('id-ID', options); // Format tanggal Indonesia
+        return date.toLocaleDateString('id-ID', options);
     };
 
     // Ambil data foto dari backend
@@ -32,20 +43,24 @@ export default function Gallery() {
             }
             const data = await response.json();
 
-            // Pastikan data adalah array dan setiap item memiliki properti yang diperlukan
             if (Array.isArray(data)) {
-                const validPhotos = data.filter(photo => 
+                // Pastikan semua foto memiliki URL yang benar
+                const validPhotos = data.map(photo => ({
+                    ...photo,
+                    image_url: getImageUrl(photo.image_url)
+                })).filter(photo => 
                     photo.id && photo.image_url && photo.created_at && photo.keterangan_foto
                 );
+                
                 setPhotos(validPhotos);
             } else {
                 console.error("Data yang diterima bukan array:", data);
-                setPhotos([]); // Set ke array kosong jika data tidak valid
+                setPhotos([]);
             }
         } catch (error) {
             console.error("Gagal mengambil data foto:", error);
             Swal.fire("Error", "Gagal mengambil data foto", "error");
-            setPhotos([]); // Set ke array kosong jika terjadi error
+            setPhotos([]);
         }
     };
 
@@ -88,9 +103,9 @@ export default function Gallery() {
 
         const formData = new FormData();
         files.forEach((file) => {
-            formData.append("images", file); // Append setiap file ke FormData
+            formData.append("images", file);
         });
-        formData.append("keterangan", keterangan); // Append keterangan ke FormData
+        formData.append("keterangan", keterangan);
 
         try {
             const response = await fetch(`${API_BASE_URL}/admin/gallery/upload`, {
@@ -104,11 +119,17 @@ export default function Gallery() {
 
             const data = await response.json();
             if (data.data && Array.isArray(data.data)) {
-                setPhotos(prevPhotos => [...prevPhotos, ...data.data]); // Tambahkan foto baru ke state
+                // Tambahkan URL lengkap ke foto yang baru diupload
+                const newPhotos = data.data.map(photo => ({
+                    ...photo,
+                    image_url: getImageUrl(photo.image_url)
+                }));
+                
+                setPhotos(prevPhotos => [...prevPhotos, ...newPhotos]);
                 Swal.fire("Berhasil!", "Foto baru telah ditambahkan.", "success");
-                setUploadModalOpen(false); // Tutup modal setelah upload
-                setSelectedFiles([]); // Reset selected files
-                setKeterangan(''); // Reset keterangan
+                setUploadModalOpen(false);
+                setSelectedFiles([]);
+                setKeterangan('');
             } else {
                 throw new Error("Data yang diterima tidak valid");
             }
@@ -125,24 +146,20 @@ export default function Gallery() {
 
         if (filesToAdd.length > 0) {
             const newFiles = [...selectedFiles];
-
-            // Isi file mulai dari index yang dipilih
             for (let i = 0; i < filesToAdd.length; i++) {
                 newFiles[index + i] = filesToAdd[i];
             }
-
             setSelectedFiles(newFiles);
         }
     };
 
-    // Fungsi untuk menghitung jumlah kotak yang harus ditampilkan
     const getVisibleBoxes = () => {
         const totalFilled = selectedFiles.filter(file => file).length;
         return Math.min(Math.max(totalFilled + 1, 1), 5);
     };
 
     const removeFile = (index) => {
-        const newFiles = selectedFiles.filter((_, i) => i !== index); // Hapus file berdasarkan index
+        const newFiles = selectedFiles.filter((_, i) => i !== index);
         setSelectedFiles(newFiles);
     };
 
@@ -152,12 +169,10 @@ export default function Gallery() {
 
     const closeUploadModal = () => {
         setUploadModalOpen(false);
-        setSelectedFiles([]); // Reset selected files saat modal ditutup
+        setSelectedFiles([]);
     };
 
-    // Fungsi untuk membuka modal dan menyimpan foto yang dipilih
     const openModal = (photo) => {
-        console.log("Foto yang diklik:", photo); // Debugging
         if (photo && photo.id && photo.image_url && photo.created_at && photo.keterangan_foto) {
             setSelectedPhoto(photo);
             setIsModalOpen(true);
@@ -167,74 +182,87 @@ export default function Gallery() {
         }
     };
 
-    // Fungsi untuk menutup modal
     const closeModal = () => {
         setSelectedPhoto(null);
         setIsModalOpen(false);
     };
 
-    // Pagination states
-    const [currentPage, setCurrentPage] = useState(1);
-    const photosPerPage = 8; // Jumlah foto per halaman
+    // Pagination logic
     const totalPages = Math.ceil(photos.length / photosPerPage);
-
-    // Pagination functions
-    const goToPage = (page) => {
-        setCurrentPage(page);
-    };
-
-    const prevPage = () => {
-        if (currentPage > 1) setCurrentPage(currentPage - 1);
-    };
-
-    const nextPage = () => {
-        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-    };
-
     const indexOfLastPhoto = currentPage * photosPerPage;
     const indexOfFirstPhoto = indexOfLastPhoto - photosPerPage;
     const currentPhotos = photos.slice(indexOfFirstPhoto, indexOfLastPhoto);
+
+    const goToPage = (page) => setCurrentPage(page);
+    const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+    const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold dark:text-gray-100">Galeri Kegiatan</h3>
                 <button
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition duration-300 cursor-pointer"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition duration-300"
                     onClick={openUploadModal}
                 >
                     Tambah Foto
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {currentPhotos.map((photo) => (
-                    <div key={photo.id} className="relative group">
-                        <img
-                            src={photo.image_url}
-                            alt={`Kegiatan ${photo.id}`}
-                            className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                            onClick={() => openModal(photo)}
-                        />
-                        <button
-                            className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                            onClick={() => handleDeletePhoto(photo.id)}
-                        >
-                            <FaTrash />
-                        </button>
-                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <p className="text-sm">
-                                {photo.keterangan_foto} diposting pada {formatDate(photo.created_at)}
-                            </p>
-                        </div>
+            {photos.length === 0 ? (
+                <div className="text-center py-10">
+                    <p className="text-gray-500">Belum ada foto di galeri</p>
+                </div>
+            ) : (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {currentPhotos.map((photo) => (
+                            <div key={photo.id} className="relative group">
+                                <img
+                                    src={photo.image_url}
+                                    alt={`Kegiatan ${photo.id}`}
+                                    className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                                    onClick={() => openModal(photo)}
+                                />
+                                <button
+                                    className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeletePhoto(photo.id);
+                                    }}
+                                >
+                                    <FaTrash size={14} />
+                                </button>
+                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <p className="text-sm truncate">
+                                        {photo.keterangan_foto}
+                                    </p>
+                                    <p className="text-xs">
+                                        {formatDate(photo.created_at)}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
 
-            {/* Modal untuk menampilkan foto secara jelas */}
+                    {photos.length > photosPerPage && (
+                        <div className="mt-6">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                goToPage={goToPage}
+                                prevPage={prevPage}
+                                nextPage={nextPage}
+                            />
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* Preview Modal */}
             {isModalOpen && selectedPhoto && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 relative">
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-auto relative">
                         <button
                             className="absolute top-4 right-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300"
                             onClick={closeModal}
@@ -244,96 +272,94 @@ export default function Gallery() {
                         <img
                             src={selectedPhoto.image_url}
                             alt={`Kegiatan ${selectedPhoto.id}`}
-                            className="w-full h-auto rounded-lg"
+                            className="w-full h-auto rounded-lg mb-4"
                         />
-                        <div className="mt-4 text-center">
-                            <p className="text-sm text-gray-700 dark:text-gray-300">
-                                {selectedPhoto.keterangan_foto} diposting pada {formatDate(selectedPhoto.created_at)}
+                        <div className="space-y-2">
+                            <h3 className="font-semibold text-lg dark:text-white">
+                                {selectedPhoto.keterangan_foto}
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                Diposting pada: {formatDate(selectedPhoto.created_at)}
                             </p>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Pagination */}
-            {photos.length > photosPerPage && (
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    goToPage={goToPage}
-                    prevPage={prevPage}
-                    nextPage={nextPage}
-                />
-            )}
-
-            {/* Modal untuk upload multiple foto */}
+            {/* Upload Modal */}
             {uploadModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 relative">
-                        <button
-                            className="absolute top-4 right-4 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-                            onClick={closeUploadModal}
-                        >
-                            &times;
-                        </button>
-                        <h2 className="font-bold text-gray-600">
-                            Upload Foto <span className="text-red-500">*</span>
-                        </h2>
-                        <p className="text-xs text-gray-500 mb-2">
-                            Maksimal upload 5 foto
-                        </p>
-                        <div className="flex flex-wrap gap-4">
-                            {[...Array(getVisibleBoxes())].map((_, index) => (
-                                <div key={index} className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                                    {selectedFiles[index] ? (
-                                        <div className="relative">
-                                            <img
-                                                src={URL.createObjectURL(selectedFiles[index])}
-                                                alt={`Preview ${index}`}
-                                                className="w-full h-full object-cover rounded-lg"
-                                            />
-                                            <button
-                                                className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full"
-                                                onClick={() => removeFile(index)}
-                                            >
-                                                <FaTrash size={12} />
-                                            </button>
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold dark:text-white">Upload Foto Baru</h3>
+                            <button
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
+                                onClick={closeUploadModal}
+                            >
+                                <FaTimes size={20} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Keterangan Foto
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    value={keterangan}
+                                    onChange={(e) => setKeterangan(e.target.value)}
+                                    placeholder="Deskripsi foto"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Pilih Foto (Maksimal 5)
+                                </label>
+                                <div className="grid grid-cols-3 gap-3">
+                                    {[...Array(5)].map((_, index) => (
+                                        <div key={index} className="relative aspect-square border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                                            {selectedFiles[index] ? (
+                                                <>
+                                                    <img
+                                                        src={URL.createObjectURL(selectedFiles[index])}
+                                                        alt={`Preview ${index}`}
+                                                        className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                                                    />
+                                                    <button
+                                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                                                        onClick={() => removeFile(index)}
+                                                    >
+                                                        <FaTrash size={12} />
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <label className="flex flex-col items-center justify-center cursor-pointer p-2 text-center">
+                                                    <FaPlus className="text-gray-400 mb-1" />
+                                                    <span className="text-xs text-gray-500">Tambahkan</span>
+                                                    <input
+                                                        type="file"
+                                                        className="hidden"
+                                                        onChange={(e) => handleFileChange(e, index)}
+                                                        accept="image/*"
+                                                    />
+                                                </label>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <label className="cursor-pointer">
-                                            <FaPlus className="text-gray-400" />
-                                            <input
-                                                type="file"
-                                                className="hidden"
-                                                onChange={(e) => handleFileChange(e, index)}
-                                                accept="image/*"
-                                                multiple
-                                            />
-                                        </label>
-                                    )}
+                                    ))}
                                 </div>
-                            ))}
+                            </div>
+
+                            <button
+                                className={`w-full py-2 px-4 rounded-md text-white ${selectedFiles.length > 0 ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                                onClick={() => handleAddPhoto(selectedFiles.filter(Boolean), keterangan)}
+                                disabled={selectedFiles.length === 0}
+                            >
+                                Upload {selectedFiles.length} Foto
+                            </button>
                         </div>
-                        {/* Tambahkan input untuk keterangan foto */}
-                        <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Keterangan Foto
-                            </label>
-                            <input
-                                type="text"
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
-                                placeholder="Masukkan keterangan foto"
-                                value={keterangan}
-                                onChange={(e) => setKeterangan(e.target.value)}
-                            />
-                        </div>
-                        <button
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition duration-300 cursor-pointer mt-4"
-                            onClick={() => handleAddPhoto(selectedFiles.filter(file => file), keterangan)}
-                            disabled={selectedFiles.filter(file => file).length === 0}
-                        >
-                            Upload {selectedFiles.filter(file => file).length} Foto
-                        </button>
                     </div>
                 </div>
             )}

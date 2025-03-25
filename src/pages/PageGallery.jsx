@@ -10,19 +10,42 @@ const PageGallery = () => {
     const [selectedPhoto, setSelectedPhoto] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeYear, setActiveYear] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     // Ambil data gallery dari backend
     useEffect(() => {
         const fetchGallery = async () => {
             try {
+                setLoading(true);
                 const response = await fetch(`${API_BASE_URL}/admin/gallery`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
-                setGallery(data);
+                
+                // Proses URL gambar
+                const processedGallery = data.map(photo => ({
+                    ...photo,
+                    image_url: photo.image_url.startsWith('http') 
+                        ? photo.image_url 
+                        : `${API_BASE_URL}/uploads/gallery/${photo.image_url}`
+                }));
+                
+                setGallery(processedGallery);
+                setError(null);
             } catch (error) {
                 console.error("Error fetching gallery data:", error);
+                setError("Gagal memuat data galeri. Silakan coba lagi.");
+                setGallery([]);
+            } finally {
+                setLoading(false);
             }
         };
+        
         fetchGallery();
     }, []);
 
@@ -59,6 +82,30 @@ const PageGallery = () => {
         navigate('/login');
     };
 
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500 flex items-center justify-center">
+                <div className="text-white text-2xl">Memuat galeri...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500 flex items-center justify-center">
+                <div className="text-white text-2xl text-center p-4 bg-red-500/30 rounded-lg">
+                    {error}
+                    <button 
+                        onClick={() => window.location.reload()}
+                        className="block mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg"
+                    >
+                        Coba Lagi
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500">
             <Navbar />
@@ -70,92 +117,112 @@ const PageGallery = () => {
                         Galeri ICCN
                     </h1>
 
-                    {/* Tahun Accordion */}
-                    {Object.keys(groupedPhotos)
-                        .sort((a, b) => b - a)
-                        .map((year) => (
-                            <div
-                                key={year}
-                                className="mb-8 bg-white/10 backdrop-blur-sm rounded-xl p-6"
-                            >
-                                <button
-                                    onClick={() => setActiveYear(activeYear === year ? null : year)}
-                                    className="w-full flex justify-between items-center text-white text-2xl font-semibold p-4 hover:bg-white/5 rounded-lg"
+                    {gallery.length === 0 ? (
+                        <div className="text-center text-white text-xl py-12">
+                            Belum ada foto di galeri
+                        </div>
+                    ) : (
+                        /* Tahun Accordion */
+                        Object.keys(groupedPhotos)
+                            .sort((a, b) => b - a)
+                            .map((year) => (
+                                <div
+                                    key={year}
+                                    className="mb-8 bg-white/10 backdrop-blur-sm rounded-xl p-6"
                                 >
-                                    <span>Tahun {year}</span>
-                                    <FaChevronDown
-                                        className={`transition-transform ${activeYear === year ? "rotate-180" : ""
-                                            }`}
-                                    />
-                                </button>
+                                    <button
+                                        onClick={() => setActiveYear(activeYear === year ? null : year)}
+                                        className="w-full flex justify-between items-center text-white text-2xl font-semibold p-4 hover:bg-white/5 rounded-lg transition-colors"
+                                    >
+                                        <span>Tahun {year}</span>
+                                        <FaChevronDown
+                                            className={`transition-transform ${activeYear === year ? "rotate-180" : ""
+                                                }`}
+                                        />
+                                    </button>
 
-                                {activeYear === year && (
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                                    {groupedPhotos[year].map((photo, index) => (
-                                        <motion.div
-                                            key={index}
-                                            initial={{ opacity: 0, scale: 0.9 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ duration: 0.3, delay: index * 0.05 }}
-                                            className="relative group cursor-pointer"
-                                            onClick={() => {
-                                                setSelectedPhoto(photo);
-                                                setIsModalOpen(true);
-                                            }}
-                                        >
-                                            <img
-                                                src={photo.image_url}
-                                                alt={`Kegiatan ICCN ${year}`}
-                                                className="w-full h-48 object-cover rounded-lg transform transition-transform group-hover:scale-105"
-                                            />
-                                            <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <span className="text-white font-medium">
-                                                    Lihat Detail
-                                                </span>
-                                            </div>
-                                            {/* Tambahkan keterangan foto di sini */}
-                                            <div className="p-2 bg-black/50 rounded-b-lg">
-                                                <p className="text-sm text-white text-center">
-                                                   {formatDate(photo.created_at)}
-                                                </p>
-                                            </div>
-                                        </motion.div>
-                                    ))}
+                                    {activeYear === year && (
+                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                                            {groupedPhotos[year].map((photo, index) => (
+                                                <motion.div
+                                                    key={index}
+                                                    initial={{ opacity: 0, scale: 0.9 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                                                    className="relative group cursor-pointer"
+                                                    onClick={() => {
+                                                        setSelectedPhoto(photo);
+                                                        setIsModalOpen(true);
+                                                    }}
+                                                >
+                                                    <div className="aspect-square overflow-hidden rounded-lg">
+                                                        <img
+                                                            src={photo.image_url}
+                                                            alt={`Kegiatan ICCN ${year}`}
+                                                            className="w-full h-full object-cover transform transition-transform group-hover:scale-105"
+                                                            onError={(e) => {
+                                                                e.target.src = 'https://via.placeholder.com/300x200?text=Gambar+Tidak+Tersedia';
+                                                                e.target.className = 'w-full h-full object-contain bg-gray-200';
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <span className="text-white font-medium">
+                                                            Lihat Detail
+                                                        </span>
+                                                    </div>
+                                                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/50 rounded-b-lg">
+                                                        <p className="text-sm text-white text-center truncate">
+                                                            {photo.keterangan_foto || 'Tidak ada keterangan'}
+                                                        </p>
+                                                        <p className="text-xs text-white/80 text-center">
+                                                            {formatDate(photo.created_at)}
+                                                        </p>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                            </div>
-                        ))}
+                            ))
+                    )}
                 </div>
             </main>
 
             {/* Modal untuk menampilkan gambar secara penuh */}
             {isModalOpen && selectedPhoto && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50 p-4">
-                <div className="bg-white rounded-xl max-w-5xl w-full overflow-hidden relative">
-                    <button
-                        className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 z-50"
-                        onClick={() => setIsModalOpen(false)}
-                    >
-                        <FaTimes className="w-8 h-8" />
-                    </button>
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50 p-4">
+                    <div className="bg-white rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden relative flex flex-col">
+                        <button
+                            className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 z-50 bg-white rounded-full p-2 shadow-lg"
+                            onClick={() => setIsModalOpen(false)}
+                        >
+                            <FaTimes className="w-6 h-6" />
+                        </button>
 
-                    <div className="flex flex-col items-center p-6">
-                        <img
-                            src={selectedPhoto.image_url}
-                            alt="Detail Kegiatan ICCN"
-                            className="w-full max-h-[80vh] object-contain rounded-lg"
-                        />
-                        {/* Tambahkan keterangan foto di sini */}
-                        <div className="mt-4 text-center">
-                            <p className="text-sm text-gray-600">
-                                {selectedPhoto.keterangan_foto} 
-                                {/* diposting pada {formatDate(selectedPhoto.created_at)} */}
+                        <div className="flex-1 overflow-auto p-6">
+                            <img
+                                src={selectedPhoto.image_url}
+                                alt="Detail Kegiatan ICCN"
+                                className="w-full h-auto max-h-[70vh] object-contain mx-auto rounded-lg"
+                                onError={(e) => {
+                                    e.target.src = 'https://via.placeholder.com/800x600?text=Gambar+Tidak+Tersedia';
+                                    e.target.className = 'w-full h-auto max-h-[70vh] object-contain bg-gray-200 mx-auto rounded-lg';
+                                }}
+                            />
+                        </div>
+                        
+                        <div className="p-4 bg-gray-100 border-t">
+                            <h3 className="text-lg font-semibold text-gray-800">
+                                {selectedPhoto.keterangan_foto || 'Tidak ada keterangan'}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                                {formatDate(selectedPhoto.created_at)}
                             </p>
                         </div>
                     </div>
                 </div>
-            </div>
-        )}
+            )}
         </div>
     );
 };

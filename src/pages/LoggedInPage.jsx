@@ -269,13 +269,27 @@ const LoggedInPage = () => {
 
         const fetchGallery = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/admin/gallery`);
-                const data = await response.json();
-                setGallery(data);
+              const response = await fetch(`${API_BASE_URL}/admin/gallery`);
+              const data = await response.json();
+              
+              if (Array.isArray(data)) {
+                const processedGallery = data.map(item => ({
+                  ...item,
+                  // Perbaikan di sini: tambahkan path uploads/gallery
+                  image_url: item.image_url.startsWith('http') 
+                    ? item.image_url 
+                    : `${API_BASE_URL}/uploads/gallery/${item.image_url}`
+                }));
+                setGallery(processedGallery);
+              } else {
+                console.error("Data gallery tidak valid:", data);
+                setGallery(dummyGallery);
+              }
             } catch (error) {
-                console.error("Error fetching gallery data:", error);
+              console.error("Error fetching gallery data:", error);
+              setGallery(dummyGallery);
             }
-        };
+          };
 
         const fetchBerita = async () => {
             try {
@@ -386,7 +400,17 @@ const LoggedInPage = () => {
 
     // Fungsi untuk membuka modal gallery
     const openGalleryModal = (photo) => {
-        setSelectedPhoto(photo);
+        // Pastikan photo memiliki image_url yang valid
+        if (!photo.image_url) {
+            console.error("Photo tidak memiliki image_url:", photo);
+            return;
+        }
+        setSelectedPhoto({
+            ...photo,
+            image_url: photo.image_url.startsWith('http') 
+                ? photo.image_url 
+                : `${API_BASE_URL}${photo.image_url}`
+        });
         setIsGalleryModalOpen(true);
     };
 
@@ -1194,11 +1218,12 @@ const LoggedInPage = () => {
                             <FaTimes className="w-5 h-5" />
                         </button>
                         <img
-                            src={selectedPhoto.image_url}
+                            src={selectedPhoto.image_url.startsWith('http') 
+                                ? selectedPhoto.image_url 
+                                : `${API_BASE_URL}${selectedPhoto.image_url}`}
                             alt={`Gallery Full`}
                             className="w-full h-auto rounded-lg"
                         />
-                        {/* Keterangan Foto di Modal */}
                         <div className="mt-4 text-center">
                             <p className="text-sm text-gray-700 dark:text-gray-300">
                                 {selectedPhoto.keterangan_foto} diposting pada {formatDate(selectedPhoto.created_at)}
