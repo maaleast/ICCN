@@ -88,27 +88,32 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
         active: {
             color: 'bg-blue-100 text-blue-700',
             icon: <PlayCircleIcon className="w-5 h-5 mr-2" />,
-            label: 'Buruan Daftar'
+            label: 'SEGERA MENDAFTAR'
         },
         upcoming: {
             color: 'bg-yellow-100 text-yellow-700',
             icon: <ClockIcon className="w-5 h-5 mr-2" />,
-            label: 'UPCOMING'
+            label: 'SEGERA HADIR'
         },
         completed: {
             color: 'bg-green-100 text-green-700',
             icon: <CheckCircleIcon className="w-5 h-5 mr-2" />,
-            label: 'COMPLETED'
+            label: 'ANDA MENYELESAIKAN PELATIHAN'
         },
         uncompleted: {
             color: 'bg-red-100 text-red-700',
             icon: <LockClosedIcon className="w-5 h-5 mr-2" />,
-            label: 'TIDAK SELESAI'
+            label: 'ANDA TIDAK MENYELESAIKAN PELATIHAN'
         },
         ongoing: {
             color: 'bg-purple-100 text-purple-700',
             icon: <PlayCircleIcon className="w-5 h-5 mr-2" />,
-            label: 'Sedang Berlangsung'
+            label: 'ANDA SEDANG BERLATIH'
+        },
+        abandoned: {
+            color: 'bg-amber-50 text-amber-700', // Oranye pudar
+            icon: <LockClosedIcon className="w-5 h-5 mr-2" />, // Pastikan ikon diimpor
+            label: 'ANDA MELEWATKAN PELATIHAN'
         }
     };
 
@@ -130,9 +135,9 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
                             {statusConfig.completed.icon}
                             {statusConfig.completed.label}
                         </div>
-                        <div className={`${statusConfig.active.color} inline-flex items-center px-3 py-1 rounded-full text-sm`}>
-                            {statusConfig.active.icon}
-                            {statusConfig.active.label}
+                        <div className={`${statusConfig.ongoing.color} inline-flex items-center px-3 py-1 rounded-full text-sm`}>
+                            {statusConfig.ongoing.icon}
+                            {statusConfig.ongoing.label}
                         </div>
                     </div>
                 ) : (
@@ -173,23 +178,27 @@ export default function TrainingCard({ title, startDate, endDate, status, badges
                     disabled={finalStatusWithOverdue !== 'active' && finalStatusWithOverdue !== 'ongoing'}
                     className={`w-full mt-6 py-2 rounded-lg font-medium transition-all ${
                         finalStatusWithOverdue === 'active'
-                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                            : finalStatusWithOverdue === 'ongoing'
-                            ? 'bg-purple-600 text-white hover:bg-purple-700' // Warna untuk ongoing
-                            : finalStatusWithOverdue === 'uncompleted'
-                            ? 'bg-red-100 text-red-700 cursor-not-allowed'
-                            : 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : finalStatusWithOverdue === 'ongoing'
+                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                        : finalStatusWithOverdue === 'abandoned'
+                        ? 'bg-amber-100 text-amber-700 cursor-not-allowed' // Warna oranye pudar
+                        : finalStatusWithOverdue === 'uncompleted'
+                        ? 'bg-red-100 text-red-700 cursor-not-allowed'
+                        : 'bg-gray-100 text-gray-500 cursor-not-allowed'
                     }`}
                 >
-                    {finalStatusWithOverdue === 'active'
-                        ? 'Daftar'
-                        : finalStatusWithOverdue === 'ongoing'
-                        ? 'Sedang Berlangsung'
-                        : finalStatusWithOverdue === 'upcoming'
-                        ? 'Segera Hadir'
-                        : finalStatusWithOverdue === 'completed'
-                        ? 'Selesai'
-                        : 'Tidak Selesai'}
+                {finalStatusWithOverdue === 'active'
+                    ? 'Daftar'
+                    : finalStatusWithOverdue === 'ongoing'
+                    ? 'Sedang Berlangsung'
+                    : finalStatusWithOverdue === 'abandoned'
+                    ? 'Anda Melewatkan Kesempatan' // Teks tombol
+                    : finalStatusWithOverdue === 'upcoming'
+                    ? 'Segera Hadir'
+                    : finalStatusWithOverdue === 'completed'
+                    ? 'Selesai'
+                    : 'Tidak Selesai'}
                 </button>
             </div>
         </motion.div>

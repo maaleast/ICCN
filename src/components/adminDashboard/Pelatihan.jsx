@@ -30,6 +30,7 @@ export default function Pelatihan() {
     const [showDetailPendaftarModal, setShowDetailPendaftarModal] = useState(false);
     const [pendaftarData, setPendaftarData] = useState([]);
     const [totalPendaftar, setTotalPendaftar] = useState({});
+    const [idPelatihan, setIdPelatihan] = useState();
 
     // Fungsi untuk menampilkan modal dan mengambil data pendaftar
     const handleShowDetailPendaftar = async (pelatihanId) => {
@@ -376,6 +377,7 @@ export default function Pelatihan() {
                             className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600"
                             onClick={() => {
                                 handleShowDetailPendaftar(item.id)
+                                setIdPelatihan(item.id)
                             }}
                         >
                             <FaUser /> {/* Ikon member */}
@@ -860,6 +862,7 @@ export default function Pelatihan() {
                 isOpen={showDetailPendaftarModal}
                 onClose={() => setShowDetailPendaftarModal(false)}
                 data={pendaftarData}
+                id={idPelatihan}
             />
         </div>
     );

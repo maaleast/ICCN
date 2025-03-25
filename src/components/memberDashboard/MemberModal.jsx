@@ -98,14 +98,24 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
     const fetchKodePelatihan = async (idMember, idTraining) => {
         try {
             const response = await fetch(`${API_BASE_URL}/pelatihan/peserta-pelatihan/kode/${idMember}/${idTraining}`);
+            
+            // Jika response tidak OK, langsung return object dengan status error
             if (!response.ok) {
-                throw new Error('Gagal mengambil data kode pelatihan');
+                return {
+                    error: true,
+                    message: 'Gagal mengambil data kode pelatihan'
+                };
             }
+            
             const data = await response.json();
             return data;
+            
         } catch (error) {
             console.error('❌ Error:', error);
-            throw error; // Lempar error agar bisa ditangkap di tempat lain
+            return {
+                error: true,
+                message: error.message || 'Terjadi kesalahan saat mengambil kode pelatihan'
+            };
         }
     };
 
@@ -120,10 +130,18 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
             setError('');
             try {
                 const kodeData = await fetchKodePelatihan(idMember, idTraining);
+                
+                // Handle jika ada error dari fetchKodePelatihan
+                if (kodeData.error) {
+                    setError(kodeData.message);
+                    return; // Keluar tanpa menampilkan Swal
+                }
+                
                 if (kodeData.kode) {
-                    setKode(kodeData.kode); // Set kode jika ditemukan
-                    setShowFinishedCode(true); // Tampilkan kode
+                    setKode(kodeData.kode);
+                    setShowFinishedCode(true);
                 } else if (kodeData.message) {
+                    // Hanya tampilkan Swal untuk pesan informasi (bukan error)
                     Swal.fire({
                         icon: 'info',
                         title: 'Informasi',
@@ -131,12 +149,8 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     });
                 }
             } catch (error) {
-                setError(error.message || 'Terjadi kesalahan saat mengambil kode pelatihan');
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.message || 'Terjadi kesalahan saat mengambil kode pelatihan',
-                });
+                // Ini akan menangkap error yang tidak terduga
+                setError(error.message || 'Terjadi kesalahan');
             } finally {
                 setLoading(false);
             }
@@ -519,12 +533,12 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                                     <span className="ml-2">Memuat kode pelatihan...</span>
                                 </div>
                             )}
-
+{/* 
                             {error && (
                                 <div className="text-red-500 text-sm mt-2">
                                     {error}
                                 </div>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 
