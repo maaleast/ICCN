@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { API_BASE_URL } from "../config";
 import Navbar from "../components/Navbar";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClock } from '@fortawesome/free-solid-svg-icons';
 
 const PageBerita = () => {
     const [berita, setBerita] = useState([]);
@@ -104,26 +106,34 @@ const PageBerita = () => {
                 {/* Modal Detail Berita */}
                 {showDetailModal && selectedBerita && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-                            <h3 className="text-2xl font-bold mb-4">{selectedBerita.judul}</h3>
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl">
+                            <h3 className="text-xl font-bold mb-4">{selectedBerita.judul}</h3>
                             {selectedBerita.gambar && (
-                                <div className="flex justify-center mb-4">
-                                    <img
-                                        src={`${API_BASE_URL}/uploads/berita/${selectedBerita.gambar}`}
-                                        alt={selectedBerita.judul}
-                                        className="max-w-full max-h-[400px] object-contain rounded-lg"
-                                    />
-                                </div>
+                                <img
+                                    src={selectedBerita.gambar.startsWith('http') ? selectedBerita.gambar : `${API_BASE_URL}/uploads/berita/${selectedBerita.gambar}`}
+                                    alt={selectedBerita.judul}
+                                    className="w-full rounded-lg mb-4"
+                                />
                             )}
-                            <div className="overflow-y-auto">
-                                <p className="text-sm text-gray-600 whitespace-pre-line">
+                            {/* Container untuk deskripsi dengan scroll */}
+                            <div className="mb-4 max-h-48 overflow-y-auto">
+                                <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap break-words">
                                     {selectedBerita.deskripsi}
                                 </p>
                             </div>
-                            <p className="text-sm text-gray-500 mt-4">
-                                {new Date(selectedBerita.waktu_tayang).toLocaleDateString()}
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                                <FontAwesomeIcon icon={faClock} className="mr-1" />
+                                {new Date(selectedBerita.waktu_tayang).toLocaleString()}
                             </p>
-                            <div className="flex justify-end mt-4">
+                            <div className="flex justify-end space-x-2">
+                                {selectedBerita.dokumen && (
+                                    <button
+                                        onClick={() => window.open(`${API_BASE_URL}/berita/dokumen/${selectedBerita.dokumen}`, '_blank')}
+                                        className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                                    >
+                                        Lihat Berita
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => setShowDetailModal(false)}
                                     className="px-4 py-2 bg-gray-500 text-white rounded-lg"

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { API_BASE_URL } from '../../config';
 import TrainingCard from './TrainingCard';
 
 const transformBadges = (badgesObj) => {
@@ -12,29 +13,55 @@ const transformBadges = (badgesObj) => {
 };
 
 
-export default function TrainingList({ trainings, badges, onRegister, endTraining }) {
+export default function TrainingList({ trainings, badges, onRegister, endTraining, memberId }) {
     // Ubah badges ke array jika masih berbentuk objek
     const badgesArray = Array.isArray(badges) ? badges : transformBadges(badges);
 
-    const trainingsList = trainings;
-
-    // console.log('trainings list: ', trainingsList);
+    const markAsUncompleted = async (idMember, pelatihanId) => {
+        if (!idMember || !pelatihanId) return;
+    
+        try {
+            const response = await fetch(`${API_BASE_URL}/pelatihan/update-status/uncompleted`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ idMember, pelatihanId })
+            });
+    
+            const data = await response.json();
+            if (response.ok) {
+                console.log("✅ Status pelatihan diperbarui menjadi 'uncompleted':", data);
+            } else {
+                console.error("❌ Gagal memperbarui status:", data.message);
+            }
+        } catch (error) {
+            console.error("❌ Error:", error);
+        }
+    };
 
     const getTrainingStatus = (training) => {
         const currentDate = new Date();
         const trainingEndDate = new Date(training.tanggal_berakhir);
         const isCompleted = badgesArray.some(badge => badge.pelatihan_id === training.id && badge.status === 'completed');
         const isRegistered = badgesArray.some(badge => badge.pelatihan_id === training.id && badge.status === 'ongoing'); // Cek pendaftaran
+        const isUncompleted = badgesArray.some(badge => badge.pelatihan_id === training.id && badge.status === 'uncompleted'); // Cek pendaftaran
         // console.log('badgesArray: ', badgesArray);
         // if (badgesArray.some(badge => badge.pelatihan_id === training.id && badge.status === 'ongoing')) {
         //     console.log('training', training.judul_pelatihan, 'isRegistered: ', isRegistered, 'badge: ', badgesArray.filter(badge => badge.pelatihan_id === training.id));
         // }
         // console.log('training', training.judul_pelatihan, 'isRegistered: ', isRegistered, 'badge: ', badgesArray.filter(badge => badge.pelatihan_id === training.id));
+        if (currentDate > trainingEndDate && !isRegistered && !isCompleted && !isUncompleted) {
+            return 'abandoned';
+        }
+        
         if (isRegistered && currentDate <= trainingEndDate) {
             return 'ongoing'; // Status ongoing jika terdaftar
         } else if (isCompleted) {
             return 'completed'; // Status completed jika sudah mendapatkan badge
-        } else if (currentDate > trainingEndDate && isRegistered) {
+        } else if (currentDate > trainingEndDate && isRegistered || isUncompleted) {
+            if (!isUncompleted) {
+                markAsUncompleted(memberId, training.id);
+            }
+            // console.log('memberId: ' + memberId, "training Id: " + training.id)
             return 'uncompleted'; // Status uncompleted jika sudah lewat
         } else if (currentDate < new Date(training.tanggal_pelatihan)) {
             return 'upcoming'; // Status upcoming jika belum dimulai
@@ -42,6 +69,7 @@ export default function TrainingList({ trainings, badges, onRegister, endTrainin
 
         return training.status; // Kembalikan status default
     };
+
     const getTrainingBadges = (trainingId) => {
         return badgesArray.filter(badge => badge.pelatihan_id === trainingId);
     };
@@ -59,8 +87,8 @@ export default function TrainingList({ trainings, badges, onRegister, endTrainin
 
     const completedTrainings = trainings
         .filter(training => {
-            const status = getTrainingStatus(training);
-            return status === 'completed' || status === 'uncompleted';
+          const status = getTrainingStatus(training);
+          return status === 'completed' || status === 'uncompleted' || status === 'abandoned';
         })
         .sort((a, b) => new Date(b.tanggal_berakhir) - new Date(a.tanggal_berakhir));
 

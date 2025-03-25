@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Pagination from "../Pagination";
 import { FaMedal, FaCrown, FaGem, FaStar, FaTrophy, FaAward, FaUser } from "react-icons/fa";
+import DetailMemberPelatihan from "./DetailMemberPelatihan";
 
 export default function Pelatihan() {
     const [pelatihan, setPelatihan] = useState([]);
@@ -26,6 +27,58 @@ export default function Pelatihan() {
         badge: "",
     });
     const [searchTerm, setSearchTerm] = useState("");
+    const [showDetailPendaftarModal, setShowDetailPendaftarModal] = useState(false);
+    const [pendaftarData, setPendaftarData] = useState([]);
+    const [totalPendaftar, setTotalPendaftar] = useState({});
+    const [idPelatihan, setIdPelatihan] = useState();
+
+    // Fungsi untuk menampilkan modal dan mengambil data pendaftar
+    const handleShowDetailPendaftar = async (pelatihanId) => {
+        try {
+            // Ambil data pendaftar dari API
+            const response = await fetch(`${API_BASE_URL}/pelatihan/peserta-pelatihan/${pelatihanId}/pendaftar`);
+            const data = await response.json();
+    
+            // Jika peserta tidak ditemukan, tampilkan SweetAlert
+            if (response.status === 404 || data.message === "peserta tidak ditemukan" || data.length === 0) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Tidak Ada Peserta",
+                    text: "Tidak ada atau belum ada peserta yang mendaftar.",
+                    confirmButtonText: "OK",
+                });
+                return;
+            }
+    
+            // Set data pendaftar jika ditemukan
+            setPendaftarData(data);
+            setShowDetailPendaftarModal(true);
+        } catch (error) {
+            console.error("❌ Error fetching pendaftar data:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Gagal Mengambil Data",
+                text: "Terjadi kesalahan saat mengambil data peserta.",
+                confirmButtonText: "OK",
+            });
+        }
+    };
+
+    const fetchTotalPendaftar = async (pelatihanId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/pelatihan/${pelatihanId}/total-pendaftar`);
+            const data = await response.json();
+            setTotalPendaftar((prev) => ({ ...prev, [pelatihanId]: data.total }));
+        } catch (error) {
+            console.error("❌ Gagal mengambil jumlah pendaftar:", error);
+        }
+    };
+
+    useEffect(() => {
+        pelatihan.forEach((item) => {
+            fetchTotalPendaftar(item.id);
+        });
+    }, [pelatihan]);
 
     // Fetch data dari backend
     useEffect(() => {
@@ -323,11 +376,12 @@ export default function Pelatihan() {
                         <button
                             className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600"
                             onClick={() => {
-                                // Tidak ada aksi karena hanya tampilan frontend
+                                handleShowDetailPendaftar(item.id)
+                                setIdPelatihan(item.id)
                             }}
                         >
                             <FaUser /> {/* Ikon member */}
-                            <span>200</span> {/* Angka */}
+                            <span>{totalPendaftar[item.id] ?? 0}</span> {/* Angka */}
                             <span>Detail Pendaftar</span> {/* Teks */}
                         </button>
                     </div>
@@ -804,6 +858,12 @@ export default function Pelatihan() {
                     </div>
                 </div>
             )}
+            <DetailMemberPelatihan 
+                isOpen={showDetailPendaftarModal}
+                onClose={() => setShowDetailPendaftarModal(false)}
+                data={pendaftarData}
+                id={idPelatihan}
+            />
         </div>
     );
 }

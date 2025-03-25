@@ -27,6 +27,40 @@ export default function MemberDashboard() {
     const [memberId, setMemberId] = useState(null);
     const [status, setStatus] = useState(false);
     const navigate = useNavigate();
+    const [userInfo, setUserInfo] = useState({
+        no_identitas: "",
+        tipe_keanggotaan: "",
+        institusi: "",
+        nama: "",
+        nomor_wa: "",
+    });
+
+    // Fetch data member saat komponen mount
+    useEffect(() => {
+        const fetchMemberInfo = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/members/member-info?user_id=${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Gagal mengambil data member");
+                }
+
+                setUserInfo(data);
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        };
+
+        fetchMemberInfo();
+    }, [userId]); // Gunakan userId sebagai dependency
 
     useEffect(() => {
         if (!userId) return; // Cegah request jika userId belum tersedia
@@ -221,11 +255,19 @@ export default function MemberDashboard() {
                                 className="space-y-8"
                             >
                                 {/* Welcome Card */}
-                                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md">
-                                    <h1 className="text-2xl font-bold">Selamat Datang, Member ICCN! 👋</h1>
-                                    <p className="text-gray-600 dark:text-gray-300 mt-2">
-                                        Selamat belajar semangat jangan pernah menyerah!
-                                    </p>
+                                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md flex flex-col md:flex-row items-center md:items-start justify-between">
+                                    <div className="md:w-6/12">
+                                        <h1 className="text-2xl font-bold text-center md:text-left">Selamat Datang, Member ICCN! 👋</h1>
+                                        <p className="text-gray-600 dark:text-gray-300 mt-4 text-center md:text-left">
+                                            Selamat belajar semangat jangan pernah menyerah!
+                                        </p>
+                                    </div>
+
+                                    {/* Nama dan No Identitas dengan Background Biru */}
+                                    <div className="mt-4 bg-gradient-to-r from-blue-700 via-blue-400 text-white py-7 px-5 rounded-lg flex flex-col w-10/12 md:w-5/12 text-center md:text-left mx-auto md:mx-0">
+                                        <p className="text-lg font-semibold">{userInfo.nama}</p>
+                                        <p className="text-sm opacity-90">{userInfo.no_identitas}</p>
+                                    </div>
                                 </div>
 
                                 {/* Statistik Pelatihan */}
@@ -267,7 +309,7 @@ export default function MemberDashboard() {
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={handleNavigateToTraining}
-                                        className="bg-yellow-600 text-white p-6 rounded-xl shadow-md cursor-pointer"
+                                        className="bg-yellow-500 text-white p-6 rounded-xl shadow-md cursor-pointer"
                                     >
                                         <h3 className="text-sm font-semibold">Pelatihan yang Akan Datang</h3>
                                         <p className="text-3xl font-bold mt-2">{upcomingTrainingsCount} Program</p>
@@ -308,9 +350,10 @@ export default function MemberDashboard() {
                                 badges={badges} // Teruskan badges ke TrainingList
                                 onRegister={handleTrainingClick} // Teruskan prop onRegister ke TrainingList
                                 endTrainings={endTrainings}
+                                memberId={memberId}
                             />
                         )}
-                        {activeMenu === 'Penghargaan' && <Penghargaan badges={transformBadges(badges)} trainings={trainings} />}
+                        {activeMenu === 'Penghargaan' && <Penghargaan badges={transformBadges(badges)} />}
                         {/* {activeMenu === 'Profil' && <Profile />} */}
                         {activeMenu === 'Notifikasi' && <Notifications />}
                         {activeMenu === 'Pengaturan' && <Settings userId={userId} />}

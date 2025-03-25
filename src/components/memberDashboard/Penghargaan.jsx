@@ -3,7 +3,7 @@ import { FaMedal, FaStar, FaTrophy, FaCrown, FaGem, FaAward } from 'react-icons/
 import { useState } from 'react';
 import Pagination from '../Pagination'; // Impor komponen Pagination
 
-export default function Penghargaan({ badges, trainings }) {
+export default function Penghargaan({ badges }) {
     const badgeIcons = {
         bronze: <FaMedal className="shine-animation bronze-glow" color="#cd7f32" />,
         silver: <FaStar className="shine-animation silver-glow" color="#c0c0c0" />,
@@ -19,32 +19,16 @@ export default function Penghargaan({ badges, trainings }) {
     const [searchTerm, setSearchTerm] = useState('');
     const itemsPerPage = 10;
 
-    // Fungsi untuk menghitung jumlah badge
-    const countBadges = (badgeType) => {
-        return badges.filter(badge => badge.badge === badgeType).length;
-    };
+    const completedBadges = badges.filter(badge => badge.status === "completed");
+    completedBadges.sort((a, b) => new Date(a.waktu_selesai) - new Date(b.waktu_selesai));
 
-    // Fungsi untuk mendapatkan judul pelatihan berdasarkan pelatihan_id
-    const getJudulPelatihan = (pelatihanId) => {
-        const pelatihan = trainings.find(training => training.id === pelatihanId);
-        return pelatihan ? pelatihan.judul_pelatihan : 'Pelatihan Tidak Ditemukan';
-    };
+    console.log('completedBadges', completedBadges)
 
-    // Warna untuk lingkaran badge
-    const badgeColors = {
-        bronze: '#cd7f32',
-        silver: '#c0c0c0',
-        gold: '#ffd700',
-        platinum: '#2fcde4',
-        diamond: '#2f72e4',
-        grandmaster: '#e42f72',
-        celestial: '#b0179c',
-    };
-
-    // Filter badge berdasarkan search term dan urutkan dari yang terbaru
+    // Filter badge berdasarkan search term dan urutkan dari yang terbaru dan yang statusnya completed
     const filteredBadges = badges
-        .filter(badge => badge.badge.toLowerCase().includes(searchTerm.toLowerCase()))
-        .sort((a, b) => new Date(b.tanggal_selesai) - new Date(a.tanggal_selesai));
+    .filter(badge => badge.status === "completed") // Hanya ambil yang selesai
+    .filter(badge => badge.badge.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => new Date(b.waktu_selesai || 0) - new Date(a.waktu_selesai || 0));
 
     // Paginasi
     const totalPages = Math.ceil(filteredBadges.length / itemsPerPage);
@@ -126,6 +110,8 @@ export default function Penghargaan({ badges, trainings }) {
         }
     `;
 
+    console.log('badges: ', badges);
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -139,124 +125,27 @@ export default function Penghargaan({ badges, trainings }) {
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-10 shadow-md">
                 <h1 className="text-2xl font-bold mb-6">Badge Koleksi Anda!🏆</h1>
                 <div className="flex items-end space-x-4">
-                    {/* Bronze Badge */}
-                    <div className="flex flex-col items-center">
-                        <div className="flex items-center">
-                            <div className="badge-icon bronze">
-                                {badgeIcons.bronze}
+                    {completedBadges.map((badge, index) => (
+                        <div key={index} className="flex flex-col items-center">
+                            <div className="flex items-center">
+                                <div className={`badge-icon ${badge.badge}`}>
+                                    {badgeIcons[badge.badge]}
+                                </div>
                             </div>
-                            <div
-                                className="badge-count-circle"
-                                style={{ backgroundColor: badgeColors.bronze }}
-                            >
-                                {countBadges('bronze')}
-                            </div>
+                            <h2 className="text-xl font-semibold mt-2">
+                                {badge.badge.charAt(0).toUpperCase() + badge.badge.slice(1)}
+                            </h2>
+                            <p className="text-gray-600 dark:text-gray-300 text-sm text-center">
+                                {badge.badge === "bronze" && "Tingkat awal, mulailah perjalananmu!"}
+                                {badge.badge === "silver" && "Tingkat menengah, pertahankan semangatmu!"}
+                                {badge.badge === "gold" && "Tingkat lanjut, kamu sudah hebat!"}
+                                {badge.badge === "platinum" && "Tingkat ahli, teruslah berkembang!"}
+                                {badge.badge === "diamond" && "Tingkat master, kamu luar biasa!"}
+                                {badge.badge === "grandmaster" && "Tingkat legenda, hampir mencapai puncak!"}
+                                {badge.badge === "celestial" && "Tingkat tertinggi, kamu adalah yang terbaik!"}
+                            </p>
                         </div>
-                        <h2 className="text-xl font-semibold mt-2">Bronze</h2>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm text-center">Tingkat awal, mulailah perjalananmu!</p>
-                    </div>
-
-                    {/* Silver Badge */}
-                    <div className="flex flex-col items-center mt-8">
-                        <div className="flex items-center">
-                            <div className="badge-icon silver">
-                                {badgeIcons.silver}
-                            </div>
-                            <div
-                                className="badge-count-circle"
-                                style={{ backgroundColor: badgeColors.silver }}
-                            >
-                                {countBadges('silver')}
-                            </div>
-                        </div>
-                        <h2 className="text-xl font-semibold mt-2">Silver</h2>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm text-center">Tingkat menengah, pertahankan semangatmu!</p>
-                    </div>
-
-                    {/* Gold Badge */}
-                    <div className="flex flex-col items-center mt-16">
-                        <div className="flex items-center">
-                            <div className="badge-icon gold">
-                                {badgeIcons.gold}
-                            </div>
-                            <div
-                                className="badge-count-circle"
-                                style={{ backgroundColor: badgeColors.gold }}
-                            >
-                                {countBadges('gold')}
-                            </div>
-                        </div>
-                        <h2 className="text-xl font-semibold mt-2">Gold</h2>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm text-center">Tingkat lanjut, kamu sudah hebat!</p>
-                    </div>
-
-                    {/* Platinum Badge */}
-                    <div className="flex flex-col items-center mt-24">
-                        <div className="flex items-center">
-                            <div className="badge-icon platinum">
-                                {badgeIcons.platinum}
-                            </div>
-                            <div
-                                className="badge-count-circle"
-                                style={{ backgroundColor: badgeColors.platinum }}
-                            >
-                                {countBadges('platinum')}
-                            </div>
-                        </div>
-                        <h2 className="text-xl font-semibold mt-2">Platinum</h2>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm text-center">Tingkat ahli, teruslah berkembang!</p>
-                    </div>
-
-                    {/* Diamond Badge */}
-                    <div className="flex flex-col items-center mt-32">
-                        <div className="flex items-center">
-                            <div className="badge-icon diamond">
-                                {badgeIcons.diamond}
-                            </div>
-                            <div
-                                className="badge-count-circle"
-                                style={{ backgroundColor: badgeColors.diamond }}
-                            >
-                                {countBadges('diamond')}
-                            </div>
-                        </div>
-                        <h2 className="text-xl font-semibold mt-2">Diamond</h2>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm text-center">Tingkat master, kamu luar biasa!</p>
-                    </div>
-
-                    {/* Grandmaster Badge */}
-                    <div className="flex flex-col items-center mt-40">
-                        <div className="flex items-center">
-                            <div className="badge-icon grandmaster">
-                                {badgeIcons.grandmaster}
-                            </div>
-                            <div
-                                className="badge-count-circle"
-                                style={{ backgroundColor: badgeColors.grandmaster }}
-                            >
-                                {countBadges('grandmaster')}
-                            </div>
-                        </div>
-                        <h2 className="text-xl font-semibold mt-2">Grandmaster</h2>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm text-center">Tingkat legenda, hampir mencapai puncak!</p>
-                    </div>
-
-                    {/* Celestial Badge */}
-                    <div className="flex flex-col items-center mt-48">
-                        <div className="flex items-center">
-                            <div className="badge-icon celestial">
-                                {badgeIcons.celestial}
-                            </div>
-                            <div
-                                className="badge-count-circle"
-                                style={{ backgroundColor: badgeColors.celestial }}
-                            >
-                                {countBadges('celestial')}
-                            </div>
-                        </div>
-                        <h2 className="text-xl font-semibold mt-2">Celestial</h2>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm text-center">Tingkat tertinggi, kamu adalah yang terbaik!</p>
-                    </div>
+                    ))}
                 </div>
 
                 {/* Tabel History Pendapatan Medal */}
@@ -291,8 +180,8 @@ export default function Penghargaan({ badges, trainings }) {
                                             <span className="capitalize">{badge.badge}</span>
                                         </td>
                                         <td className="px-4 py-2">
-                                            {badge.tanggal_selesai
-                                                ? new Date(badge.tanggal_selesai).toLocaleDateString('id-ID', {
+                                            {badge.waktu_selesai
+                                                ? new Date(badge.waktu_selesai).toLocaleDateString('id-ID', {
                                                     day: 'numeric',
                                                     month: 'long',
                                                     year: 'numeric',
@@ -301,7 +190,7 @@ export default function Penghargaan({ badges, trainings }) {
                                             }
                                         </td>
                                         <td className="px-4 py-2">
-                                            {getJudulPelatihan(badge.pelatihan_id)}
+                                            {badge.judul_pelatihan || "Pelatihan Tidak Ditemukan"}
                                         </td>
                                     </tr>
                                 ))}

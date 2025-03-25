@@ -11,6 +11,8 @@ import PageBerita from "./pages/PageBerita";
 import PageServices from './pages/PageServices';
 import PageEvents from './pages/PageEvents';
 import PageTeam from './pages/PageTeam';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const token = localStorage.getItem("token");
@@ -55,6 +57,18 @@ function RouteGuard({ children }) {
 function App() {
   return (
     <Router>
+      <ToastContainer 
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <Routes>
         {/* Route untuk landing page dengan proteksi */}
         <Route path="/" element={
