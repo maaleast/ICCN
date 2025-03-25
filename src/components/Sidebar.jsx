@@ -10,6 +10,7 @@ export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMen
         { name: 'Kelola Pelatihan', icon: FiAward },
         { name: 'Galeri Kegiatan', icon: FiImage },
         { name: 'Kelola Berita', icon: FiFileText },
+        { name: 'Kelola Services', icon: FiFileText },
         { name: 'Kelola Organisasi', icon: FiUsers },
         { name: 'Laporan Keuangan', icon: BiMoneyWithdraw },
         { name: 'Pemasukan', icon: FiDownload  },
