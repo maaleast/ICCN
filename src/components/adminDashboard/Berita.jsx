@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArchive, faTag, faClock, faNewspaper } from '@fortawesome/free-solid-svg-icons';
+import { faArchive, faTag, faClock, faNewspaper, faSearch, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
-import { FaEye, FaEdit, FaTrash, FaArchive, FaAward } from "react-icons/fa";
+import { FaEye, FaEdit, FaTrash, FaArchive, FaCertificate } from "react-icons/fa";
+import Pagination from "../Pagination";
+import Select from 'react-select';
 
 const Berita = () => {
     const [berita, setBerita] = useState([]);
-    const [filter, setFilter] = useState('all');
+    const [filter, setFilter] = useState({ value: 'all', label: 'Semua' });
     const [showAddForm, setShowAddForm] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -17,6 +19,7 @@ const Berita = () => {
         deskripsi: '',
         waktu_tayang: '',
         gambar: null,
+        dokumen: null,
     });
     const [editBerita, setEditBerita] = useState({
         id: '',
@@ -25,8 +28,23 @@ const Berita = () => {
         waktu_tayang: '',
         gambar: null,
         gambar_lama: '',
+        dokumen: null,
+        dokumen_lama: '',
         status: '',
     });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchDate, setSearchDate] = useState('');
+    const itemsPerPage = 6;
+
+    const filterOptions = [
+        { value: 'all', label: 'Semua' },
+        { value: 'latest', label: 'Latest' },
+        { value: 'upcoming', label: 'Upcoming' },
+        { value: 'archived', label: 'Archived' },
+        { value: 'branding', label: 'Branding' },
+    ];
 
     // Fetch semua berita
     const fetchBerita = async () => {
@@ -35,6 +53,7 @@ const Berita = () => {
             const data = await response.json();
             if (data.success) {
                 setBerita(data.data);
+                setTotalPages(Math.ceil(data.data.length / itemsPerPage));
             }
         } catch (error) {
             console.error('Error fetching berita:', error);
@@ -48,6 +67,7 @@ const Berita = () => {
             const data = await response.json();
             if (data.success) {
                 setBerita(data.data);
+                setTotalPages(Math.ceil(data.data.length / itemsPerPage));
             }
         } catch (error) {
             console.error('Error fetching filtered berita:', error);
@@ -55,10 +75,10 @@ const Berita = () => {
     };
 
     useEffect(() => {
-        if (filter === 'all') {
+        if (filter.value === 'all') {
             fetchBerita();
         } else {
-            fetchFilteredBerita(filter);
+            fetchFilteredBerita(filter.value);
         }
     }, [filter]);
 
@@ -71,6 +91,9 @@ const Berita = () => {
         if (newBerita.gambar) {
             formData.append('gambar', newBerita.gambar);
         }
+        if (newBerita.dokumen) {
+            formData.append('dokumen', newBerita.dokumen);
+        }
 
         try {
             const response = await fetch(`${API_BASE_URL}/berita/uploadberita`, {
@@ -81,7 +104,7 @@ const Berita = () => {
             if (data.success) {
                 await fetchBerita(); // Refresh data
                 setShowAddForm(false);
-                setNewBerita({ judul: '', deskripsi: '', waktu_tayang: '', gambar: null });
+                setNewBerita({ judul: '', deskripsi: '', waktu_tayang: '', gambar: null, dokumen: null });
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil',
@@ -115,6 +138,11 @@ const Berita = () => {
             formData.append('gambar', editBerita.gambar);
         } else {
             formData.append('gambar_lama', editBerita.gambar_lama);
+        }
+        if (editBerita.dokumen) {
+            formData.append('dokumen', editBerita.dokumen);
+        } else {
+            formData.append('dokumen_lama', editBerita.dokumen_lama);
         }
 
         try {
@@ -150,40 +178,52 @@ const Berita = () => {
 
     // Handle hapus berita
     const handleDeleteBerita = async (id) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/berita/hapus/${id}`, {
-                method: 'DELETE',
-            });
-            const data = await response.json();
-            if (data.success) {
-                await fetchBerita(); // Refresh data
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'Berita berhasil dihapus',
+        const result = await Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Anda tidak akan dapat mengembalikan ini!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Tidak'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/berita/hapus/${id}`, {
+                    method: 'DELETE',
                 });
-            } else {
+                const data = await response.json();
+                if (data.success) {
+                    await fetchBerita(); // Refresh data
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Berita berhasil dihapus',
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: data.message,
+                    });
+                }
+            } catch (error) {
+                console.error('Error deleting berita:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Gagal',
-                    text: data.message,
+                    text: 'Terjadi kesalahan pada server',
                 });
             }
-        } catch (error) {
-            console.error('Error deleting berita:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: 'Terjadi kesalahan pada server',
-            });
         }
     };
 
+    // Handle archive berita
     const handleArchiveBerita = async (id, currentStatus) => {
-        // Cari berita berdasarkan ID
         const selectedBerita = berita.find((item) => item.id === id);
 
-        // Jika status berita adalah "upcoming", tampilkan alert dan hentikan proses
         if (selectedBerita.status === 'upcoming') {
             Swal.fire({
                 icon: 'warning',
@@ -195,15 +235,15 @@ const Berita = () => {
 
         try {
             const endpoint = currentStatus === 'archived'
-                ? `${API_BASE_URL}/berita/${id}/update-status` // Batal arsip (kembalikan ke status sebelumnya)
-                : `${API_BASE_URL}/berita/${id}/archive`; // Arsipkan
+                ? `${API_BASE_URL}/berita/${id}/update-status`
+                : `${API_BASE_URL}/berita/${id}/archive`;
 
             const response = await fetch(endpoint, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ status: currentStatus === 'archived' ? 'latest' : 'archived' }), // Sesuaikan status baru
+                body: JSON.stringify({ status: currentStatus === 'archived' ? 'latest' : 'archived' }),
             });
             const data = await response.json();
             if (data.success) {
@@ -230,11 +270,10 @@ const Berita = () => {
         }
     };
 
+    // Handle update status
     const handleUpdateStatus = async (id, currentStatus) => {
-        // Cari berita berdasarkan ID
         const selectedBerita = berita.find((item) => item.id === id);
 
-        // Jika status berita adalah "upcoming", tampilkan alert dan hentikan proses
         if (selectedBerita.status === 'upcoming') {
             Swal.fire({
                 icon: 'warning',
@@ -244,7 +283,7 @@ const Berita = () => {
             return;
         }
 
-        const newStatus = currentStatus === 'branding' ? 'latest' : 'branding'; // Contoh: kembalikan ke 'latest' jika nonaktifkan branding
+        const newStatus = currentStatus === 'branding' ? 'latest' : 'branding';
         try {
             const response = await fetch(`${API_BASE_URL}/berita/${id}/update-status`, {
                 method: 'PUT',
@@ -293,201 +332,124 @@ const Berita = () => {
             waktu_tayang: berita.waktu_tayang,
             gambar: null,
             gambar_lama: berita.gambar,
+            dokumen: null,
+            dokumen_lama: berita.dokumen,
             status: berita.status,
         });
         setShowEditForm(true);
     };
 
+    // Pagination functions
+    const goToPage = (page) => {
+        setCurrentPage(page);
+    };
+
+    const prevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const nextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    // Handle search
+    const handleSearch = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
+    const handleSearchDate = (e) => {
+        setSearchDate(e.target.value);
+    };
+
+    // Filter berita berdasarkan search query dan tanggal
+    const filteredBerita = berita.filter((item) => {
+        const matchesSearch = item.judul.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesDate = searchDate ? new Date(item.waktu_tayang).toLocaleDateString() === new Date(searchDate).toLocaleDateString() : true;
+        return matchesSearch && matchesDate;
+    });
+
+    // Calculate the current items to display
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredBerita.slice(indexOfFirstItem, indexOfLastItem);
+
     return (
         <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold mb-4">Kelola Berita</h2>
 
-            {/* Filter buttons */}
-            <div className="flex space-x-4 mb-6">
+            {/* Card Penjelasan */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-2">Latest</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Berita terbaru yang sudah dirilis dan sudah tampil di halaman awal.
+                    </p>
+                </div>
+                <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-2">Upcoming</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Berita yang akan datang dan belum dirilis.
+                    </p>
+                </div>
+                <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-2">Archived</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Berita yang sudah diarsipkan dan tidak ditampilkan di halaman utama.
+                    </p>
+                </div>
+                <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-2">Branding</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Berita yang digunakan untuk keperluan branding atau promosi.
+                    </p>
+                </div>
+            </div>
+
+            {/* Search and Filter Section */}
+            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-6">
+                <div className="relative flex-grow">
+                    <input
+                        type="text"
+                        placeholder="Cari berdasarkan judul..."
+                        value={searchQuery}
+                        onChange={handleSearch}
+                        className="w-full pl-10 pr-4 py-2 border rounded-lg dark:text-gray-600"
+                    />
+                    <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-3 text-gray-400" />
+                </div>
+                <div className="relative flex-grow">
+                    <input
+                        type="date"
+                        value={searchDate}
+                        onChange={handleSearchDate}
+                        className="w-full pl-10 pr-4 py-2 border rounded-lg dark:text-gray-600"
+                    />
+                    <FontAwesomeIcon icon={faCalendarAlt} className="absolute left-3 top-3 text-gray-400" />
+                </div>
+                <div className="flex-grow">
+                    <Select
+                        options={filterOptions}
+                        value={filter}
+                        onChange={setFilter}
+                        className="react-select-container"
+                        classNamePrefix="react-select"
+                    />
+                </div>
                 <button
-                    onClick={() => setFilter('all')}
-                    className={`px-4 py-2 rounded-lg transition-all duration-300 ${filter === 'all'
-                        ? 'bg-blue-500 text-white shadow-lg'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-400 hover:text-white hover:shadow-lg'
-                        }`}
+                    onClick={() => setShowAddForm(true)}
+                    className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg shadow-md hover:from-green-700 hover:to-green-600 hover:shadow-lg transition-all duration-300"
                 >
-                    Semua
-                </button>
-                <button
-                    onClick={() => setFilter('latest')}
-                    className={`px-4 py-2 rounded-lg transition-all duration-300 ${filter === 'latest'
-                        ? 'bg-green-500 text-white shadow-lg'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-400 hover:text-white hover:shadow-lg'
-                        }`}
-                >
-                    Latest!
-                </button>
-                <button
-                    onClick={() => setFilter('upcoming')}
-                    className={`px-4 py-2 rounded-lg transition-all duration-300 ${filter === 'upcoming'
-                        ? 'bg-orange-500 text-white shadow-lg'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-orange-400 hover:text-white hover:shadow-lg'
-                        }`}
-                >
-                    Upcoming
-                </button>
-                <button
-                    onClick={() => setFilter('archived')}
-                    className={`px-4 py-2 rounded-lg transition-all duration-300 ${filter === 'archived'
-                        ? 'bg-gray-500 text-white shadow-lg'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-400 hover:text-white hover:shadow-lg'
-                        }`}
-                >
-                    Archived
-                </button>
-                <button
-                    onClick={() => setFilter('branding')}
-                    className={`px-4 py-2 rounded-lg transition-all duration-300 ${filter === 'branding'
-                        ? 'bg-yellow-500 text-white shadow-lg'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-yellow-400 hover:text-white hover:shadow-lg'
-                        }`}
-                >
-                    Branding
+                    Tambah Berita
                 </button>
             </div>
 
-            {/* Tombol tambah berita */}
-            <button
-                onClick={() => setShowAddForm(true)}
-                className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg mb-4 shadow-md hover:from-green-700 hover:to-green-600 hover:shadow-lg transition-all duration-300"
-            >
-                Tambah Berita
-            </button>
-
-            {/* Form tambah berita */}
-            {showAddForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
-                        <h3 className="text-xl font-bold mb-4">Tambah Berita</h3>
-                        <form onSubmit={(e) => { e.preventDefault(); handleAddBerita(); }}>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium mb-2">Judul</label>
-                                <input
-                                    type="text"
-                                    value={newBerita.judul}
-                                    onChange={(e) => setNewBerita({ ...newBerita, judul: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:text-gray-600"
-                                    required
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium mb-2">Deskripsi</label>
-                                <textarea
-                                    value={newBerita.deskripsi}
-                                    onChange={(e) => setNewBerita({ ...newBerita, deskripsi: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:text-gray-600"
-                                    required
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium mb-2">Waktu Tayang</label>
-                                <input
-                                    type="datetime-local"
-                                    value={newBerita.waktu_tayang}
-                                    onChange={(e) => setNewBerita({ ...newBerita, waktu_tayang: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:text-gray-600"
-                                    required
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium mb-2 dark:text-gray-600">Gambar</label>
-                                <input
-                                    type="file"
-                                    onChange={(e) => setNewBerita({ ...newBerita, gambar: e.target.files[0] })}
-                                    className="w-full p-2 border rounded-lg"
-                                />
-                            </div>
-                            <div className="flex justify-end space-x-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowAddForm(false)}
-                                    className="px-4 py-2 bg-gray-500 text-white rounded-lg"
-                                >
-                                    Batal
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 bg-green-600 text-white rounded-lg"
-                                >
-                                    Simpan
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Form edit berita */}
-            {showEditForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
-                        <h3 className="text-xl font-bold mb-4">Edit Berita</h3>
-                        <form onSubmit={(e) => { e.preventDefault(); handleEditBerita(); }}>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium mb-2">Judul</label>
-                                <input
-                                    type="text"
-                                    value={editBerita.judul}
-                                    onChange={(e) => setEditBerita({ ...editBerita, judul: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:text-gray-600"
-                                    required
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium mb-2">Deskripsi</label>
-                                <textarea
-                                    value={editBerita.deskripsi}
-                                    onChange={(e) => setEditBerita({ ...editBerita, deskripsi: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:text-gray-600"
-                                    required
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium mb-2">Waktu Tayang</label>
-                                <input
-                                    type="datetime-local"
-                                    value={editBerita.waktu_tayang}
-                                    onChange={(e) => setEditBerita({ ...editBerita, waktu_tayang: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:text-gray-600"
-                                    required
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium mb-2">Gambar</label>
-                                <input
-                                    type="file"
-                                    onChange={(e) => setEditBerita({ ...editBerita, gambar: e.target.files[0] })}
-                                    className="w-full p-2 border rounded-lg"
-                                />
-                            </div>
-                            <div className="flex justify-end space-x-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowAddForm(false)}
-                                    className="px-4 py-2 bg-gradient-to-r from-gray-500 to-gray-400 text-white rounded-lg shadow-md hover:from-gray-600 hover:to-gray-500 hover:shadow-lg transition-all duration-300"
-                                >
-                                    Batal
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg shadow-md hover:from-green-700 hover:to-green-600 hover:shadow-lg transition-all duration-300"
-                                >
-                                    Simpan
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
             {/* Daftar berita dalam grid vertikal */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {berita.map((item) => (
+                {currentItems.map((item) => (
                     <div key={item.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         {item.gambar && (
                             <img
@@ -554,7 +516,7 @@ const Berita = () => {
                                     : 'bg-yellow-400 text-white border-yellow-400 hover:bg-yellow-600'
                                     }`}
                             >
-                                <FaAward className="text-xl transition-all duration-300" />
+                                <FaCertificate className="text-xl transition-all duration-300" />
                                 <span className="opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2 transition-all duration-300">
                                     {item.status === 'branding' ? 'Nonaktifkan' : 'Branding'}
                                 </span>
@@ -591,6 +553,95 @@ const Berita = () => {
                 ))}
             </div>
 
+            {/* Pagination */}
+            <div className="mt-6">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    goToPage={goToPage}
+                    prevPage={prevPage}
+                    nextPage={nextPage}
+                />
+            </div>
+
+            {/* Modal Tambah Berita */}
+            {showAddForm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <h3 className="text-xl font-bold mb-4">Tambah Berita Baru</h3>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Judul Berita (untuk preview)</label>
+                                <input
+                                    type="text"
+                                    value={newBerita.judul}
+                                    onChange={(e) => setNewBerita({...newBerita, judul: e.target.value})}
+                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                                    placeholder="Masukkan judul berita"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Deskripsi (untuk preview)</label>
+                                <textarea
+                                    value={newBerita.deskripsi}
+                                    onChange={(e) => setNewBerita({...newBerita, deskripsi: e.target.value})}
+                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                                    placeholder="Masukkan deskripsi berita"
+                                    rows="5"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Waktu Tayang</label>
+                                <input
+                                    type="datetime-local"
+                                    value={newBerita.waktu_tayang}
+                                    onChange={(e) => setNewBerita({...newBerita, waktu_tayang: e.target.value})}
+                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Gambar Berita</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setNewBerita({...newBerita, gambar: e.target.files[0]})}
+                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Dokumen (Word)</label>
+                                <input
+                                    type="file"
+                                    accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    onChange={(e) => setNewBerita({...newBerita, dokumen: e.target.files[0]})}
+                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-2 mt-6">
+                            <button
+                                onClick={() => setShowAddForm(false)}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleAddBerita}
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                            >
+                                Simpan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Modal detail berita */}
             {showDetailModal && selectedBerita && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
@@ -613,7 +664,15 @@ const Berita = () => {
                             <FontAwesomeIcon icon={faClock} className="mr-1" />
                             {new Date(selectedBerita.waktu_tayang).toLocaleString()}
                         </p>
-                        <div className="flex justify-end">
+                        <div className="flex justify-end space-x-2">
+                            {selectedBerita.dokumen && (
+                                <button
+                                    onClick={() => window.open(`${API_BASE_URL}/berita/dokumen/${selectedBerita.dokumen}`, '_blank')}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                                >
+                                    Lihat Berita
+                                </button>
+                            )}
                             <button
                                 onClick={() => setShowDetailModal(false)}
                                 className="px-4 py-2 bg-gray-500 text-white rounded-lg"
