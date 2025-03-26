@@ -259,28 +259,28 @@ const LandingPage = () => {
         };
 
         const fetchGallery = async () => {
-                    try {
-                      const response = await fetch(`${API_BASE_URL}/admin/gallery`);
-                      const data = await response.json();
-                      
-                      if (Array.isArray(data)) {
-                        const processedGallery = data.map(item => ({
-                          ...item,
-                          // Perbaikan di sini: tambahkan path uploads/gallery
-                          image_url: item.image_url.startsWith('http') 
-                            ? item.image_url 
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/gallery`);
+                const data = await response.json();
+
+                if (Array.isArray(data)) {
+                    const processedGallery = data.map(item => ({
+                        ...item,
+                        // Perbaikan di sini: tambahkan path uploads/gallery
+                        image_url: item.image_url.startsWith('http')
+                            ? item.image_url
                             : `${API_BASE_URL}/uploads/gallery/${item.image_url}`
-                        }));
-                        setGallery(processedGallery);
-                      } else {
-                        console.error("Data gallery tidak valid:", data);
-                        setGallery(dummyGallery);
-                      }
-                    } catch (error) {
-                      console.error("Error fetching gallery data:", error);
-                      setGallery(dummyGallery);
-                    }
-                  };
+                    }));
+                    setGallery(processedGallery);
+                } else {
+                    console.error("Data gallery tidak valid:", data);
+                    setGallery(dummyGallery);
+                }
+            } catch (error) {
+                console.error("Error fetching gallery data:", error);
+                setGallery(dummyGallery);
+            }
+        };
 
         const fetchBerita = async () => {
             try {
@@ -304,11 +304,17 @@ const LandingPage = () => {
 
         const fetchServices = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/services`);
+                const response = await fetch(`${API_BASE_URL}/services/all`);
                 const data = await response.json();
-                setServices(data);
+                if (data.success) {
+                    setServices(data.data);
+                } else {
+                    console.error("Error fetching services:", data.message);
+                    setServices(dummyServices); // Fallback ke dummy data jika error
+                }
             } catch (error) {
                 console.error("Error fetching services:", error);
+                setServices(dummyServices); // Fallback ke dummy data jika error
             }
         };
 
@@ -873,22 +879,26 @@ const LandingPage = () => {
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Our Services</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {dummyServices.slice(0, 2).map((service, index) => (
+                            {services.slice(0, 2).map((service, index) => (
                                 <motion.div
-                                    key={service._id}
+                                    key={service.id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
                                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                                    onClick={() => navigate("/services")}
                                 >
                                     <img
-                                        src={service.image} // Menggunakan path dari dummy data
+                                        src={service.image ? `${API_BASE_URL}/uploads/services/${service.image}` : "https://via.placeholder.com/300x200"}
                                         alt={service.title}
                                         className="w-full h-48 object-cover"
                                     />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-blue-900 mb-2">{service.title}</h3>
-                                        <p className="text-gray-700 line-clamp-3">{service.shortDescription}</p>
+                                        <p className="text-gray-700 line-clamp-3">{service.description}</p>
+                                        <p className="text-sm text-gray-500 mt-2">
+                                            {new Date(service.date).toLocaleDateString()}
+                                        </p>
                                     </div>
                                 </motion.div>
                             ))}
@@ -899,7 +909,7 @@ const LandingPage = () => {
                                 className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
                                 onClick={() => navigate("/services")}
                             >
-                                <div className="p-6 text-4xl font-bold text-white">+{dummyServices.length - 2}</div>
+                                <div className="p-6 text-4xl font-bold text-white">+{services.length > 2 ? services.length - 2 : 0}</div>
                             </motion.div>
                         </div>
                     </div>
@@ -1114,49 +1124,49 @@ const LandingPage = () => {
                 </section>
 
                 {/* Gallery Section */}
-                                <section id="gallery" className="py-12 bg-white scroll-mt-[110px] pt-32">
-                                <div className="container mx-auto px-4">
-                                    <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        {/* Gunakan state gallery jika ada, jika tidak, gunakan dummyGallery */}
-                                        {(gallery.length > 0 ? gallery : dummyGallery).slice(0, 2).map((item, index) => (
-                                            <motion.div
-                                                key={index}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ duration: 0.5, delay: index * 0.1 }}
-                                                className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-                                                onClick={() => openGalleryModal(item)}
-                                            >
-                                                {/* Gambar Gallery */}
-                                                <img
-                                                    src={item.image_url.startsWith('http') ? item.image_url : `${API_BASE_URL}${item.image_url}`}
-                                                    alt={`Gallery ${index + 1}`}
-                                                    className="w-full h-48 object-cover"
-                                                />
-                                                {/* Keterangan Foto */}
-                                                <div className="p-4 bg-white">
-                                                    <p className="text-sm text-gray-700">
-                                                        {item.keterangan_foto} diposting pada {formatDate(item.created_at)}
-                                                    </p>
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                        {/* Tombol + untuk melihat lebih banyak gallery */}
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.5, delay: 0.5 }}
-                                            className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
-                                            onClick={() => navigate("/gallery")}
-                                        >
-                                            <div className="p-6 text-4xl font-bold text-white">
-                                                +{(gallery.length > 0 ? gallery : dummyGallery).length - 2}
-                                            </div>
-                                        </motion.div>
+                <section id="gallery" className="py-12 bg-white scroll-mt-[110px] pt-32">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Gunakan state gallery jika ada, jika tidak, gunakan dummyGallery */}
+                            {(gallery.length > 0 ? gallery : dummyGallery).slice(0, 2).map((item, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                                    className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                                    onClick={() => openGalleryModal(item)}
+                                >
+                                    {/* Gambar Gallery */}
+                                    <img
+                                        src={item.image_url.startsWith('http') ? item.image_url : `${API_BASE_URL}${item.image_url}`}
+                                        alt={`Gallery ${index + 1}`}
+                                        className="w-full h-48 object-cover"
+                                    />
+                                    {/* Keterangan Foto */}
+                                    <div className="p-4 bg-white">
+                                        <p className="text-sm text-gray-700">
+                                            {item.keterangan_foto} diposting pada {formatDate(item.created_at)}
+                                        </p>
                                     </div>
+                                </motion.div>
+                            ))}
+                            {/* Tombol + untuk melihat lebih banyak gallery */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.5 }}
+                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+                                onClick={() => navigate("/gallery")}
+                            >
+                                <div className="p-6 text-4xl font-bold text-white">
+                                    +{(gallery.length > 0 ? gallery : dummyGallery).length - 2}
                                 </div>
-                            </section>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Modal Gallery */}
                 {isGalleryModalOpen && selectedPhoto && (
