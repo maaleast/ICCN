@@ -6,6 +6,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import Pagination from "../Pagination";
 import { FaMedal, FaCrown, FaGem, FaStar, FaTrophy, FaAward, FaUser } from "react-icons/fa";
 import DetailMemberPelatihan from "./DetailMemberPelatihan";
+import moment from "moment-timezone";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { id } from "date-fns/locale";
 
 export default function Pelatihan() {
     const [pelatihan, setPelatihan] = useState([]);
@@ -173,12 +178,20 @@ export default function Pelatihan() {
             return;
         }
 
-        const formatTanggal = (date) => {
-            const pad = (num) => num.toString().padStart(2, '0');
-            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-        };
+        console.log('tanggal pelatihan before format ', tanggal_pelatihan)
+        console.log('tanggal berakhir before format     ', tanggal_berakhir)
 
-        const formData = new FormData();
+        const formatTanggal = (date) => {
+            const formattedDate = moment(date).format("YYYY-MM-DD HH:mm:ss"); 
+            console.log("Formatted Date:", formattedDate);
+            return formattedDate;
+        };        
+        
+        // Debugging: Cek hasil format tanggal sebelum dimasukkan ke formData
+        console.log("Tanggal Pelatihan (Formatted):", formatTanggal(new Date(tanggal_pelatihan)));
+        console.log("Tanggal Berakhir (Formatted):", formatTanggal(new Date(tanggal_berakhir)));
+        
+        const formData = new FormData();    
         formData.append("judul_pelatihan", judul_pelatihan);
         formData.append("tanggal_pelatihan", formatTanggal(new Date(tanggal_pelatihan)));
         formData.append("tanggal_berakhir", formatTanggal(new Date(tanggal_berakhir)));
@@ -191,6 +204,11 @@ export default function Pelatihan() {
         // Hanya kirim file jika ada perubahan
         if (upload_banner instanceof File) {
             formData.append("upload_banner", upload_banner);
+        }
+
+        // Debugging: Tampilkan isi formData di konsol
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
         }
 
         try {
@@ -233,18 +251,8 @@ export default function Pelatihan() {
     };
 
     const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        const options = {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-            timeZone: "Asia/Jakarta",
-        };
-        return date.toLocaleString("id-ID", options);
-    };
+        return moment.utc(dateString).local().format("YYYY-MM-DD HH:mm:ss");
+    };    
 
     const showSuccessNotification = (message) => {
         Swal.fire({
@@ -324,6 +332,7 @@ export default function Pelatihan() {
     };
 
 
+    console.log(new Date().getTimezoneOffset());
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
@@ -709,27 +718,45 @@ export default function Pelatihan() {
                         <div className="grid grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label className="block mb-2">Tanggal Mulai</label>
-                                <DatePicker
-                                    selected={new Date(selectedPelatihan.tanggal_pelatihan)}
-                                    onChange={(date) => setSelectedPelatihan({ ...selectedPelatihan, tanggal_pelatihan: date })}
-                                    showTimeSelect
-                                    dateFormat="dd/MM/yyyy HH:mm"
-                                    timeIntervals={15}
-                                    timeCaption="Waktu"
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-600"
-                                />
+                                <LocalizationProvider dateAdapter={AdapterDateFns} locale={id}>
+                                    <DateTimePicker
+                                        label="Pilih Tanggal & Waktu"
+                                        value={
+                                            selectedPelatihan.tanggal_pelatihan 
+                                                ? new Date(selectedPelatihan.tanggal_pelatihan) 
+                                                : null
+                                        }
+                                        onChange={(date) => {
+                                            const formattedDate = date
+                                                ? moment(date).tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss") // Pastikan tetap di zona WIB
+                                                : null;
+                                            console.log("Selected Date (Local Time):", formattedDate);
+                                            setSelectedPelatihan({ ...selectedPelatihan, tanggal_pelatihan: formattedDate });
+                                        }}
+                                        renderInput={(params) => <TextField {...params} fullWidth />}
+                                    />
+                                </LocalizationProvider>
                             </div>
                             <div>
                                 <label className="block mb-2">Tanggal Berakhir</label>
-                                <DatePicker
-                                    selected={new Date(selectedPelatihan.tanggal_berakhir)}
-                                    onChange={(date) => setSelectedPelatihan({ ...selectedPelatihan, tanggal_berakhir: date })}
-                                    showTimeSelect
-                                    dateFormat="dd/MM/yyyy HH:mm"
-                                    timeIntervals={15}
-                                    timeCaption="Waktu"
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-600"
-                                />
+                                <LocalizationProvider dateAdapter={AdapterDateFns} locale={id}>
+                                    <DateTimePicker
+                                        label="Pilih Tanggal & Waktu"
+                                        value={
+                                            selectedPelatihan.tanggal_berakhir 
+                                                ? new Date(selectedPelatihan.tanggal_berakhir) 
+                                                : null
+                                        }
+                                        onChange={(date) => {
+                                            const formattedDate = date
+                                                ? moment(date).tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss") // Pastikan tetap di zona WIB
+                                                : null;
+                                            console.log("Selected Date (Local Time):", formattedDate);
+                                            setSelectedPelatihan({ ...selectedPelatihan, tanggal_berakhir: formattedDate });
+                                        }}
+                                        renderInput={(params) => <TextField {...params} fullWidth />}
+                                    />
+                                </LocalizationProvider>
                             </div>
                         </div>
 

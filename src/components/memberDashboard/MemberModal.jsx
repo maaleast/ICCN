@@ -76,7 +76,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
     const [selectFinishOrRegister, setSelectFinishOrRegister] = useState(false);
     const [textConfirmationModal, setTextConfirmationModal] = useState('Apakah kamu yakin mendaftar pelatihan ini?');
 
-    // console.log('selected Training: ', selectedTraining)
+    // console.log('selected Training: ', selectedTraining.upload_banner)
     // console.log('member ID: ', memberId)
 
     const idMember = memberId;
@@ -334,9 +334,19 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     {selectedTraining.upload_banner && (
                         <div className="mb-6">
                             <img
-                            src={`http://localhost:5050${selectedTraining.upload_banner}`}
-                            alt="Banner Pelatihan"
-                            className="w-full max-h-96 object-contain rounded-lg"
+                                src={
+                                    selectedTraining.upload_banner.startsWith('http') 
+                                        ? selectedTraining.upload_banner
+                                        : selectedTraining.upload_banner.startsWith('/uploads')
+                                            ? `${API_BASE_URL || 'https://iccnbackend-production.up.railway.app'}${selectedTraining.upload_banner}`
+                                            : selectedTraining.upload_banner
+                                }
+                                alt="Banner Pelatihan"
+                                className="w-full max-h-96 object-contain rounded-lg"
+                                onError={(e) => {
+                                    e.target.src = '/placeholder-image.jpg'; // Fallback image
+                                    e.target.alt = 'Gambar tidak tersedia';
+                                }}
                             />
                         </div>
                     )}
@@ -439,7 +449,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     {selectedTraining.upload_banner && (
                     <div className="mb-6">
                         <img
-                        src={`http://localhost:5050${selectedTraining.upload_banner}`}
+                        src={`${API_BASE_URL}${selectedTraining.upload_banner}`}
                         alt="Banner Pelatihan"
                         className="w-full max-h-96 object-contain rounded-lg"
                         />
@@ -630,7 +640,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     {selectedTraining.upload_banner && (
                     <div className="mb-6">
                         <img
-                        src={`http://localhost:5050${selectedTraining.upload_banner}`}
+                        src={`${API_BASE_URL}${selectedTraining.upload_banner}`}
                         alt="Banner Pelatihan"
                         className="w-full max-h-96 object-contain rounded-lg"
                         />
