@@ -1,21 +1,21 @@
-import { FiUsers, FiFileText, FiImage, FiActivity, FiDollarSign, FiSettings, FiAward, FiUserCheck, FiUpload, FiDownload  } from 'react-icons/fi';
+import { FiUsers, FiFileText, FiImage, FiActivity, FiLayers, FiSettings, FiAward, FiUserCheck, FiUpload, FiDownload } from 'react-icons/fi';
 import { FaFileDownload, FaFileUpload, FaMoneyBillWave } from "react-icons/fa";
 import { FaTimesCircle, FaHourglassHalf } from 'react-icons/fa'; // Ikon untuk status
 import { BiMoneyWithdraw } from "react-icons/bi";
 
-export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMenu, verificationStatus,}) {
+export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMenu, verificationStatus, }) {
     const adminMenus = [
         { name: 'Dashboard', icon: FiActivity },
         { name: 'Aktivasi Member', icon: FiUserCheck },
         { name: 'Kelola Pelatihan', icon: FiAward },
         { name: 'Galeri Kegiatan', icon: FiImage },
         { name: 'Kelola Berita', icon: FiFileText },
-        { name: 'Kelola Services', icon: FiFileText },
+        { name: 'Kelola Services', icon: FiLayers },
         { name: 'Kelola Organisasi', icon: FiUsers },
         { name: 'Laporan Keuangan', icon: BiMoneyWithdraw },
-        { name: 'Pemasukan', icon: FiDownload  },
-        { name: 'Pengeluaran', icon: FiUpload  },
-       
+        { name: 'Pemasukan', icon: FiDownload },
+        { name: 'Pengeluaran', icon: FiUpload },
+
     ];
 
     const memberMenus = [
