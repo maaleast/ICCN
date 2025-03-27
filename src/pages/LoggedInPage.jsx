@@ -269,27 +269,27 @@ const LoggedInPage = () => {
 
         const fetchGallery = async () => {
             try {
-              const response = await fetch(`${API_BASE_URL}/admin/gallery`);
-              const data = await response.json();
-              
-              if (Array.isArray(data)) {
-                const processedGallery = data.map(item => ({
-                  ...item,
-                  // Perbaikan di sini: tambahkan path uploads/gallery
-                  image_url: item.image_url.startsWith('http') 
-                    ? item.image_url 
-                    : `${API_BASE_URL}/uploads/gallery/${item.image_url}`
-                }));
-                setGallery(processedGallery);
-              } else {
-                console.error("Data gallery tidak valid:", data);
-                setGallery(dummyGallery);
-              }
+                const response = await fetch(`${API_BASE_URL}/admin/gallery`);
+                const data = await response.json();
+
+                if (Array.isArray(data)) {
+                    const processedGallery = data.map(item => ({
+                        ...item,
+                        // Perbaikan di sini: tambahkan path uploads/gallery
+                        image_url: item.image_url.startsWith('http')
+                            ? item.image_url
+                            : `${API_BASE_URL}/uploads/gallery/${item.image_url}`
+                    }));
+                    setGallery(processedGallery);
+                } else {
+                    console.error("Data gallery tidak valid:", data);
+                    setGallery(dummyGallery);
+                }
             } catch (error) {
-              console.error("Error fetching gallery data:", error);
-              setGallery(dummyGallery);
+                console.error("Error fetching gallery data:", error);
+                setGallery(dummyGallery);
             }
-          };
+        };
 
         const fetchBerita = async () => {
             try {
@@ -325,11 +325,17 @@ const LoggedInPage = () => {
 
         const fetchServices = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/services`);
+                const response = await fetch(`${API_BASE_URL}/services/all`);
                 const data = await response.json();
-                setServices(data);
+                if (data.success) {
+                    setServices(data.data);
+                } else {
+                    console.error("Error fetching services:", data.message);
+                    setServices(dummyServices); // Fallback ke dummy data jika error
+                }
             } catch (error) {
                 console.error("Error fetching services:", error);
+                setServices(dummyServices); // Fallback ke dummy data jika error
             }
         };
 
@@ -407,8 +413,8 @@ const LoggedInPage = () => {
         }
         setSelectedPhoto({
             ...photo,
-            image_url: photo.image_url.startsWith('http') 
-                ? photo.image_url 
+            image_url: photo.image_url.startsWith('http')
+                ? photo.image_url
                 : `${API_BASE_URL}${photo.image_url}`
         });
         setIsGalleryModalOpen(true);
@@ -602,8 +608,8 @@ const LoggedInPage = () => {
                                     Contact
                                 </ScrollLink>
                             </li>
-                            
-                            
+
+
                         </ul>
 
                         {/* Bagian Kanan (Desktop) */}
@@ -922,25 +928,27 @@ const LoggedInPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {services.slice(0, 2).map((service, index) => (
                                 <motion.div
-                                    key={service._id}
+                                    key={service.id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
                                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => setSelectedService(service)}
+                                    onClick={() => navigate("/services")}
                                 >
                                     <img
-                                        src={service.image} // Pastikan ini adalah URL yang valid
+                                        src={service.image ? `${API_BASE_URL}/uploads/services/${service.image}` : "https://via.placeholder.com/300x200"}
                                         alt={service.title}
                                         className="w-full h-48 object-cover"
                                     />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-blue-900 mb-2">{service.title}</h3>
-                                        <p className="text-gray-700 line-clamp-3">{service.shortDescription}</p>
+                                        <p className="text-gray-700 line-clamp-3">{service.description}</p>
+                                        <p className="text-sm text-gray-500 mt-2">
+                                            {new Date(service.date).toLocaleDateString()}
+                                        </p>
                                     </div>
                                 </motion.div>
                             ))}
-                            {/* Tombol + untuk menuju PageServices */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -948,7 +956,7 @@ const LoggedInPage = () => {
                                 className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
                                 onClick={() => navigate("/services")}
                             >
-                                <div className="p-6 text-4xl font-bold text-white">+{services.length - 2}</div>
+                                <div className="p-6 text-4xl font-bold text-white">+{services.length > 2 ? services.length - 2 : 0}</div>
                             </motion.div>
                         </div>
                     </div>
@@ -1164,116 +1172,116 @@ const LoggedInPage = () => {
 
                 {/* Gallery Section */}
                 <section id="gallery" className="py-12 bg-white scroll-mt-[110px] pt-32">
-                <div className="container mx-auto px-4">
-                    <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Gunakan state gallery jika ada, jika tidak, gunakan dummyGallery */}
-                        {(gallery.length > 0 ? gallery : dummyGallery).slice(0, 2).map((item, index) => (
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Foto Kegiatan</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Gunakan state gallery jika ada, jika tidak, gunakan dummyGallery */}
+                            {(gallery.length > 0 ? gallery : dummyGallery).slice(0, 2).map((item, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                                    className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                                    onClick={() => openGalleryModal(item)}
+                                >
+                                    {/* Gambar Gallery */}
+                                    <img
+                                        src={item.image_url.startsWith('http') ? item.image_url : `${API_BASE_URL}${item.image_url}`}
+                                        alt={`Gallery ${index + 1}`}
+                                        className="w-full h-48 object-cover"
+                                    />
+                                    {/* Keterangan Foto */}
+                                    <div className="p-4 bg-white">
+                                        <p className="text-sm text-gray-700">
+                                            {item.keterangan_foto} diposting pada {formatDate(item.created_at)}
+                                        </p>
+                                    </div>
+                                </motion.div>
+                            ))}
+                            {/* Tombol + untuk melihat lebih banyak gallery */}
                             <motion.div
-                                key={index}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: index * 0.1 }}
-                                className="overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-                                onClick={() => openGalleryModal(item)}
+                                transition={{ duration: 0.5, delay: 0.5 }}
+                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+                                onClick={() => navigate("/gallery")}
                             >
-                                {/* Gambar Gallery */}
-                                <img
-                                    src={item.image_url.startsWith('http') ? item.image_url : `${API_BASE_URL}${item.image_url}`}
-                                    alt={`Gallery ${index + 1}`}
-                                    className="w-full h-48 object-cover"
-                                />
-                                {/* Keterangan Foto */}
-                                <div className="p-4 bg-white">
-                                    <p className="text-sm text-gray-700">
-                                        {item.keterangan_foto} diposting pada {formatDate(item.created_at)}
-                                    </p>
+                                <div className="p-6 text-4xl font-bold text-white">
+                                    +{(gallery.length > 0 ? gallery : dummyGallery).length - 2}
                                 </div>
                             </motion.div>
-                        ))}
-                        {/* Tombol + untuk melihat lebih banyak gallery */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.5 }}
-                            className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
-                            onClick={() => navigate("/gallery")}
-                        >
-                            <div className="p-6 text-4xl font-bold text-white">
-                                +{(gallery.length > 0 ? gallery : dummyGallery).length - 2}
-                            </div>
-                        </motion.div>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
                 {/* Modal Gallery */}
                 {isGalleryModalOpen && selectedPhoto && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 relative">
-                        <button
-                            className="absolute top-4 right-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300"
-                            onClick={closeGalleryModal}
-                        >
-                            <FaTimes className="w-5 h-5" />
-                        </button>
-                        <img
-                            src={selectedPhoto.image_url.startsWith('http') 
-                                ? selectedPhoto.image_url 
-                                : `${API_BASE_URL}${selectedPhoto.image_url}`}
-                            alt={`Gallery Full`}
-                            className="w-full h-auto rounded-lg"
-                        />
-                        <div className="mt-4 text-center">
-                            <p className="text-sm text-gray-700 dark:text-gray-300">
-                                {selectedPhoto.keterangan_foto} diposting pada {formatDate(selectedPhoto.created_at)}
-                            </p>
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 relative">
+                            <button
+                                className="absolute top-4 right-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300"
+                                onClick={closeGalleryModal}
+                            >
+                                <FaTimes className="w-5 h-5" />
+                            </button>
+                            <img
+                                src={selectedPhoto.image_url.startsWith('http')
+                                    ? selectedPhoto.image_url
+                                    : `${API_BASE_URL}${selectedPhoto.image_url}`}
+                                alt={`Gallery Full`}
+                                className="w-full h-auto rounded-lg"
+                            />
+                            <div className="mt-4 text-center">
+                                <p className="text-sm text-gray-700 dark:text-gray-300">
+                                    {selectedPhoto.keterangan_foto} diposting pada {formatDate(selectedPhoto.created_at)}
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
                 {/* Modal Detail Berita */}
-{showDetailModal && selectedBerita && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl">
-            <h3 className="text-xl font-bold mb-4">{selectedBerita.judul}</h3>
-            {selectedBerita.gambar && (
-                <img
-                    src={selectedBerita.gambar.startsWith('http') ? selectedBerita.gambar : `${API_BASE_URL}/uploads/berita/${selectedBerita.gambar}`}
-                    alt={selectedBerita.judul}
-                    className="w-full rounded-lg mb-4"
-                />
-            )}
-            {/* Container untuk deskripsi dengan scroll */}
-            <div className="mb-4 max-h-48 overflow-y-auto">
-                <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap break-words">
-                    {selectedBerita.deskripsi}
-                </p>
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                <FontAwesomeIcon icon={faClock} className="mr-1" />
-                {new Date(selectedBerita.waktu_tayang).toLocaleString()}
-            </p>
-            <div className="flex justify-end space-x-2">
-                {selectedBerita.dokumen && (
-                    <button
-                        onClick={() => window.open(`${API_BASE_URL}/berita/dokumen/${selectedBerita.dokumen}`, '_blank')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-                    >
-                        Lihat Berita
-                    </button>
+                {showDetailModal && selectedBerita && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl">
+                            <h3 className="text-xl font-bold mb-4">{selectedBerita.judul}</h3>
+                            {selectedBerita.gambar && (
+                                <img
+                                    src={selectedBerita.gambar.startsWith('http') ? selectedBerita.gambar : `${API_BASE_URL}/uploads/berita/${selectedBerita.gambar}`}
+                                    alt={selectedBerita.judul}
+                                    className="w-full rounded-lg mb-4"
+                                />
+                            )}
+                            {/* Container untuk deskripsi dengan scroll */}
+                            <div className="mb-4 max-h-48 overflow-y-auto">
+                                <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap break-words">
+                                    {selectedBerita.deskripsi}
+                                </p>
+                            </div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                                <FontAwesomeIcon icon={faClock} className="mr-1" />
+                                {new Date(selectedBerita.waktu_tayang).toLocaleString()}
+                            </p>
+                            <div className="flex justify-end space-x-2">
+                                {selectedBerita.dokumen && (
+                                    <button
+                                        onClick={() => window.open(`${API_BASE_URL}/berita/dokumen/${selectedBerita.dokumen}`, '_blank')}
+                                        className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                                    >
+                                        Lihat Berita
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => setShowDetailModal(false)}
+                                    className="px-4 py-2 bg-gray-500 text-white rounded-lg"
+                                >
+                                    Tutup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
-                <button
-                    onClick={() => setShowDetailModal(false)}
-                    className="px-4 py-2 bg-gray-500 text-white rounded-lg"
-                >
-                    Tutup
-                </button>
-            </div>
-        </div>
-    </div>
-)}
 
                 {/* Contact Section */}
                 <section id="contact" className="py-12 bg-gray-100">
