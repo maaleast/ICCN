@@ -11,6 +11,8 @@ import Logo from "../assets/iccn.png";
 import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes } from "react-icons/fa";
 import uk from "../assets/uk.png";
 import ina from "../assets/ina.png";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClock } from '@fortawesome/free-solid-svg-icons';
 
 // Dummy data untuk semua section
 const dummyServices = [
