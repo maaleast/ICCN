@@ -309,14 +309,27 @@ const LandingPage = () => {
                 const response = await fetch(`${API_BASE_URL}/services/all`);
                 const data = await response.json();
                 if (data.success) {
-                    setServices(data.data);
+                    const processedServices = data.data.map(service => ({
+                        ...service,
+                        image: service.image
+                            ? `${API_BASE_URL}/uploads/services/${service.image}`
+                            : "https://via.placeholder.com/300x200",
+                        // Normalisasi tanggal
+                        date: service.date || service.created_at || new Date().toISOString()
+                    }));
+                    setServices(processedServices);
                 } else {
-                    console.error("Error fetching services:", data.message);
-                    setServices(dummyServices); // Fallback ke dummy data jika error
+                    setServices(dummyServices.map(s => ({
+                        ...s,
+                        date: s.date || new Date().toISOString()
+                    })));
                 }
             } catch (error) {
                 console.error("Error fetching services:", error);
-                setServices(dummyServices); // Fallback ke dummy data jika error
+                setServices(dummyServices.map(s => ({
+                    ...s,
+                    date: s.date || new Date().toISOString()
+                })));
             }
         };
 
@@ -382,13 +395,58 @@ const LandingPage = () => {
     };
 
     // Fungsi untuk memformat tanggal
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString("id-ID", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
+    const formatDate = {
+        // Format: 31/12/2023
+        short: (dateString) => {
+            if (!dateString) return '--/--/----';
+            try {
+                const date = new Date(dateString.includes('T') ? dateString : `${dateString}T00:00:00`);
+                if (isNaN(date.getTime())) return '--/--/----';
+                return date.toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    timeZone: 'UTC'
+                });
+            } catch (e) {
+                return '--/--/----';
+            }
+        },
+        // Format: 31 Desember 2023
+        long: (dateString) => {
+            if (!dateString) return '--/--/----';
+            try {
+                const date = new Date(dateString.includes('T') ? dateString : `${dateString}T00:00:00`);
+                if (isNaN(date.getTime())) return '--/--/----';
+                return date.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    timeZone: 'UTC'
+                });
+            } catch (e) {
+                return '--/--/----';
+            }
+        },
+        // Format: 31 Desember 2023 10:30 WIB
+        withTime: (dateString) => {
+            if (!dateString) return '--/--/---- --:--';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return '--/--/---- --:--';
+                return date.toLocaleString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZoneName: 'short',
+                    timeZone: 'Asia/Jakarta'
+                });
+            } catch (e) {
+                return '--/--/---- --:--';
+            }
+        }
     };
 
     const filteredPartners = partners.filter((partner) => {
@@ -891,15 +949,19 @@ const LandingPage = () => {
                                     onClick={() => navigate("/services")}
                                 >
                                     <img
-                                        src={service.image ? `${API_BASE_URL}/uploads/services/${service.image}` : "https://via.placeholder.com/300x200"}
+                                        src={service.image}
                                         alt={service.title}
                                         className="w-full h-48 object-cover"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "https://via.placeholder.com/300x200";
+                                        }}
                                     />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-blue-900 mb-2">{service.title}</h3>
                                         <p className="text-gray-700 line-clamp-3">{service.description}</p>
                                         <p className="text-sm text-gray-500 mt-2">
-                                            {new Date(service.date).toLocaleDateString()}
+                                            {formatDate.long(service.date)}
                                         </p>
                                     </div>
                                 </motion.div>
@@ -939,7 +1001,7 @@ const LandingPage = () => {
                                         <h3 className="text-xl font-semibold text-blue-900 mb-2">{event.title}</h3>
                                         <p className="text-gray-700 line-clamp-3">{event.description}</p>
                                         <p className="text-sm text-gray-500 mt-4">
-                                            {new Date(event.date).toLocaleDateString()}
+                                            {formatDate.long(event.date)}
                                         </p>
                                     </div>
                                 </motion.div>
@@ -1098,7 +1160,7 @@ const LandingPage = () => {
                                         <h3 className="text-xl font-semibold text-blue-900 mb-2">{item.judul}</h3>
                                         <p className="text-gray-700 line-clamp-3">{item.deskripsi}</p>
                                         <p className="text-sm text-gray-500 mt-4">
-                                            {new Date(item.waktu_tayang).toLocaleDateString()}
+                                            {formatDate.long(item.waktu_tayang)}
                                         </p>
                                         {/* Badge untuk berita branding */}
                                         {item.status === "branding" && (
@@ -1149,7 +1211,7 @@ const LandingPage = () => {
                                     {/* Keterangan Foto */}
                                     <div className="p-4 bg-white">
                                         <p className="text-sm text-gray-700">
-                                            {item.keterangan_foto} diposting pada {formatDate(item.created_at)}
+                                            {item.keterangan_foto} diposting pada {formatDate.long(item.created_at)}
                                         </p>
                                     </div>
                                 </motion.div>
@@ -1215,7 +1277,7 @@ const LandingPage = () => {
                             </div>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                                 <FontAwesomeIcon icon={faClock} className="mr-1" />
-                                {new Date(selectedBerita.waktu_tayang).toLocaleString()}
+                                {formatDate.withTime(selectedBerita.waktu_tayang)}
                             </p>
                             <div className="flex justify-end space-x-2">
                                 {selectedBerita.dokumen && (
