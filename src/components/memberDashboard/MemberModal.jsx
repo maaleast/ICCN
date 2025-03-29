@@ -459,11 +459,16 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     {selectedTraining.upload_banner && (
                     <div className="mb-6">
                         <img
-                        src={`${API_BASE_URL}${selectedTraining.upload_banner}`}
-                        alt="Banner Pelatihan"
-                        className="w-full max-h-96 object-contain rounded-lg"
+                            src={`${API_BASE_URL}${selectedTraining.upload_banner}`}
+                            alt="Banner Pelatihan"
+                            className="w-full max-h-96 object-contain rounded-lg"
+                            onError={(e) => {
+                                e.target.onerror = null; // Mencegah infinite loop
+                                e.target.src = `${API_BASE_URL}/uploads/pelatihan/default.png`; // Ganti dengan gambar default
+                                e.target.alt = "Gambar tidak tersedia";
+                            }}
                         />
-                    </div>
+                    </div>                
                     )}
                 
                     {/* Grid untuk Konten */}
