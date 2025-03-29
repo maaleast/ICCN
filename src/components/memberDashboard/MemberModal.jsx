@@ -75,8 +75,9 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
     const [buttonText, setButtonText] = useState('Daftar');
     const [selectFinishOrRegister, setSelectFinishOrRegister] = useState(false);
     const [textConfirmationModal, setTextConfirmationModal] = useState('Apakah kamu yakin mendaftar pelatihan ini?');
+    const [isDaftar, setIsDaftar] = useState(false);
 
-    // console.log('selected Training: ', selectedTraining.upload_banner)
+    // console.log('selected Training banner: ', selectedTraining.upload_banner)
     // console.log('member ID: ', memberId)
 
     const idMember = memberId;
@@ -97,51 +98,53 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
 
     const fetchKodePelatihan = async (idMember, idTraining) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/pelatihan/peserta-pelatihan/kode/${idMember}/${idTraining}`);
-            
-            // Jika response tidak OK, langsung return object dengan status error
+            const response = await fetch(
+                `${API_BASE_URL}/pelatihan/peserta-pelatihan/kode/${idMember}/${idTraining}`
+            ).catch(() => {
+                // Tangani error jaringan atau request gagal sebelum fetch mengembalikan response
+                return { ok: false, status: 500 };
+            });
+    
             if (!response.ok) {
                 return {
                     error: true,
-                    message: 'Gagal mengambil data kode pelatihan'
+                    message:
+                        response.status === 404
+                            ? "Kode pelatihan tidak ditemukan."
+                            : "Gagal mengambil data kode pelatihan",
                 };
             }
-            
+    
             const data = await response.json();
             return data;
-            
         } catch (error) {
-            console.error('❌ Error:', error);
             return {
                 error: true,
-                message: error.message || 'Terjadi kesalahan saat mengambil kode pelatihan'
+                message: "Terjadi kesalahan saat mengambil kode pelatihan",
             };
         }
     };
-
+    
     useEffect(() => {
-        if (!idMember || !idTraining) {
-            console.log("⚠️ idMember atau idTraining tidak tersedia.");
-            return;
-        }
+        if (!idMember || !idTraining) return;
     
         const fetchData = async () => {
             setLoading(true);
             setError('');
+    
             try {
                 const kodeData = await fetchKodePelatihan(idMember, idTraining);
                 
-                // Handle jika ada error dari fetchKodePelatihan
                 if (kodeData.error) {
                     setError(kodeData.message);
-                    return; // Keluar tanpa menampilkan Swal
+                    return; // Stop execution tanpa menampilkan alert
                 }
                 
                 if (kodeData.kode) {
                     setKode(kodeData.kode);
                     setShowFinishedCode(true);
                 } else if (kodeData.message) {
-                    // Hanya tampilkan Swal untuk pesan informasi (bukan error)
+                    // Swal hanya untuk informasi, bukan error
                     Swal.fire({
                         icon: 'info',
                         title: 'Informasi',
@@ -149,15 +152,14 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     });
                 }
             } catch (error) {
-                // Ini akan menangkap error yang tidak terduga
-                setError(error.message || 'Terjadi kesalahan');
+                setError("Terjadi kesalahan");
             } finally {
                 setLoading(false);
             }
         };
     
         fetchData();
-    }, [idMember, idTraining]);
+    }, [idMember, idTraining]);    
 
     useEffect(() => {
         if (!idMember || !idTraining) {
@@ -173,11 +175,13 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     setButtonText('Selesaikan Pelatihan');
                     setTextConfirmationModal('Apakah kamu yakin menyelesaikan pelatihan ini?');
                     setSelectFinishOrRegister(true);
+                    setIsDaftar(true);
                 }
             } else {
                 setButtonText('Daftar');
                 setTextConfirmationModal('Apakah kamu yakin mendaftar pelatihan ini?');
                 setSelectFinishOrRegister(false);
+                setIsDaftar(false);
             }
         };
 
@@ -344,7 +348,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                                 alt="Banner Pelatihan"
                                 className="w-full max-h-96 object-contain rounded-lg"
                                 onError={(e) => {
-                                    e.target.src = '/placeholder-image.jpg'; // Fallback image
+                                    e.target.src = `${API_BASE_URL}/uploads/pelatihan/default.png` // Fallback image
                                     e.target.alt = 'Gambar tidak tersedia';
                                 }}
                             />
@@ -407,18 +411,24 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                         ) : (
                             <>
                                 Anda telah mendaftar ke pelatihan{" "}
-                                <span className="font-semibold">{selectedTraining.judul_pelatihan}</span> 
-                                dan jika selesai akan mendapatkan:
+                                <span className="font-semibold">{selectedTraining.judul_pelatihan}</span>
                             </>
                         )}
                         </p>
                         <div className="flex items-center justify-center mb-4">
-                            <div className="mr-2">
-                                {badgeIcons[selectedTraining.badge.toLowerCase()] || badgeIcons.bronze}
-                            </div>
-                            <span className="text-lg font-semibold">
-                                {selectedTraining.badge}
-                            </span>
+                            {selectFinishOrRegister ? (
+                                <>
+                                    <div className="mr-2">
+                                        {badgeIcons[selectedTraining.badge.toLowerCase()] || badgeIcons.bronze}
+                                    </div>
+                                    <span className="text-lg font-semibold">
+                                        {selectedTraining.badge}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                </>
+                            )}
                         </div>
                         <p className="text-gray-600 dark:text-gray-300">
                             Halaman akan refresh dalam{" "}
@@ -449,11 +459,16 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     {selectedTraining.upload_banner && (
                     <div className="mb-6">
                         <img
-                        src={`${API_BASE_URL}${selectedTraining.upload_banner}`}
-                        alt="Banner Pelatihan"
-                        className="w-full max-h-96 object-contain rounded-lg"
+                            src={`${API_BASE_URL}${selectedTraining.upload_banner}`}
+                            alt="Banner Pelatihan"
+                            className="w-full max-h-96 object-contain rounded-lg"
+                            onError={(e) => {
+                                e.target.onerror = null; // Mencegah infinite loop
+                                e.target.src = `${API_BASE_URL}/uploads/pelatihan/default.png`; // Ganti dengan gambar default
+                                e.target.alt = "Gambar tidak tersedia";
+                            }}
                         />
-                    </div>
+                    </div>                
                     )}
                 
                     {/* Grid untuk Konten */}
@@ -518,38 +533,41 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                         </div>
                 
                         {/* Kode Penyelesaian */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Kode Penyelesaian
-                            </label>
-                            <div className="flex items-center">
-                                <input
-                                    type={showFinishedCode ? "text" : "password"}
-                                    value={kode || 'Belum Menerima Kode Penyelesaian'}
-                                    readOnly
-                                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowFinishedCode(!showFinishedCode)}
-                                    className="ml-2 p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
-                                >
-                                    {showFinishedCode ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
-                                </button>
-                            </div>
-                            {loading && (
-                                <div className="flex justify-center items-center">
-                                    <FaHourglassHalf className="animate-spin text-2xl text-blue-500" />
-                                    <span className="ml-2">Memuat kode pelatihan...</span>
+                        { isDaftar && (
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Kode Penyelesaian
+                                    </label>
+                                    <div className="flex items-center">
+                                        <input
+                                            type={showFinishedCode ? "text" : "password"}
+                                            value={kode || 'Belum Menerima Kode Penyelesaian'}
+                                            readOnly
+                                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowFinishedCode(!showFinishedCode)}
+                                            className="ml-2 p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
+                                        >
+                                            {showFinishedCode ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
+                                        </button>
+                                    </div>
+                                    {loading && (
+                                        <div className="flex justify-center items-center">
+                                            <FaHourglassHalf className="animate-spin text-2xl text-blue-500" />
+                                            <span className="ml-2">Memuat kode pelatihan...</span>
+                                        </div>
+                                    )}
+        {/* 
+                                    {error && (
+                                        <div className="text-red-500 text-sm mt-2">
+                                            {error}
+                                        </div>
+                                    )} */}
                                 </div>
-                            )}
-{/* 
-                            {error && (
-                                <div className="text-red-500 text-sm mt-2">
-                                    {error}
-                                </div>
-                            )} */}
-                        </div>
+                            )
+                        }
                     </div>
                 
                     {/* Kolom Kanan */}
@@ -562,48 +580,51 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                         <textarea
                             value={selectedTraining.deskripsi_pelatihan}
                             readOnly
-                            rows="5"
+                            rows={selectedTraining.deskripsi_pelatihan.split("\n").length || 1} // Sesuaikan jumlah baris dengan konten
                             className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                            style={{ resize: "none", overflow: "hidden" }} // Mencegah resize manual dan scrollbar
                         />
                         </div>
                 
                         {/* Link Pelatihan */}
-                        {selectedTraining.link && (
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Link Pelatihan
-                            </label>
-                            <a
-                            href={selectedTraining.link}
-                            rel="noopener noreferrer"
-                            className={`w-full px-4 py-2 text-white rounded-lg transition-colors text-center block ${
-                                buttonText === 'Daftar' 
-                                    ? 'bg-gray-400 cursor-not-allowed pointer-events-none' 
-                                    : 'bg-blue-600 hover:bg-blue-700'
-                            }`}
-                            >
-                            Buka Link Pelatihan
-                            </a>
-                        </div>
+                        {isDaftar && selectedTraining.link && (
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Link Pelatihan
+                                </label>
+                                <a
+                                    href={selectedTraining.link}
+                                    rel="noopener noreferrer"
+                                    className={`w-full px-4 py-2 text-white rounded-lg transition-colors text-center block ${
+                                        buttonText === "Daftar"
+                                            ? "bg-gray-400 cursor-not-allowed pointer-events-none"
+                                            : "bg-blue-600 hover:bg-blue-700"
+                                    }`}
+                                >
+                                    Buka Link Pelatihan
+                                </a>
+                            </div>
                         )}
                 
                         {/* Kode Pelatihan */}
-                        <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Kode Pelatihan
-                        </label>
-                        <input
-                            disabled={
-                                buttonText === 'Daftar'
-                            }
-                            type="text"
-                            value={kodeFinished}
-                            onChange={(e) => setKodeFinished(e.target.value)}
-                            placeholder="Masukkan kode peyelesaian..."
-                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
-                        />
-                        {selectFinishOrRegister === true ? error && <p className="text-red-500 text-sm mt-1">{error}</p> : <p></p>}
-                        </div>
+                        { isDaftar && (
+                                <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Kode Pelatihan
+                                </label>
+                                <input
+                                    disabled={
+                                        buttonText === 'Daftar'
+                                    }
+                                    type="text"
+                                    value={kodeFinished}
+                                    onChange={(e) => setKodeFinished(e.target.value)}
+                                    placeholder="Masukkan kode peyelesaian..."
+                                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                                />
+                                </div>
+                            )
+                        }
                     </div>
                     </div>
                 
