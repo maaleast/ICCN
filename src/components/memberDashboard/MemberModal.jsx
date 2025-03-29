@@ -75,7 +75,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
     const [buttonText, setButtonText] = useState('Daftar');
     const [selectFinishOrRegister, setSelectFinishOrRegister] = useState(false);
     const [textConfirmationModal, setTextConfirmationModal] = useState('Apakah kamu yakin mendaftar pelatihan ini?');
-    const [isBannerBroken, setIsBannerBroken] = useState(false);
+    const [isDaftar, setIsDaftar] = useState(false);
 
     // console.log('selected Training banner: ', selectedTraining.upload_banner)
     // console.log('member ID: ', memberId)
@@ -175,11 +175,13 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     setButtonText('Selesaikan Pelatihan');
                     setTextConfirmationModal('Apakah kamu yakin menyelesaikan pelatihan ini?');
                     setSelectFinishOrRegister(true);
+                    setIsDaftar(true);
                 }
             } else {
                 setButtonText('Daftar');
                 setTextConfirmationModal('Apakah kamu yakin mendaftar pelatihan ini?');
                 setSelectFinishOrRegister(false);
+                setIsDaftar(false);
             }
         };
 
@@ -526,38 +528,41 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                         </div>
                 
                         {/* Kode Penyelesaian */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Kode Penyelesaian
-                            </label>
-                            <div className="flex items-center">
-                                <input
-                                    type={showFinishedCode ? "text" : "password"}
-                                    value={kode || 'Belum Menerima Kode Penyelesaian'}
-                                    readOnly
-                                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowFinishedCode(!showFinishedCode)}
-                                    className="ml-2 p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
-                                >
-                                    {showFinishedCode ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
-                                </button>
-                            </div>
-                            {loading && (
-                                <div className="flex justify-center items-center">
-                                    <FaHourglassHalf className="animate-spin text-2xl text-blue-500" />
-                                    <span className="ml-2">Memuat kode pelatihan...</span>
+                        { isDaftar && (
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Kode Penyelesaian
+                                    </label>
+                                    <div className="flex items-center">
+                                        <input
+                                            type={showFinishedCode ? "text" : "password"}
+                                            value={kode || 'Belum Menerima Kode Penyelesaian'}
+                                            readOnly
+                                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowFinishedCode(!showFinishedCode)}
+                                            className="ml-2 p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
+                                        >
+                                            {showFinishedCode ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
+                                        </button>
+                                    </div>
+                                    {loading && (
+                                        <div className="flex justify-center items-center">
+                                            <FaHourglassHalf className="animate-spin text-2xl text-blue-500" />
+                                            <span className="ml-2">Memuat kode pelatihan...</span>
+                                        </div>
+                                    )}
+        {/* 
+                                    {error && (
+                                        <div className="text-red-500 text-sm mt-2">
+                                            {error}
+                                        </div>
+                                    )} */}
                                 </div>
-                            )}
-{/* 
-                            {error && (
-                                <div className="text-red-500 text-sm mt-2">
-                                    {error}
-                                </div>
-                            )} */}
-                        </div>
+                            )
+                        }
                     </div>
                 
                     {/* Kolom Kanan */}
@@ -570,47 +575,51 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                         <textarea
                             value={selectedTraining.deskripsi_pelatihan}
                             readOnly
-                            rows="5"
+                            rows={selectedTraining.deskripsi_pelatihan.split("\n").length || 1} // Sesuaikan jumlah baris dengan konten
                             className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                            style={{ resize: "none", overflow: "hidden" }} // Mencegah resize manual dan scrollbar
                         />
                         </div>
                 
                         {/* Link Pelatihan */}
-                        {selectedTraining.link && (
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Link Pelatihan
-                            </label>
-                            <a
-                            href={selectedTraining.link}
-                            rel="noopener noreferrer"
-                            className={`w-full px-4 py-2 text-white rounded-lg transition-colors text-center block ${
-                                buttonText === 'Daftar' 
-                                    ? 'bg-gray-400 cursor-not-allowed pointer-events-none' 
-                                    : 'bg-blue-600 hover:bg-blue-700'
-                            }`}
-                            >
-                            Buka Link Pelatihan
-                            </a>
-                        </div>
+                        {isDaftar && selectedTraining.link && (
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Link Pelatihan
+                                </label>
+                                <a
+                                    href={selectedTraining.link}
+                                    rel="noopener noreferrer"
+                                    className={`w-full px-4 py-2 text-white rounded-lg transition-colors text-center block ${
+                                        buttonText === "Daftar"
+                                            ? "bg-gray-400 cursor-not-allowed pointer-events-none"
+                                            : "bg-blue-600 hover:bg-blue-700"
+                                    }`}
+                                >
+                                    Buka Link Pelatihan
+                                </a>
+                            </div>
                         )}
                 
                         {/* Kode Pelatihan */}
-                        <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Kode Pelatihan
-                        </label>
-                        <input
-                            disabled={
-                                buttonText === 'Daftar'
-                            }
-                            type="text"
-                            value={kodeFinished}
-                            onChange={(e) => setKodeFinished(e.target.value)}
-                            placeholder="Masukkan kode peyelesaian..."
-                            className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
-                        />
-                        </div>
+                        { isDaftar && (
+                                <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Kode Pelatihan
+                                </label>
+                                <input
+                                    disabled={
+                                        buttonText === 'Daftar'
+                                    }
+                                    type="text"
+                                    value={kodeFinished}
+                                    onChange={(e) => setKodeFinished(e.target.value)}
+                                    placeholder="Masukkan kode peyelesaian..."
+                                    className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
+                                />
+                                </div>
+                            )
+                        }
                     </div>
                     </div>
                 
