@@ -75,8 +75,9 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
     const [buttonText, setButtonText] = useState('Daftar');
     const [selectFinishOrRegister, setSelectFinishOrRegister] = useState(false);
     const [textConfirmationModal, setTextConfirmationModal] = useState('Apakah kamu yakin mendaftar pelatihan ini?');
+    const [isBannerBroken, setIsBannerBroken] = useState(false);
 
-    // console.log('selected Training: ', selectedTraining.upload_banner)
+    // console.log('selected Training banner: ', selectedTraining.upload_banner)
     // console.log('member ID: ', memberId)
 
     const idMember = memberId;
@@ -97,51 +98,53 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
 
     const fetchKodePelatihan = async (idMember, idTraining) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/pelatihan/peserta-pelatihan/kode/${idMember}/${idTraining}`);
-            
-            // Jika response tidak OK, langsung return object dengan status error
+            const response = await fetch(
+                `${API_BASE_URL}/pelatihan/peserta-pelatihan/kode/${idMember}/${idTraining}`
+            ).catch(() => {
+                // Tangani error jaringan atau request gagal sebelum fetch mengembalikan response
+                return { ok: false, status: 500 };
+            });
+    
             if (!response.ok) {
                 return {
                     error: true,
-                    message: 'Gagal mengambil data kode pelatihan'
+                    message:
+                        response.status === 404
+                            ? "Kode pelatihan tidak ditemukan."
+                            : "Gagal mengambil data kode pelatihan",
                 };
             }
-            
+    
             const data = await response.json();
             return data;
-            
         } catch (error) {
-            console.error('❌ Error:', error);
             return {
                 error: true,
-                message: error.message || 'Terjadi kesalahan saat mengambil kode pelatihan'
+                message: "Terjadi kesalahan saat mengambil kode pelatihan",
             };
         }
     };
-
+    
     useEffect(() => {
-        if (!idMember || !idTraining) {
-            console.log("⚠️ idMember atau idTraining tidak tersedia.");
-            return;
-        }
+        if (!idMember || !idTraining) return;
     
         const fetchData = async () => {
             setLoading(true);
             setError('');
+    
             try {
                 const kodeData = await fetchKodePelatihan(idMember, idTraining);
                 
-                // Handle jika ada error dari fetchKodePelatihan
                 if (kodeData.error) {
                     setError(kodeData.message);
-                    return; // Keluar tanpa menampilkan Swal
+                    return; // Stop execution tanpa menampilkan alert
                 }
                 
                 if (kodeData.kode) {
                     setKode(kodeData.kode);
                     setShowFinishedCode(true);
                 } else if (kodeData.message) {
-                    // Hanya tampilkan Swal untuk pesan informasi (bukan error)
+                    // Swal hanya untuk informasi, bukan error
                     Swal.fire({
                         icon: 'info',
                         title: 'Informasi',
@@ -149,15 +152,14 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                     });
                 }
             } catch (error) {
-                // Ini akan menangkap error yang tidak terduga
-                setError(error.message || 'Terjadi kesalahan');
+                setError("Terjadi kesalahan");
             } finally {
                 setLoading(false);
             }
         };
     
         fetchData();
-    }, [idMember, idTraining]);
+    }, [idMember, idTraining]);    
 
     useEffect(() => {
         if (!idMember || !idTraining) {
@@ -344,7 +346,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                                 alt="Banner Pelatihan"
                                 className="w-full max-h-96 object-contain rounded-lg"
                                 onError={(e) => {
-                                    e.target.src = '/placeholder-image.jpg'; // Fallback image
+                                    e.target.src = `${API_BASE_URL}/uploads/pelatihan/default.png` // Fallback image
                                     e.target.alt = 'Gambar tidak tersedia';
                                 }}
                             />
@@ -407,18 +409,24 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                         ) : (
                             <>
                                 Anda telah mendaftar ke pelatihan{" "}
-                                <span className="font-semibold">{selectedTraining.judul_pelatihan}</span> 
-                                dan jika selesai akan mendapatkan:
+                                <span className="font-semibold">{selectedTraining.judul_pelatihan}</span>
                             </>
                         )}
                         </p>
                         <div className="flex items-center justify-center mb-4">
-                            <div className="mr-2">
-                                {badgeIcons[selectedTraining.badge.toLowerCase()] || badgeIcons.bronze}
-                            </div>
-                            <span className="text-lg font-semibold">
-                                {selectedTraining.badge}
-                            </span>
+                            {selectFinishOrRegister ? (
+                                <>
+                                    <div className="mr-2">
+                                        {badgeIcons[selectedTraining.badge.toLowerCase()] || badgeIcons.bronze}
+                                    </div>
+                                    <span className="text-lg font-semibold">
+                                        {selectedTraining.badge}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                </>
+                            )}
                         </div>
                         <p className="text-gray-600 dark:text-gray-300">
                             Halaman akan refresh dalam{" "}
@@ -602,7 +610,6 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                             placeholder="Masukkan kode peyelesaian..."
                             className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg focus:outline-none"
                         />
-                        {selectFinishOrRegister === true ? error && <p className="text-red-500 text-sm mt-1">{error}</p> : <p></p>}
                         </div>
                     </div>
                     </div>
