@@ -151,7 +151,7 @@ const Navbar = () => {
                                 onClick={() => handleNavigation(isLoggedIn ? "/home" : "/")}
                                 className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200"
                             >
-                                About
+                                Tentang
                             </button>
                         </li>
                         <li>
@@ -159,7 +159,7 @@ const Navbar = () => {
                                 to="/services"
                                 className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200"
                             >
-                                Services
+                                Layanan
                             </Link>
                         </li>
                         <li>
