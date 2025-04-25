@@ -151,7 +151,7 @@ const Navbar = () => {
                                 onClick={() => handleNavigation(isLoggedIn ? "/home" : "/")}
                                 className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200"
                             >
-                                About
+                                Tentang
                             </button>
                         </li>
                         <li>
@@ -159,7 +159,7 @@ const Navbar = () => {
                                 to="/services"
                                 className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200"
                             >
-                                Services
+                                Layanan
                             </Link>
                         </li>
                         <li>
@@ -167,7 +167,7 @@ const Navbar = () => {
                                 to="/events"
                                 className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200"
                             >
-                                Events
+                                Acara
                             </Link>
                         </li>
                         <li>
@@ -183,7 +183,7 @@ const Navbar = () => {
                                 to="/team"
                                 className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200"
                             >
-                                Our Team
+                                Tim Kami
                             </Link>
                         </li>
                         <li>
@@ -191,7 +191,7 @@ const Navbar = () => {
                                 onClick={() => handleNavigation(isLoggedIn ? "/home" : "/")}
                                 className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200"
                             >
-                                Contact
+                                Kontak
                             </button>
                         </li>
                         <li>
@@ -199,7 +199,7 @@ const Navbar = () => {
                                 to="/gallery"
                                 className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200"
                             >
-                                Gallery
+                                Galeri
                             </Link>
                         </li>
                         <li>

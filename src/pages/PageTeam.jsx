@@ -515,7 +515,8 @@ const PageTeam = () => {
             <main className="pt-32 pb-12 px-4 md:px-8">
                 {/* Struktur Organisasi */}
                 <div className="max-w-7xl mx-auto mb-16">
-                    <h1 className="text-4xl font-bold text-white mb-8 text-center">Struktur Organisasi</h1>
+                <h1 className="text-4xl font-bold text-white mb-8 text-center">Tim Kami</h1>
+                    <h1 className="text-2xl font-bold text-white mb-8 text-center">Struktur Organisasi</h1>
                     <div className="flex justify-center">
                         {organizationData.struktur.map((node) => (
                             <OrganizationNode key={node.id} node={node} isRoot={true} />
