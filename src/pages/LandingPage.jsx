@@ -552,7 +552,7 @@ const LandingPage = () => {
                                     duration={500}
                                     className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                                 >
-                                    About
+                                    Tentang
                                 </ScrollLink>
                             </li>
                             <li>
@@ -562,7 +562,7 @@ const LandingPage = () => {
                                     duration={500}
                                     className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                                 >
-                                    Services
+                                    Layanan
                                 </ScrollLink>
                             </li>
                             <li>
@@ -572,7 +572,7 @@ const LandingPage = () => {
                                     duration={500}
                                     className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                                 >
-                                    Event
+                                    Acara
                                 </ScrollLink>
                             </li>
                             <li>
@@ -592,7 +592,7 @@ const LandingPage = () => {
                                     duration={500}
                                     className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                                 >
-                                    Our Team
+                                    Tim Kami
                                 </ScrollLink>
                             </li>
                             <li>
@@ -612,7 +612,7 @@ const LandingPage = () => {
                                     duration={500}
                                     className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                                 >
-                                    Gallery
+                                    Galeri
                                 </ScrollLink>
                             </li>
                             <li>
@@ -622,7 +622,7 @@ const LandingPage = () => {
                                     duration={500}
                                     className="px-2 hover:text-white hover:bg-gradient-to-b from-orange-600 to-orange-400 hover:scale-105 rounded-md duration-200 cursor-pointer"
                                 >
-                                    Contact
+                                    Kontak
                                 </ScrollLink>
                             </li>
                         </ul>
@@ -937,7 +937,7 @@ const LandingPage = () => {
                 {/* Services Section */}
                 <section id="services" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Our Services</h2>
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Layanan Kami</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {services.slice(0, 2).map((service, index) => (
                                 <motion.div
@@ -982,7 +982,7 @@ const LandingPage = () => {
                 {/* Events Section */}
                 <section id="event" className="py-12 bg-white scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Events</h2>
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Acara</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {dummyEvents.slice(0, 2).map((event, index) => (
                                 <motion.div
@@ -1023,7 +1023,7 @@ const LandingPage = () => {
                     {/* Partnership Section */}
                     <section id="partnership" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
                         <div className="container mx-auto px-4">
-                            <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Our Partners</h2>
+                            <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Partner Kami</h2>
 
                             {/* Filter Navigation */}
                             <motion.div
@@ -1076,8 +1076,8 @@ const LandingPage = () => {
                     <div className="container mx-auto px-4">
                         {/* Judul dan Subjudul */}
                         <div className="text-center mb-12">
-                            <h2 className="text-4xl font-bold text-blue-900 uppercase">TEAM</h2>
-                            <p className="text-lg text-gray-600 mt-2">CHECK OUR TEAM</p>
+                            <h2 className="text-4xl font-bold text-blue-900 ">Tim Kami</h2>
+                            <p className="text-lg text-gray-600 mt-2">Cek Tim Kami</p>
                         </div>
 
                         {/* Grid untuk Card Team */}
@@ -1114,7 +1114,7 @@ const LandingPage = () => {
                                 onClick={() => navigate("/team")} // Navigasi ke /team saat tombol diklik
                                 className="flex items-center px-6 py-3 bg-blue-900 text-white rounded-full hover:bg-blue-700 transition-colors duration-300"
                             >
-                                <span>More</span>
+                                <span>Lebih Banyak</span>
                                 <svg
                                     className="w-6 h-6 ml-2"
                                     fill="none"
@@ -1302,7 +1302,7 @@ const LandingPage = () => {
                 {/* Contact Section */}
                 <section id="contact" className="py-12 bg-gray-100">
                     <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Contact Us</h2>
+                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Hubungi Kami</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {/* Form Kontak */}
                             <div className="bg-white p-6 rounded-lg shadow-md">
@@ -1395,7 +1395,7 @@ const LandingPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {/* About Section */}
                             <div className="space-y-4">
-                                <h4 className="text-xl font-bold">About ICCN</h4>
+                                <h4 className="text-xl font-bold">Tentang ICCN</h4>
                                 <p className="text-gray-400">
                                     Indonesia Career Center Network (ICCN) adalah jejaring pusat karir yang bertujuan untuk meningkatkan kualitas SDM Indonesia.
                                 </p>
@@ -1438,7 +1438,7 @@ const LandingPage = () => {
                                             className="flex items-center text-gray-400 hover:text-white cursor-pointer"
                                         >
                                             <FaArrowRight className="mr-2 text-orange-500" />
-                                            <span>About</span>
+                                            <span>Tentang</span>
                                         </ScrollLink>
                                     </li>
                                     <li>
@@ -1449,7 +1449,7 @@ const LandingPage = () => {
                                             className="flex items-center text-gray-400 hover:text-white cursor-pointer"
                                         >
                                             <FaArrowRight className="mr-2 text-orange-500" />
-                                            <span>Services</span>
+                                            <span>Layanan</span>
                                         </ScrollLink>
                                     </li>
                                     <li>
@@ -1460,7 +1460,7 @@ const LandingPage = () => {
                                             className="flex items-center text-gray-400 hover:text-white cursor-pointer"
                                         >
                                             <FaArrowRight className="mr-2 text-orange-500" />
-                                            <span>Event</span>
+                                            <span>Acara</span>
                                         </ScrollLink>
                                     </li>
                                     <li>
@@ -1479,7 +1479,7 @@ const LandingPage = () => {
 
                             {/* Contact Info Section */}
                             <div className="space-y-4">
-                                <h4 className="text-xl font-bold">Contact Info</h4>
+                                <h4 className="text-xl font-bold">Info Kontak</h4>
                                 <div className="space-y-4">
                                     <div className="flex items-center space-x-4">
                                         <FaMapMarkerAlt className="text-orange-400 text-xl" />
