@@ -26,6 +26,7 @@ export default function MemberDashboard() {
     const [userId, setUserId] = useState(localStorage.getItem("user_id"));
     const [memberId, setMemberId] = useState(null);
     const [status, setStatus] = useState(false);
+    const [nameGeneration, setNameGeneration] = useState([]);
     const navigate = useNavigate();
     const [userInfo, setUserInfo] = useState({
         no_identitas: "",
@@ -33,6 +34,7 @@ export default function MemberDashboard() {
         institusi: "",
         nama: "",
         nomor_wa: "",
+        nama_generasi: []
     });
 
     // Fetch data member saat komponen mount
@@ -54,6 +56,7 @@ export default function MemberDashboard() {
                 }
 
                 setUserInfo(data);
+                setNameGeneration(data.nama_generasi);
             } catch (error) {
                 console.error("Error:", error);
             }
@@ -61,6 +64,9 @@ export default function MemberDashboard() {
 
         fetchMemberInfo();
     }, [userId]); // Gunakan userId sebagai dependency
+
+    // console.log('user info', userInfo);
+    // console.log('name generasi', nameGeneration);
 
     useEffect(() => {
         if (!userId) return; // Cegah request jika userId belum tersedia
@@ -353,7 +359,7 @@ export default function MemberDashboard() {
                                 memberId={memberId}
                             />
                         )}
-                        {activeMenu === 'Penghargaan' && <Penghargaan badges={transformBadges(badges)} />}
+                        {activeMenu === 'Penghargaan' && <Penghargaan badges={transformBadges(badges)} generasi={nameGeneration} />}
                         {/* {activeMenu === 'Profil' && <Profile />} */}
                         {activeMenu === 'Notifikasi' && <Notifications />}
                         {activeMenu === 'Pengaturan' && <Settings userId={userId} />}

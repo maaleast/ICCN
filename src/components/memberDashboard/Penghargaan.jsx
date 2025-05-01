@@ -3,7 +3,7 @@ import { FaMedal, FaStar, FaTrophy, FaCrown, FaGem, FaAward } from 'react-icons/
 import { useState } from 'react';
 import Pagination from '../Pagination'; // Impor komponen Pagination
 
-export default function Penghargaan({ badges }) {
+export default function Penghargaan({ badges, generasi }) {
     const badgeIcons = {
         bronze: <FaMedal className="shine-animation bronze-glow" color="#cd7f32" />,
         silver: <FaStar className="shine-animation silver-glow" color="#c0c0c0" />,
@@ -17,6 +17,7 @@ export default function Penghargaan({ badges }) {
     // State untuk paginasi dan pencarian
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedOption, setSelectedOption] = useState(''); // State untuk dropdown
     const itemsPerPage = 10;
 
     const completedBadges = badges.filter(badge => badge.status === "completed");
@@ -24,10 +25,18 @@ export default function Penghargaan({ badges }) {
 
     console.log('completedBadges', completedBadges)
 
+    console.log('generasi', generasi)
+
     // Filter badge berdasarkan search term dan urutkan dari yang terbaru dan yang statusnya completed
     const filteredBadges = badges
-    .filter(badge => badge.status === "completed") // Hanya ambil yang selesai
-    .filter(badge => badge.badge.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(badge => badge.status === "completed")
+    .filter(badge =>
+        badge.badge.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter(badge => {
+        if (!selectedOption) return true;
+        return badge.generasi === selectedOption;
+    })
     .sort((a, b) => new Date(b.waktu_selesai || 0) - new Date(a.waktu_selesai || 0));
 
     // Paginasi
@@ -152,15 +161,28 @@ export default function Penghargaan({ badges }) {
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md mt-10">
                     <h2 className="text-2xl font-bold mb-6">History Pendapatan Badge</h2>
                     {/* Input Pencarian */}
-                    <div className="mb-4">
-                        <input
-                            type="text"
-                            placeholder="Cari berdasarkan nama badge..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        />
-                    </div>
+                    <div className="mb-4 flex flex-wrap gap-2">
+                    <input
+                        type="text"
+                        placeholder="Cari berdasarkan nama badge..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="flex-1 min-w-[200px] p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+
+                    <select
+                        value={selectedOption}
+                        onChange={(e) => setSelectedOption(e.target.value)}
+                        className="min-w-[150px] p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    >
+                        <option value="">Semua</option>
+                        {generasi && Object.entries(generasi).map(([key, value]) => (
+                            <option key={key} value={key}>
+                                {key} - {value.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
                     <div className="overflow-x-auto">
                         <table className="min-w-full bg-white dark:bg-gray-800">
                             <thead>
