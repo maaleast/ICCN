@@ -22,12 +22,12 @@ const DetailMemberPelatihan = ({ isOpen, onClose, data, id }) => {
                 accessor: "aksi",
                 Cell: ({ row }) => (
                     <div className="flex gap-2 justify-center">
-                        <button
+                        {/* <button
                             onClick={() => deletePeserta(row.original.aksi.deleteId, row.original.nama)}
                             className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700"
                         >
                             Hapus
-                        </button>
+                        </button> */}
                         <button
                             id={`btnKirim${row.original.aksi.kirimId}`}
                             onClick={() => kirimPeserta(row.original.aksi.kirimId, row.original.aksi.pelatihanId)}
