@@ -391,7 +391,7 @@ export default function Pelatihan() {
                         >
                             <FaUser /> {/* Ikon member */}
                             <span>{totalPendaftar[item.id] ?? 0}</span> {/* Angka */}
-                            <span>Detail Peserta yang mendaftar</span> {/* Teks */}
+                            <span>Detail Peserta</span> {/* Teks */}
                         </button>
                     </div>
                 </td>
