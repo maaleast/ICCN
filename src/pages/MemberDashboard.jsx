@@ -227,7 +227,7 @@ export default function MemberDashboard() {
     };
 
     const handlePerpanjang = () => {
-        navigate('/perpanjang');
+        navigate('/perpanjang', { state: { userInfo } });
     };
     
     const handleNavigateToTraining = () => {

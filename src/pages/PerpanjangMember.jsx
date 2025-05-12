@@ -5,14 +5,19 @@ import Swal from "sweetalert2";
 import Navbar from "../components/Navbar";
 import { FaArrowLeft } from "react-icons/fa";
 import { API_BASE_URL } from "../config";
+import { useLocation } from 'react-router-dom';
 
 const PerpanjangMember = () => {
+    const location = useLocation();
+    const userInfo = location.state;
+    // console.log(userInfo);
     const [formData, setFormData] = useState({
+        name: userInfo?.userInfo.nama,
         receiptName: "",
         transferAmount: "",
         buktiPembayaran: null,
     });
-
+    // console.log(formData.name);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAllowed, setIsAllowed] = useState(false);
@@ -113,9 +118,19 @@ const PerpanjangMember = () => {
         const user_id = localStorage.getItem("user_id");
 
         formDataToSend.append("user_id", user_id);
+        formDataToSend.append("nama", formData.name);
         formDataToSend.append("nama_kuitansi", formData.receiptName);
         formDataToSend.append("nominal_transfer", formData.transferAmount);
         formDataToSend.append("bukti_pembayaran_perpanjang", formData.buktiPembayaran);
+        if (!formData.buktiPembayaran) {
+            Swal.fire({
+                icon: "warning",
+                title: "Peringatan",
+                text: "Silakan unggah bukti pembayaran terlebih dahulu.",
+            });
+            setIsSubmitting(false);
+            return;
+        }
 
         try {
             // Kirim data perpanjangan member
@@ -152,7 +167,7 @@ const PerpanjangMember = () => {
                 title: "Berhasil!",
                 text: "Permohonan perpanjangan member berhasil, menunggu verifikasi",
             }).then(() => {
-                navigate("/home");
+                navigate("/member");
             });
         } catch (error) {
             Swal.fire({
@@ -166,7 +181,7 @@ const PerpanjangMember = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-800 to-blue-500">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-gray-500">
             <Navbar />
             <div className="flex items-center justify-center min-h-screen p-20 pt-28">
                 <motion.div
@@ -176,7 +191,7 @@ const PerpanjangMember = () => {
                     className="w-full max-w-7xl bg-white shadow-lg rounded-xl flex overflow-hidden"
                 >
                     {/* Bagian Kiri */}
-                    <div className="w-2/5 p-8 bg-blue-700 text-white flex flex-col justify-center relative">
+                    <div className="w-2/5 p-8 bg-orange-600 text-white flex flex-col justify-center relative">
                         <button
                             onClick={() => navigate("/home")}
                             className="absolute top-4 left-4 flex items-center text-white hover:text-blue-300 transition-all"
@@ -203,6 +218,23 @@ const PerpanjangMember = () => {
                             Formulir Perpanjangan Membership
                         </h2>
                         <form className="space-y-5" onSubmit={handleSubmit}>
+                            {/* Nama member */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">Nama</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    className={`mt-1 block w-full p-3 border rounded-md focus:ring focus:ring-blue-300 ${errors.name ? "border-red-500" : ""
+                                        }`}
+                                    placeholder="Nama yang muncul di kuitansi"
+                                />
+                                {errors.name && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                                )}
+                            </div>
+                            
                             {/* Nama pada Kuitansi */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-600">Nama pada Kuitansi</label>
@@ -259,7 +291,7 @@ const PerpanjangMember = () => {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full py-3 mt-6 text-white bg-blue-700 rounded-md hover:bg-sky-800 hover:scale-105 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                className="w-full py-3 mt-6 text-white bg-orange-600 rounded-md hover:shadow-lg hover:scale-105 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting ? "Mengirim..." : "Perpanjang Sekarang"}
                             </button>
