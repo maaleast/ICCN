@@ -99,7 +99,7 @@ const DetailMemberPelatihan = ({ isOpen, onClose, data, id }) => {
                 className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-4xl max-h-h[90hv] overflow-y-auto dark:bg-gray-800"
             >
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-semibold">Detail Pendaftar</h2>
+                    <h2 className="text-xl font-semibold">Detail Peserta yang mendaftar</h2>
                     <DownloadDataButton pelatihanId={id} />
                 </div>
 
