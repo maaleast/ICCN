@@ -83,7 +83,7 @@ const PageServices = () => {
                         transition={{ duration: 0.5 }}
                         className="text-4xl md:text-5xl font-bold text-center text-white mb-8"
                     >
-                        Layanan Kami
+                        Our Services
                     </motion.h1>
 
                     {isLoading ? (
