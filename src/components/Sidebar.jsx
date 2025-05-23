@@ -2,6 +2,7 @@ import { FiUsers, FiFileText, FiImage, FiActivity, FiLayers, FiSettings, FiAward
 import { FaFileDownload, FaFileUpload, FaMoneyBillWave } from "react-icons/fa";
 import { FaTimesCircle, FaHourglassHalf } from 'react-icons/fa'; // Ikon untuk status
 import { BiMoneyWithdraw } from "react-icons/bi";
+import { HiOutlineCalendar } from "react-icons/hi";
 
 export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMenu, verificationStatus, }) {
     const adminMenus = [
@@ -11,6 +12,7 @@ export default function Sidebar({ isAdmin, sidebarOpen, activeMenu, setActiveMen
         { name: 'Galeri Kegiatan', icon: FiImage },
         { name: 'Kelola Berita', icon: FiFileText },
         { name: 'Kelola Services', icon: FiLayers },
+        { name: 'Kelola Events', icon: HiOutlineCalendar },
         { name: 'Kelola Organisasi', icon: FiUsers },
         { name: 'Laporan Keuangan', icon: BiMoneyWithdraw },
         { name: 'Pemasukan', icon: FiDownload },
