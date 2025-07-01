@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Pagination from "../Pagination";
-import { FaMedal, FaCrown, FaGem, FaStar, FaTrophy, FaAward, FaUser } from "react-icons/fa";
+import { FaMedal, FaCrown, FaGem, FaStar, FaTrophy, FaAward, FaUser, FaPaperPlane } from "react-icons/fa";
 import DetailMemberPelatihan from "./DetailMemberPelatihan";
 import moment from "moment-timezone";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
@@ -28,7 +28,6 @@ export default function Pelatihan() {
         link: "",
         narasumber: "",
         upload_banner: null,
-        kode: "",
         badge: "",
     });
     const [searchTerm, setSearchTerm] = useState("");
@@ -37,14 +36,11 @@ export default function Pelatihan() {
     const [totalPendaftar, setTotalPendaftar] = useState({});
     const [idPelatihan, setIdPelatihan] = useState();
 
-    // Fungsi untuk menampilkan modal dan mengambil data pendaftar
     const handleShowDetailPendaftar = async (pelatihanId) => {
         try {
-            // Ambil data pendaftar dari API
             const response = await fetch(`${API_BASE_URL}/pelatihan/peserta-pelatihan/${pelatihanId}/pendaftar`);
             const data = await response.json();
-    
-            // Jika peserta tidak ditemukan, tampilkan SweetAlert
+
             if (response.status === 404 || data.message === "peserta tidak ditemukan" || data.length === 0) {
                 Swal.fire({
                     icon: "warning",
@@ -54,8 +50,7 @@ export default function Pelatihan() {
                 });
                 return;
             }
-    
-            // Set data pendaftar jika ditemukan
+
             setPendaftarData(data);
             setShowDetailPendaftarModal(true);
         } catch (error) {
@@ -64,6 +59,47 @@ export default function Pelatihan() {
                 icon: "error",
                 title: "Gagal Mengambil Data",
                 text: "Terjadi kesalahan saat mengambil data peserta.",
+                confirmButtonText: "OK",
+            });
+        }
+    };
+
+    const handleSendCode = async (userId, pelatihanId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/pelatihan/kirim-kode`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    pelatihan_id: pelatihanId
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Kode Berhasil Dikirim",
+                    text: "Kode pelatihan telah dikirim ke peserta",
+                    confirmButtonText: "OK",
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Gagal Mengirim Kode",
+                    text: data.message || "Terjadi kesalahan saat mengirim kode",
+                    confirmButtonText: "OK",
+                });
+            }
+        } catch (error) {
+            console.error("❌ Error sending code:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Gagal Mengirim Kode",
+                text: "Terjadi kesalahan saat mengirim kode",
                 confirmButtonText: "OK",
             });
         }
@@ -85,7 +121,6 @@ export default function Pelatihan() {
         });
     }, [pelatihan]);
 
-    // Fetch data dari backend
     useEffect(() => {
         fetchPelatihan();
     }, []);
@@ -95,7 +130,6 @@ export default function Pelatihan() {
             const res = await fetch(`${API_BASE_URL}/admin/pelatihan`);
             const data = await res.json();
 
-            // Urutkan data berdasarkan tanggal pelatihan (terbaru ke terlama)
             const sortedData = data.sort((a, b) => new Date(b.tanggal_pelatihan) - new Date(a.tanggal_pelatihan));
 
             setPelatihan(sortedData);
@@ -107,28 +141,35 @@ export default function Pelatihan() {
     };
 
     const handleTambahPelatihan = async () => {
-        const { judul, tanggal_mulai, tanggal_berakhir, deskripsi, link, narasumber, upload_banner, badge, kode } = newPelatihan;
+        // Format tanggal untuk backend
+        const formatDateForBackend = (date) => {
+            return moment(date).format('YYYY-MM-DD HH:mm:ss');
+        };
 
-        if (!judul || !tanggal_mulai || !tanggal_berakhir || !deskripsi || !link || !narasumber || !upload_banner || !badge || !kode) {
+        // Validasi semua field
+        if (
+            !newPelatihan.judul ||
+            !newPelatihan.tanggal_mulai ||
+            !newPelatihan.tanggal_berakhir ||
+            !newPelatihan.deskripsi ||
+            !newPelatihan.link ||
+            !newPelatihan.narasumber ||
+            !newPelatihan.upload_banner ||
+            !newPelatihan.badge
+        ) {
             showErrorNotification("Semua field harus diisi!");
             return;
         }
 
-        const formatTanggal = (date) => {
-            const pad = (num) => num.toString().padStart(2, '0');
-            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-        };
-
         const formData = new FormData();
-        formData.append('judul_pelatihan', judul);
-        formData.append('tanggal_pelatihan', formatTanggal(tanggal_mulai));
-        formData.append('tanggal_berakhir', formatTanggal(tanggal_berakhir));
-        formData.append('deskripsi_pelatihan', deskripsi);
-        formData.append('link', link);
-        formData.append('narasumber', narasumber);
-        formData.append('banner', upload_banner);
-        formData.append('badge', badge);
-        formData.append('kode', kode); // Kirim kode ke backend
+        formData.append('judul_pelatihan', newPelatihan.judul);
+        formData.append('tanggal_pelatihan', formatDateForBackend(newPelatihan.tanggal_mulai));
+        formData.append('tanggal_berakhir', formatDateForBackend(newPelatihan.tanggal_berakhir));
+        formData.append('deskripsi_pelatihan', newPelatihan.deskripsi);
+        formData.append('link', newPelatihan.link);
+        formData.append('narasumber', newPelatihan.narasumber);
+        formData.append('badge', newPelatihan.badge);
+        formData.append('banner', newPelatihan.upload_banner);
 
         try {
             const res = await fetch(`${API_BASE_URL}/admin/pelatihan/tambah`, {
@@ -136,24 +177,28 @@ export default function Pelatihan() {
                 body: formData,
             });
 
-            if (res.ok) {
-                setShowModal(false);
-                setNewPelatihan({
-                    judul: "",
-                    tanggal_mulai: null,
-                    tanggal_berakhir: null,
-                    deskripsi: "",
-                    link: "",
-                    narasumber: "",
-                    upload_banner: null,
-                    badge: "",
-                    kode: "", // Reset kode
-                });
-                fetchPelatihan();
-                showSuccessNotification("Pelatihan berhasil ditambahkan!");
-            } else {
-                showErrorNotification("Gagal menambah pelatihan");
+            const responseData = await res.json();
+
+            if (!res.ok) {
+                console.error("Error response dari backend:", responseData);
+                showErrorNotification(responseData.message || "Gagal menambah pelatihan");
+                return;
             }
+
+            // Reset form dan refresh data
+            setShowModal(false);
+            setNewPelatihan({
+                judul: "",
+                tanggal_mulai: null,
+                tanggal_berakhir: null,
+                deskripsi: "",
+                link: "",
+                narasumber: "",
+                upload_banner: null,
+                badge: "",
+            });
+            fetchPelatihan();
+            showSuccessNotification("Pelatihan berhasil ditambahkan!");
         } catch (error) {
             console.error("❌ Error menambah data:", error);
             showErrorNotification("Terjadi kesalahan saat menambah data");
@@ -161,37 +206,19 @@ export default function Pelatihan() {
     };
 
     const handleEditPelatihan = async () => {
-        const { id, judul_pelatihan, tanggal_pelatihan, tanggal_berakhir, deskripsi_pelatihan, link, narasumber, upload_banner, badge, kode } = selectedPelatihan;
+        const { id, judul_pelatihan, tanggal_pelatihan, tanggal_berakhir, deskripsi_pelatihan, link, narasumber, upload_banner, badge } = selectedPelatihan;
 
-        // Validasi field wajib diisi (kecuali kode jika pelatihan belum berakhir)
         if (!judul_pelatihan || !tanggal_pelatihan || !tanggal_berakhir || !deskripsi_pelatihan || !link || !narasumber || !badge) {
             showErrorNotification("Semua field harus diisi!");
             return;
         }
 
-        // Validasi apakah pelatihan sudah berakhir untuk mengubah kode
-        const currentDate = new Date();
-        const endDate = new Date(tanggal_berakhir);
-
-        if (endDate > currentDate && kode !== selectedPelatihan.kode) {
-            showErrorNotification("Kode pelatihan tidak dapat diubah sampai pelatihan berakhir.");
-            return;
-        }
-
-        console.log('tanggal pelatihan before format ', tanggal_pelatihan)
-        console.log('tanggal berakhir before format     ', tanggal_berakhir)
-
         const formatTanggal = (date) => {
-            const formattedDate = moment(date).format("YYYY-MM-DD HH:mm:ss"); 
-            console.log("Formatted Date:", formattedDate);
+            const formattedDate = moment(date).format("YYYY-MM-DD HH:mm:ss");
             return formattedDate;
-        };        
-        
-        // Debugging: Cek hasil format tanggal sebelum dimasukkan ke formData
-        console.log("Tanggal Pelatihan (Formatted):", formatTanggal(new Date(tanggal_pelatihan)));
-        console.log("Tanggal Berakhir (Formatted):", formatTanggal(new Date(tanggal_berakhir)));
-        
-        const formData = new FormData();    
+        };
+
+        const formData = new FormData();
         formData.append("judul_pelatihan", judul_pelatihan);
         formData.append("tanggal_pelatihan", formatTanggal(new Date(tanggal_pelatihan)));
         formData.append("tanggal_berakhir", formatTanggal(new Date(tanggal_berakhir)));
@@ -199,16 +226,9 @@ export default function Pelatihan() {
         formData.append("link", link);
         formData.append("narasumber", narasumber);
         formData.append("badge", badge);
-        formData.append("kode", kode);
 
-        // Hanya kirim file jika ada perubahan
         if (upload_banner instanceof File) {
-            formData.append("upload_banner", upload_banner);
-        }
-
-        // Debugging: Tampilkan isi formData di konsol
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
+            formData.append("banner", upload_banner);  // Changed from 'upload_banner' to 'banner'
         }
 
         try {
@@ -218,11 +238,11 @@ export default function Pelatihan() {
             });
 
             if (res.ok) {
-                fetchPelatihan(); // Fetch data kembali setelah mengedit
+                fetchPelatihan();
                 setShowEditModal(false);
                 showSuccessNotification("Pelatihan berhasil diperbarui!");
             } else {
-                const errorData = await res.json(); // Ambil pesan error dari backend
+                const errorData = await res.json();
                 showErrorNotification(errorData.message || "Gagal memperbarui pelatihan");
             }
         } catch (error) {
@@ -252,7 +272,7 @@ export default function Pelatihan() {
 
     const formatDate = (dateString) => {
         return moment.utc(dateString).local().format("YYYY-MM-DD HH:mm:ss");
-    };    
+    };
 
     const showSuccessNotification = (message) => {
         Swal.fire({
@@ -293,7 +313,6 @@ export default function Pelatihan() {
         { name: "Celestial", icon: <FaCrown color="#b0179c" />, value: "celestial" },
     ];
 
-    // CSS untuk efek animasi mengkilap
     const styles = `
 @keyframes shine {
     0% { opacity: 0.8; transform: scale(1); }
@@ -324,20 +343,11 @@ export default function Pelatihan() {
     .celestial-glow {
         filter: drop-shadow(0 0 8px #b0179c);
     }
-;`
-
-    const generateKode = () => {
-        const randomString = Math.random().toString(36).substring(2, 8).toUpperCase(); // Generate random string
-        setNewPelatihan({ ...newPelatihan, kode: randomString });
-    };
-
-
-    console.log(new Date().getTimezoneOffset());
+`;
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <style>{styles}</style>
-            {/* Header dan Tabel */}
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold dark:text-gray-100">Daftar Pelatihan</h3>
                 <div className="flex gap-2">
@@ -361,74 +371,70 @@ export default function Pelatihan() {
                 <p className="text-gray-500 dark:text-gray-300">Memuat data...</p>
             ) : (
                 <>
-                    {/* Tabel */}
                     <table className="w-full">
-    <thead className="bg-gray-50 dark:bg-gray-900">
-        <tr>
-            <th className="text-left py-3 px-4">Judul</th>
-            <th className="text-left py-3 px-4">Tanggal Mulai</th>
-            <th className="text-left py-3 px-4">Tanggal Berakhir</th>
-            <th className="text-left py-3 px-4">Total Member Mendaftar</th> {/* Kolom Baru */}
-            <th className="text-left py-3 px-4">Aksi</th>
-        </tr>
-    </thead>
-    <tbody>
-        {displayedPelatihan.map((item) => (
-            <tr key={item.id} className="border-t">
-                <td className="py-3 px-4">{item.judul_pelatihan}</td>
-                <td className="py-3 px-4">{formatDate(item.tanggal_pelatihan)}</td>
-                <td className="py-3 px-4">{formatDate(item.tanggal_berakhir)}</td>
-                {/* Kolom Baru: Total Member Mendaftar */}
-                <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                        {/* Tombol memanjang dengan ikon, angka, dan teks */}
-                        <button
-                            className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600"
-                            onClick={() => {
-                                handleShowDetailPendaftar(item.id)
-                                setIdPelatihan(item.id)
-                            }}
-                        >
-                            <FaUser /> {/* Ikon member */}
-                            <span>{totalPendaftar[item.id] ?? 0}</span> {/* Angka */}
-                            <span>Detail Peserta</span> {/* Teks */}
-                        </button>
-                    </div>
-                </td>
-                {/* Kolom Aksi */}
-                <td className="py-3 px-4 flex gap-2">
-                    <button
-                        className="text-blue-600 hover:underline"
-                        onClick={() => {
-                            setSelectedPelatihan(item);
-                            setShowDetailModal(true);
-                        }}
-                    >
-                        Detail
-                    </button>
-                    <button
-                        className="text-green-600 hover:underline"
-                        onClick={() => {
-                            setSelectedPelatihan(item);
-                            setShowEditModal(true);
-                        }}
-                    >
-                        Edit
-                    </button>
-                    <button
-                        className="text-red-600 hover:underline"
-                        onClick={() => {
-                            setSelectedPelatihan(item);
-                            setShowDeleteModal(true);
-                        }}
-                    >
-                        Hapus
-                    </button>
-                </td>
-            </tr>
-        ))}
-    </tbody>
-</table>
+                        <thead className="bg-gray-50 dark:bg-gray-900">
+                            <tr>
+                                <th className="text-left py-3 px-4">Judul</th>
+                                <th className="text-left py-3 px-4">Tanggal Mulai</th>
+                                <th className="text-left py-3 px-4">Tanggal Berakhir</th>
+                                <th className="text-left py-3 px-4">Total Member Mendaftar</th>
+                                <th className="text-left py-3 px-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {displayedPelatihan.map((item) => (
+                                <tr key={item.id} className="border-t">
+                                    <td className="py-3 px-4">{item.judul_pelatihan}</td>
+                                    <td className="py-3 px-4">{formatDate(item.tanggal_pelatihan)}</td>
+                                    <td className="py-3 px-4">{formatDate(item.tanggal_berakhir)}</td>
+                                    <td className="py-3 px-4">
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600"
+                                                onClick={() => {
+                                                    handleShowDetailPendaftar(item.id)
+                                                    setIdPelatihan(item.id)
+                                                }}
+                                            >
+                                                <FaUser />
+                                                <span>{totalPendaftar[item.id] ?? 0}</span>
+                                                <span>Detail Peserta</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td className="py-3 px-4 flex gap-2">
+                                        <button
+                                            className="text-blue-600 hover:underline"
+                                            onClick={() => {
+                                                setSelectedPelatihan(item);
+                                                setShowDetailModal(true);
+                                            }}
+                                        >
+                                            Detail
+                                        </button>
+                                        <button
+                                            className="text-green-600 hover:underline"
+                                            onClick={() => {
+                                                setSelectedPelatihan(item);
+                                                setShowEditModal(true);
+                                            }}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="text-red-600 hover:underline"
+                                            onClick={() => {
+                                                setSelectedPelatihan(item);
+                                                setShowDeleteModal(true);
+                                            }}
+                                        >
+                                            Hapus
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
 
                     <div className="mt-6">
                         <Pagination
@@ -447,7 +453,6 @@ export default function Pelatihan() {
                     <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl dark:bg-gray-800">
                         <h2 className="text-lg font-semibold mb-4">Tambah Pelatihan</h2>
 
-                        {/* Judul Pelatihan */}
                         <input
                             type="text"
                             placeholder="Judul Pelatihan"
@@ -456,7 +461,6 @@ export default function Pelatihan() {
                             onChange={(e) => setNewPelatihan({ ...newPelatihan, judul: e.target.value })}
                         />
 
-                        {/* Tanggal Mulai dan Tanggal Berakhir */}
                         <div className="grid grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label className="block mb-2">Tanggal Mulai</label>
@@ -484,7 +488,6 @@ export default function Pelatihan() {
                             </div>
                         </div>
 
-                        {/* Deskripsi Pelatihan */}
                         <textarea
                             placeholder="Deskripsi Pelatihan"
                             className="w-full p-2 mb-4 border rounded-lg dark:bg-gray-600"
@@ -493,7 +496,6 @@ export default function Pelatihan() {
                             onChange={(e) => setNewPelatihan({ ...newPelatihan, deskripsi: e.target.value })}
                         />
 
-                        {/* Link Pelatihan */}
                         <input
                             type="text"
                             placeholder="Link Pelatihan"
@@ -502,7 +504,6 @@ export default function Pelatihan() {
                             onChange={(e) => setNewPelatihan({ ...newPelatihan, link: e.target.value })}
                         />
 
-                        {/* Narasumber */}
                         <input
                             type="text"
                             placeholder="Nama Narasumber"
@@ -511,32 +512,20 @@ export default function Pelatihan() {
                             onChange={(e) => setNewPelatihan({ ...newPelatihan, narasumber: e.target.value })}
                         />
 
-                        {/* Input Kode */}
-                        <div className="flex gap-2 mb-4">
-                            <input
-                                type="text"
-                                placeholder="Kode Pelatihan"
-                                className="w-full p-2 border rounded-lg dark:bg-gray-600"
-                                value={newPelatihan.kode}
-                                readOnly
-                                onChange={(e) => setNewPelatihan({ ...newPelatihan, kode: e.target.value })}
-                            />
-                            <button
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
-                                onClick={generateKode}
-                            >
-                                Generate Kode
-                            </button>
-                        </div>
-
-                        {/* Banner */}
                         <input
                             type="file"
                             className="w-full p-2 mb-4 border rounded-lg dark:bg-gray-600"
-                            onChange={(e) => setNewPelatihan({ ...newPelatihan, upload_banner: e.target.files[0] })}
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                    setNewPelatihan({ ...newPelatihan, upload_banner: e.target.files[0] });
+                                } else {
+                                    setNewPelatihan({ ...newPelatihan, upload_banner: null });
+                                }
+                            }}
+                            accept="image/*"  // Hanya menerima file gambar
+                            required
                         />
 
-                        {/* Badge */}
                         <div className="flex justify-between mt-4">
                             {badgeOptions.map((badge) => (
                                 <div
@@ -544,13 +533,12 @@ export default function Pelatihan() {
                                     className={`cursor-pointer p-2 rounded-lg flex flex-col items-center ${newPelatihan.badge === badge.value ? 'border-2 border-blue-500' : ''}`}
                                     onClick={() => setNewPelatihan({ ...newPelatihan, badge: badge.value })}
                                 >
-                                    {badge.icon} {/* Gunakan badge.icon untuk menampilkan ikon */}
+                                    {badge.icon}
                                     <span className="text-sm">{badge.name}</span>
                                 </div>
                             ))}
                         </div>
 
-                        {/* Tombol Batal dan Simpan */}
                         <div className="flex justify-end gap-2 mt-4">
                             <button
                                 className="bg-gray-500 text-white px-4 py-2 rounded-lg"
@@ -574,7 +562,6 @@ export default function Pelatihan() {
                     <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-4xl max-h-[90vh] overflow-y-auto dark:bg-gray-800">
                         <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-white">Detail Pelatihan</h2>
 
-                        {/* Banner di Paling Atas dan Center */}
                         {selectedPelatihan.upload_banner && (
                             <div className="flex justify-center mb-6">
                                 <img
@@ -585,11 +572,8 @@ export default function Pelatihan() {
                             </div>
                         )}
 
-                        {/* Grid untuk Detail Pelatihan */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Kolom Pertama */}
                             <div className="space-y-4">
-                                {/* Judul Pelatihan */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Judul:</label>
                                     <input
@@ -600,7 +584,6 @@ export default function Pelatihan() {
                                     />
                                 </div>
 
-                                {/* Tanggal Mulai */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Tanggal Mulai:</label>
                                     <input
@@ -611,7 +594,6 @@ export default function Pelatihan() {
                                     />
                                 </div>
 
-                                {/* Tanggal Berakhir */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Tanggal Berakhir:</label>
                                     <input
@@ -622,7 +604,6 @@ export default function Pelatihan() {
                                     />
                                 </div>
 
-                                {/* Narasumber */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Narasumber:</label>
                                     <input
@@ -632,22 +613,9 @@ export default function Pelatihan() {
                                         className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     />
                                 </div>
-
-                                {/* Kode */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Kode:</label>
-                                    <input
-                                        type="text"
-                                        value={selectedPelatihan.kode}
-                                        readOnly
-                                        className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    />
-                                </div>
                             </div>
 
-                            {/* Kolom Kedua */}
                             <div className="space-y-4">
-                                {/* Deskripsi */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Deskripsi:</label>
                                     <textarea
@@ -658,7 +626,6 @@ export default function Pelatihan() {
                                     />
                                 </div>
 
-                                {/* Link */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Link:</label>
                                     <input
@@ -669,7 +636,6 @@ export default function Pelatihan() {
                                     />
                                 </div>
 
-                                {/* Badge dengan Ikon Besar dan Efek Animasi */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Badge:</label>
                                     <div className="flex items-center gap-3">
@@ -687,7 +653,6 @@ export default function Pelatihan() {
                             </div>
                         </div>
 
-                        {/* Tombol Tutup */}
                         <div className="flex justify-end mt-6">
                             <button
                                 className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200"
@@ -705,7 +670,6 @@ export default function Pelatihan() {
                     <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-2xl dark:bg-gray-800">
                         <h2 className="text-lg font-semibold mb-4">Edit Pelatihan</h2>
 
-                        {/* Judul Pelatihan */}
                         <input
                             type="text"
                             placeholder="Judul Pelatihan"
@@ -714,7 +678,6 @@ export default function Pelatihan() {
                             onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, judul_pelatihan: e.target.value })}
                         />
 
-                        {/* Tanggal Mulai dan Tanggal Berakhir */}
                         <div className="grid grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label className="block mb-2">Tanggal Mulai</label>
@@ -722,15 +685,14 @@ export default function Pelatihan() {
                                     <DateTimePicker
                                         label="Pilih Tanggal & Waktu"
                                         value={
-                                            selectedPelatihan.tanggal_pelatihan 
-                                                ? new Date(selectedPelatihan.tanggal_pelatihan) 
+                                            selectedPelatihan.tanggal_pelatihan
+                                                ? new Date(selectedPelatihan.tanggal_pelatihan)
                                                 : null
                                         }
                                         onChange={(date) => {
                                             const formattedDate = date
-                                                ? moment(date).tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss") // Pastikan tetap di zona WIB
+                                                ? moment(date).tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss")
                                                 : null;
-                                            console.log("Selected Date (Local Time):", formattedDate);
                                             setSelectedPelatihan({ ...selectedPelatihan, tanggal_pelatihan: formattedDate });
                                         }}
                                         renderInput={(params) => <TextField {...params} fullWidth />}
@@ -743,15 +705,14 @@ export default function Pelatihan() {
                                     <DateTimePicker
                                         label="Pilih Tanggal & Waktu"
                                         value={
-                                            selectedPelatihan.tanggal_berakhir 
-                                                ? new Date(selectedPelatihan.tanggal_berakhir) 
+                                            selectedPelatihan.tanggal_berakhir
+                                                ? new Date(selectedPelatihan.tanggal_berakhir)
                                                 : null
                                         }
                                         onChange={(date) => {
                                             const formattedDate = date
-                                                ? moment(date).tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss") // Pastikan tetap di zona WIB
+                                                ? moment(date).tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss")
                                                 : null;
-                                            console.log("Selected Date (Local Time):", formattedDate);
                                             setSelectedPelatihan({ ...selectedPelatihan, tanggal_berakhir: formattedDate });
                                         }}
                                         renderInput={(params) => <TextField {...params} fullWidth />}
@@ -760,7 +721,6 @@ export default function Pelatihan() {
                             </div>
                         </div>
 
-                        {/* Deskripsi Pelatihan */}
                         <textarea
                             placeholder="Deskripsi Pelatihan"
                             className="w-full p-2 mb-4 border rounded-lg dark:bg-gray-600"
@@ -769,7 +729,6 @@ export default function Pelatihan() {
                             onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, deskripsi_pelatihan: e.target.value })}
                         />
 
-                        {/* Link Pelatihan */}
                         <input
                             type="text"
                             placeholder="Link Pelatihan"
@@ -778,7 +737,6 @@ export default function Pelatihan() {
                             onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, link: e.target.value })}
                         />
 
-                        {/* Narasumber */}
                         <input
                             type="text"
                             placeholder="Nama Narasumber"
@@ -787,35 +745,6 @@ export default function Pelatihan() {
                             onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, narasumber: e.target.value })}
                         />
 
-                        {/* Input Kode (Nonaktif jika pelatihan belum berakhir atau kode sudah ada) */}
-                        <div className="flex gap-2 mb-4">
-                            <input
-                                type="text"
-                                placeholder="Kode Pelatihan"
-                                className="w-full p-2 border rounded-lg dark:bg-gray-600"
-                                value={selectedPelatihan.kode}
-                                onChange={(e) => setSelectedPelatihan({ ...selectedPelatihan, kode: e.target.value })}
-                                disabled={new Date(selectedPelatihan.tanggal_berakhir) > new Date() || selectedPelatihan.kode} // Nonaktif jika pelatihan belum berakhir atau kode sudah ada
-                            />
-                            <button
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:bg-gray-400"
-                                onClick={() => {
-                                    const randomString = Math.random().toString(36).substring(2, 8).toUpperCase();
-                                    setSelectedPelatihan({ ...selectedPelatihan, kode: randomString });
-                                }}
-                                disabled={new Date(selectedPelatihan.tanggal_berakhir) > new Date() || selectedPelatihan.kode} // Nonaktif jika pelatihan belum berakhir atau kode sudah ada
-                            >
-                                Generate Kode
-                            </button>
-                        </div>
-                        {/* Pesan Informasi */}
-                        {new Date(selectedPelatihan.tanggal_berakhir) > new Date() && (
-                            <p className="text-sm text-gray-500 mb-4">
-                                Kode pelatihan tidak dapat diubah sampai pelatihan berakhir.
-                            </p>
-                        )}
-
-                        {/* Banner */}
                         <input
                             type="file"
                             className="w-full p-2 mb-4 border rounded-lg dark:bg-gray-600"
@@ -829,7 +758,6 @@ export default function Pelatihan() {
                             />
                         )}
 
-                        {/* Badge */}
                         <div className="flex justify-between mt-4">
                             {badgeOptions.map((badge) => (
                                 <div
@@ -843,7 +771,6 @@ export default function Pelatihan() {
                             ))}
                         </div>
 
-                        {/* Tombol Batal dan Simpan */}
                         <div className="flex justify-end gap-2 mt-4">
                             <button
                                 className="bg-gray-500 text-white px-4 py-2 rounded-lg"
@@ -862,7 +789,6 @@ export default function Pelatihan() {
                 </div>
             )}
 
-            {/* Modal Konfirmasi Hapus Pelatihan */}
             {showDeleteModal && selectedPelatihan && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96 dark:bg-gray-800">
@@ -885,11 +811,13 @@ export default function Pelatihan() {
                     </div>
                 </div>
             )}
-            <DetailMemberPelatihan 
+
+            <DetailMemberPelatihan
                 isOpen={showDetailPendaftarModal}
                 onClose={() => setShowDetailPendaftarModal(false)}
                 data={pendaftarData}
                 id={idPelatihan}
+                onSendCode={handleSendCode}
             />
         </div>
     );
