@@ -1,635 +1,501 @@
-import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../../config';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
-import Swal from 'sweetalert2';
-import { FaEye, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
-import Pagination from "../Pagination";
+import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from "../../config";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Pagination from '../Pagination';
+import FiturSearchKeuangan from '../FiturSearchKeuangan';
+import { utils, writeFile } from 'xlsx';
+import { FaFileExcel } from 'react-icons/fa';
 
-const formatDate = (dateString) => {
-    if (!dateString) return '--/--/----';
+const CustomDropdown = ({ options, onSelect }) => {
+    const [isOpen, setIsOpen] = useState(false);
 
-    try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return '--/--/----';
-
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-
-        return `${day}/${month}/${year}`;
-    } catch (error) {
-        console.error('Error formatting date:', error);
-        return '--/--/----';
-    }
-};
-
-const Services = () => {
-    const [services, setServices] = useState([]);
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [showEditForm, setShowEditForm] = useState(false);
-    const [showDetailModal, setShowDetailModal] = useState(false);
-    const [selectedService, setSelectedService] = useState(null);
-    const [newService, setNewService] = useState({
-        title: '',
-        shortDescription: '',
-        description: '',
-        date: '',
-        image: null
-    });
-    const [editService, setEditService] = useState({
-        id: '',
-        title: '',
-        shortDescription: '',
-        description: '',
-        date: '',
-        image: null,
-        image_old: ''
-    });
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [searchQuery, setSearchQuery] = useState('');
-    const itemsPerPage = 6;
-
-    const fetchServices = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/services/all`);
-            const data = await response.json();
-            if (data.success) {
-                setServices(data.data);
-                setTotalPages(Math.ceil(data.data.length / itemsPerPage));
-            } else {
-                console.error('Error fetching services:', data.message);
-                // Fallback to dummy data if API fails
-                setServices([
-                    {
-                        id: 1,
-                        title: "Career Counseling",
-                        shortDescription: "Layanan konsultasi karir profesional untuk membantu pengambilan keputusan",
-                        description: "Layanan konsultasi karir profesional untuk membantu pengambilan keputusan. Kami menyediakan panduan karir yang komprehensif untuk membantu Anda mencapai tujuan profesional Anda.",
-                        date: new Date().toISOString(),
-                        image: "https://maukuliah.ap-south-1.linodeobjects.com/job/1701409908-ii2tk3e4w9.jpeg"
-                    },
-                    {
-                        id: 2,
-                        title: "Workshop Development",
-                        shortDescription: "Pelatihan pengembangan keterampilan profesional",
-                        description: "Pelatihan pengembangan keterampilan profesional untuk meningkatkan kompetensi Anda di dunia kerja. Workshop ini mencakup berbagai topik penting untuk pengembangan karir.",
-                        date: new Date().toISOString(),
-                        image: "https://executivevc.unl.edu/sites/unl.edu.executive-vice-chancellor/files/media/image/development-workshops-header.jpg"
-                    }
-                ]);
-                setTotalPages(1);
-            }
-        } catch (error) {
-            console.error('Error fetching services:', error);
-            // Fallback to dummy data if API fails
-            setServices([
-                {
-                    id: 1,
-                    title: "Career Counseling",
-                    shortDescription: "Layanan konsultasi karir profesional untuk membantu pengambilan keputusan",
-                    description: "Layanan konsultasi karir profesional untuk membantu pengambilan keputusan. Kami menyediakan panduan karir yang komprehensif untuk membantu Anda mencapai tujuan profesional Anda.",
-                    date: new Date().toISOString(),
-                    image: "https://maukuliah.ap-south-1.linodeobjects.com/job/1701409908-ii2tk3e4w9.jpeg"
-                },
-                {
-                    id: 2,
-                    title: "Workshop Development",
-                    shortDescription: "Pelatihan pengembangan keterampilan profesional",
-                    description: "Pelatihan pengembangan keterampilan profesional untuk meningkatkan kompetensi Anda di dunia kerja. Workshop ini mencakup berbagai topik penting untuk pengembangan karir.",
-                    date: new Date().toISOString(),
-                    image: "https://executivevc.unl.edu/sites/unl.edu.executive-vice-chancellor/files/media/image/development-workshops-header.jpg"
-                }
-            ]);
-            setTotalPages(1);
-        }
+    const handleSelect = (option) => {
+        onSelect(option);
+        setIsOpen(false);
     };
-
-    useEffect(() => {
-        fetchServices();
-    }, []);
-
-    const handleAddService = async () => {
-        if (!newService.title || !newService.shortDescription || !newService.description || !newService.date) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: 'Semua field wajib diisi',
-            });
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('title', newService.title);
-        formData.append('shortDescription', newService.shortDescription);
-        formData.append('description', newService.description);
-        formData.append('date', newService.date);
-        if (newService.image) {
-            formData.append('image', newService.image);
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/services/create`, {
-                method: 'POST',
-                body: formData,
-            });
-            const data = await response.json();
-            if (data.success) {
-                await fetchServices();
-                setShowAddForm(false);
-                setNewService({
-                    title: '',
-                    shortDescription: '',
-                    description: '',
-                    date: '',
-                    image: null
-                });
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'Layanan berhasil ditambahkan',
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: data.message,
-                });
-            }
-        } catch (error) {
-            console.error('Error adding service:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: 'Terjadi kesalahan pada server',
-            });
-        }
-    };
-
-    const handleEditService = async () => {
-        if (!editService.title || !editService.shortDescription || !editService.description || !editService.date) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: 'Semua field wajib diisi',
-            });
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('title', editService.title);
-        formData.append('shortDescription', editService.shortDescription);
-        formData.append('description', editService.description);
-        formData.append('date', editService.date);
-        if (editService.image) {
-            formData.append('image', editService.image);
-        }
-        if (editService.image_old) {
-            formData.append('image_old', editService.image_old);
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/services/update/${editService.id}`, {
-                method: 'PUT',
-                body: formData,
-            });
-            const data = await response.json();
-            if (data.success) {
-                await fetchServices();
-                setShowEditForm(false);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'Layanan berhasil diperbarui',
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: data.message,
-                });
-            }
-        } catch (error) {
-            console.error('Error updating service:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: 'Terjadi kesalahan pada server',
-            });
-        }
-    };
-
-    const handleDeleteService = async (id) => {
-        const result = await Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Anda tidak akan dapat mengembalikan ini!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Tidak'
-        });
-
-        if (result.isConfirmed) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/services/delete/${id}`, {
-                    method: 'DELETE',
-                });
-                const data = await response.json();
-                if (data.success) {
-                    await fetchServices();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: 'Layanan berhasil dihapus',
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: data.message,
-                    });
-                }
-            } catch (error) {
-                console.error('Error deleting service:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: 'Terjadi kesalahan pada server',
-                });
-            }
-        }
-    };
-
-    const handleOpenEditModal = (service) => {
-        setEditService({
-            id: service.id,
-            title: service.title,
-            shortDescription: service.shortDescription,
-            description: service.description,
-            date: service.date.split('T')[0],
-            image: null,
-            image_old: service.image || ''
-        });
-        setShowEditForm(true);
-    };
-
-    const handleShowDetail = (service) => {
-        setSelectedService(service);
-        setShowDetailModal(true);
-    };
-
-    const goToPage = (page) => {
-        setCurrentPage(page);
-    };
-
-    const prevPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
-
-    const nextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
-    const handleSearch = (e) => {
-        setSearchQuery(e.target.value);
-    };
-
-    const filteredServices = services.filter((item) => {
-        return item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.shortDescription.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = filteredServices.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
-        <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
-            <h2 className="text-2xl font-bold mb-4 dark:text-white">Kelola Layanan Career Center</h2>
+        <div className="relative">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 flex items-center gap-2"
+            >
+                <FaFileExcel /> Unduh Excel
+            </button>
 
-            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-6">
-                <div className="relative flex-grow">
-                    <input
-                        type="text"
-                        placeholder="Cari layanan..."
-                        value={searchQuery}
-                        onChange={handleSearch}
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                    />
-                    <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-3 text-gray-400" />
-                </div>
-                <button
-                    onClick={() => setShowAddForm(true)}
-                    className="group flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg shadow-md hover:from-blue-700 hover:to-blue-600 hover:shadow-lg transition-all duration-300"
-                >
-                    <FaPlus className="text-xl transition-all duration-300" />
-                    <span className="ml-2">Tambah Layanan</span>
-                </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {currentItems.map((item) => (
-                    <div
-                        key={item.id}
-                        className="p-5 bg-white dark:bg-gray-700 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg border border-gray-200 dark:border-gray-600"
-                    >
-                        {item.image && (
-                            <img
-                                src={item.image.startsWith('http') ? item.image : `${API_BASE_URL}/uploads/services/${item.image}`}
-                                alt={item.title}
-                                className="w-full h-48 object-cover rounded-lg mb-4"
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = "https://via.placeholder.com/300x200";
-                                }}
-                            />
-                        )}
-                        <h3 className="text-lg font-semibold dark:text-white mb-2">{item.title}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
-                            {item.shortDescription || item.description}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                            <FontAwesomeIcon icon={faCalendarAlt} className="mr-1" />
-                            {formatDate(item.date)}
-                        </p>
-
-                        <div className="flex justify-end space-x-2 mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
-                            <button
-                                onClick={() => handleShowDetail(item)}
-                                className="group flex items-center justify-center w-10 h-10 bg-blue-500 text-white border border-blue-500 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:w-auto px-3"
-                            >
-                                <FaEye className="text-xl transition-all duration-300" />
-                                <span className="opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2 transition-all duration-300">
-                                    Detail
-                                </span>
-                            </button>
-
-                            <button
-                                onClick={() => handleOpenEditModal(item)}
-                                className="group flex items-center justify-center w-10 h-10 bg-yellow-500 text-white border border-yellow-500 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:w-auto px-3"
-                            >
-                                <FaEdit className="text-xl transition-all duration-300" />
-                                <span className="opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2 transition-all duration-300">
-                                    Edit
-                                </span>
-                            </button>
-
-                            <button
-                                onClick={() => handleDeleteService(item.id)}
-                                className="group flex items-center justify-center w-10 h-10 bg-red-600 text-white border border-red-600 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:w-auto px-3"
-                            >
-                                <FaTrash className="text-xl transition-all duration-300" />
-                                <span className="opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto group-hover:ml-2 transition-all duration-300">
-                                    Hapus
-                                </span>
-                            </button>
+            {isOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-10">
+                    {options.map((option) => (
+                        <div
+                            key={option.value}
+                            onClick={() => handleSelect(option)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
+                        >
+                            {option.label}
                         </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="mt-6">
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    goToPage={goToPage}
-                    prevPage={prevPage}
-                    nextPage={nextPage}
-                />
-            </div>
-
-            {showAddForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <h3 className="text-xl font-bold mb-4 dark:text-white">Tambah Layanan Baru</h3>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Judul Layanan *</label>
-                                <input
-                                    type="text"
-                                    value={newService.title}
-                                    onChange={(e) => setNewService({ ...newService, title: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                    placeholder="Contoh: Konsultasi Karir"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Deskripsi Singkat *</label>
-                                <input
-                                    type="text"
-                                    value={newService.shortDescription}
-                                    onChange={(e) => setNewService({ ...newService, shortDescription: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                    placeholder="Deskripsi singkat untuk tampilan card"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Deskripsi Lengkap *</label>
-                                <textarea
-                                    value={newService.description}
-                                    onChange={(e) => setNewService({ ...newService, description: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                    placeholder="Deskripsi lengkap layanan ini"
-                                    rows="4"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Tanggal *</label>
-                                <input
-                                    type="date"
-                                    value={newService.date}
-                                    onChange={(e) => setNewService({ ...newService, date: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Gambar Layanan</label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setNewService({ ...newService, image: e.target.files[0] })}
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex justify-end space-x-2 mt-6">
-                            <button
-                                onClick={() => setShowAddForm(false)}
-                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
-                            >
-                                Batal
-                            </button>
-                            <button
-                                onClick={handleAddService}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                                disabled={!newService.title || !newService.shortDescription || !newService.description || !newService.date}
-                            >
-                                Simpan Layanan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {showEditForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <h3 className="text-xl font-bold mb-4 dark:text-white">Edit Layanan</h3>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Judul Layanan *</label>
-                                <input
-                                    type="text"
-                                    value={editService.title}
-                                    onChange={(e) => setEditService({ ...editService, title: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Deskripsi Singkat *</label>
-                                <input
-                                    type="text"
-                                    value={editService.shortDescription}
-                                    onChange={(e) => setEditService({ ...editService, shortDescription: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Deskripsi Lengkap *</label>
-                                <textarea
-                                    value={editService.description}
-                                    onChange={(e) => setEditService({ ...editService, description: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                    rows="4"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Tanggal *</label>
-                                <input
-                                    type="date"
-                                    value={editService.date}
-                                    onChange={(e) => setEditService({ ...editService, date: e.target.value })}
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Gambar Layanan</label>
-                                {editService.image_old && (
-                                    <div className="mb-2">
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Gambar saat ini:</p>
-                                        <img
-                                            src={editService.image_old.startsWith('http') ? editService.image_old : `${API_BASE_URL}/uploads/services/${editService.image_old}`}
-                                            alt="Current"
-                                            className="w-32 h-32 object-cover rounded-lg border dark:border-gray-600"
-                                            onError={(e) => {
-                                                e.target.onerror = null;
-                                                e.target.src = "https://via.placeholder.com/300x200";
-                                            }}
-                                        />
-                                    </div>
-                                )}
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setEditService({ ...editService, image: e.target.files[0] })}
-                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex justify-end space-x-2 mt-6">
-                            <button
-                                onClick={() => setShowEditForm(false)}
-                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
-                            >
-                                Batal
-                            </button>
-                            <button
-                                onClick={handleEditService}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                                disabled={!editService.title || !editService.shortDescription || !editService.description || !editService.date}
-                            >
-                                Simpan Perubahan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {showDetailModal && selectedService && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
-                        {/* Header with Close Button */}
-                        <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
-                            <h3 className="text-xl font-bold dark:text-white">{selectedService.title}</h3>
-                            <button
-                                onClick={() => setShowDetailModal(false)}
-                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl"
-                            >
-                                &times;
-                            </button>
-                        </div>
-
-                        {/* Image Container (Top) */}
-                        {selectedService.image && (
-                            <div className="p-4 flex justify-center bg-gray-50 dark:bg-gray-700">
-                                <img
-                                    src={selectedService.image.startsWith('http') ? selectedService.image : `${API_BASE_URL}/uploads/services/${selectedService.image}`}
-                                    alt={selectedService.title}
-                                    className="max-h-64 w-auto rounded-lg object-contain shadow-sm"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = "https://via.placeholder.com/300x200";
-                                    }}
-                                />
-                            </div>
-                        )}
-
-                        {/* Text Container (Bottom) with Scroll */}
-                        <div className="flex-1 overflow-y-auto p-4">
-                            <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
-                                {selectedService.description.split('\n').map((paragraph, index) => (
-                                    <p
-                                        key={index}
-                                        className={`mb-4 ${paragraph.trim() === '' ? 'h-4' : 'text-justify'}`}
-                                    >
-                                        {paragraph.trim() === '' ? '\u00A0' : paragraph}
-                                    </p>
-                                ))}
-                            </div>
-
-                            {/* Date Info */}
-                            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    <FontAwesomeIcon icon={faCalendarAlt} className="mr-2" />
-                                    <span className="font-medium">Tanggal:</span> {formatDate(selectedService.date)}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             )}
         </div>
     );
 };
 
-export default Services;
+const MonthYearPickerModal = ({ 
+    isOpen, 
+    onClose, 
+    onDownload, 
+    availableMonths 
+}) => {
+    const [selectedMonth, setSelectedMonth] = useState('');
+    const [selectedYear, setSelectedYear] = useState('');
+
+    const availableYears = [
+        ...new Set(availableMonths.map(month => month.split('-')[0]))
+    ].sort((a, b) => b - a);
+
+    const monthsForSelectedYear = availableMonths
+        .filter(month => month.startsWith(selectedYear))
+        .map(month => month.split('-')[1])
+        .sort((a, b) => b - a);
+
+    useEffect(() => {
+        if (availableMonths.length > 0 && !selectedYear) {
+            const latestMonth = availableMonths[0];
+            const [year, month] = latestMonth.split('-');
+            setSelectedYear(year);
+            setSelectedMonth(month);
+        }
+    }, [availableMonths, selectedYear]);
+
+    const handleDownload = () => {
+        if (!selectedYear || !selectedMonth) {
+            toast.error('Harap pilih bulan dan tahun');
+            return;
+        }
+        onDownload(`${selectedYear}-${selectedMonth}`);
+        onClose();
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96">
+                <h2 className="text-lg font-semibold mb-4 dark:text-gray-100">Unduh Laporan Bulanan</h2>
+                
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Tahun
+                        </label>
+                        <select
+                            value={selectedYear}
+                            onChange={(e) => {
+                                setSelectedYear(e.target.value);
+                                setSelectedMonth('');
+                            }}
+                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-gray-100"
+                        >
+                            <option value="">Pilih Tahun</option>
+                            {availableYears.map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Bulan
+                        </label>
+                        <select
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(e.target.value)}
+                            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-gray-100"
+                            disabled={!selectedYear}
+                        >
+                            <option value="">Pilih Bulan</option>
+                            {selectedYear && monthsForSelectedYear.map(month => (
+                                <option key={month} value={month}>
+                                    {new Date(2000, parseInt(month) - 1, 1).toLocaleString('id-ID', { month: 'long' })}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="mt-6 flex justify-end space-x-3">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        onClick={handleDownload}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        disabled={!selectedYear || !selectedMonth}
+                    >
+                        Unduh
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+    }).format(amount);
+};
+
+const getFormattedDate = (dateString) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+};
+
+export default function FinanceReport() {
+    const [transactions, setTransactions] = useState([]);
+    const [filteredTransactions, setFilteredTransactions] = useState([]);
+    const [pendapatanBulanIni, setPendapatanBulanIni] = useState(0);
+    const [pengeluaranBulanIni, setPengeluaranBulanIni] = useState(0);
+    const [saldoAkhir, setSaldoAkhir] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [currentTransactions, setCurrentTransactions] = useState([]);
+    const [availableMonths, setAvailableMonths] = useState([]);
+    const [isMonthYearPickerOpen, setIsMonthYearPickerOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const itemsPerPage = 10;
+
+    const fetchData = async () => {
+        try {
+            const [responseBulanIni, responseAll, responseSaldo] = await Promise.all([
+                fetch(`${API_BASE_URL}/admin/keuangan/bulan-ini`),
+                fetch(`${API_BASE_URL}/admin/keuangan`),
+                fetch(`${API_BASE_URL}/admin/keuangan/saldo-akhir`)
+            ]);
+
+            const [dataBulanIni, dataAll, dataSaldo] = await Promise.all([
+                responseBulanIni.json(),
+                responseAll.json(),
+                responseSaldo.json()
+            ]);
+
+            setPendapatanBulanIni(Number(dataBulanIni.total_pendapatan) || 0);
+            setPengeluaranBulanIni(Number(dataBulanIni.total_pengeluaran) || 0);
+            
+            const sortedTransactions = dataAll.sort((a, b) => 
+                new Date(b.tanggal_waktu) - new Date(a.tanggal_waktu)
+            );
+            
+            setTransactions(sortedTransactions);
+            setFilteredTransactions(sortedTransactions);
+            setSaldoAkhir(Number(dataSaldo.saldo_akhir) || 0);
+
+        } catch (error) {
+            console.error('Gagal mengambil data:', error);
+            toast.error('Gagal mengambil data keuangan');
+        }
+    };
+
+    const updateTransactions = () => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex);
+        setCurrentTransactions(paginatedTransactions);
+    };
+
+    useEffect(() => {
+        const loadData = async () => {
+            setIsLoading(true);
+            try {
+                await fetchData();
+            } catch (error) {
+                console.error('Gagal memuat data:', error);
+                toast.error('Gagal memuat data keuangan');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadData();
+    }, []);
+
+    useEffect(() => {
+        updateTransactions();
+        
+        const months = [
+            ...new Set(
+                transactions.map(t => getFormattedDate(t.tanggal_waktu))
+            )
+        ].sort((a, b) => {
+            const [yearA, monthA] = a.split('-');
+            const [yearB, monthB] = b.split('-');
+            return yearB - yearA || monthB - monthA;
+        });
+        
+        setAvailableMonths(months);
+    }, [transactions, filteredTransactions, currentPage]);
+
+    const handleSearch = ({ month, description, amount }) => {
+        let filtered = transactions;
+
+        if (month) {
+            filtered = filtered.filter(t => 
+                getFormattedDate(t.tanggal_waktu) === month
+            );
+        }
+
+        if (description) {
+            filtered = filtered.filter(t =>
+                t.deskripsi.toLowerCase().includes(description.toLowerCase())
+            );
+        }
+
+        if (amount) {
+            filtered = filtered.filter(t =>
+                t.jumlah.toString().includes(amount)
+            );
+        }
+
+        setFilteredTransactions(filtered);
+        setCurrentPage(1); // Reset ke halaman pertama saat melakukan pencarian
+    };
+
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage) || 1;
+
+    const handleDownloadExcel = (period, specificMonth = '') => {
+        try {
+            let dataToExport;
+            
+            if (period === 'specific-month') {
+                // Gunakan data asli (transactions) bukan yang difilter
+                dataToExport = transactions.filter(t => 
+                    getFormattedDate(t.tanggal_waktu) === specificMonth
+                );
+            } else {
+                // Gunakan semua data untuk ekspor
+                dataToExport = transactions;
+                
+                const currentDate = new Date();
+                const currentYear = currentDate.getFullYear();
+                const currentMonth = currentDate.getMonth() + 1;
+
+                if (period === 'monthly') {
+                    dataToExport = dataToExport.filter(t => {
+                        const transactionDate = new Date(t.tanggal_waktu);
+                        return (
+                            transactionDate.getFullYear() === currentYear &&
+                            transactionDate.getMonth() + 1 === currentMonth
+                        );
+                    });
+                } else if (period === 'yearly') {
+                    dataToExport = dataToExport.filter(t => {
+                        const transactionDate = new Date(t.tanggal_waktu);
+                        return transactionDate.getFullYear() === currentYear;
+                    });
+                }
+            }
+
+            if (dataToExport.length === 0) {
+                toast.error('Tidak ada data untuk di-download');
+                return;
+            }
+
+            const excelData = dataToExport.map(t => ({
+                Deskripsi: t.deskripsi,
+                Status: t.status,
+                Tanggal: new Date(t.tanggal_waktu).toLocaleDateString('id-ID'),
+                Jumlah: t.jumlah,
+                'Jumlah (Format)': formatCurrency(t.jumlah)
+            }));
+
+            const worksheet = utils.json_to_sheet(excelData);
+
+            let title = 'Laporan Keuangan';
+            if (period === 'monthly') {
+                title = 'Laporan Bulanan Keuangan';
+            } else if (period === 'yearly') {
+                title = 'Laporan Tahunan Keuangan';
+            } else if (period === 'all') {
+                title = 'Laporan Seluruh Keuangan';
+            } else if (period === 'specific-month') {
+                const [year, month] = specificMonth.split('-');
+                const monthName = new Date(2000, parseInt(month) - 1, 1).toLocaleString('id-ID', { month: 'long' });
+                title = `Laporan Keuangan ${monthName} ${year}`;
+            }
+
+            utils.sheet_add_aoa(worksheet, [[title]], { origin: 'A1' });
+            utils.sheet_add_aoa(worksheet, [['Deskripsi', 'Status', 'Tanggal', 'Jumlah', 'Jumlah (Format)']], { origin: 'A2' });
+
+            worksheet['!cols'] = [
+                { width: 40 },
+                { width: 20 },
+                { width: 20 },
+                { width: 20 },
+                { width: 20 }
+            ];
+
+            const workbook = utils.book_new();
+            utils.book_append_sheet(workbook, worksheet, 'Laporan Keuangan');
+
+            let fileName = 'laporan-keuangan.xlsx';
+            if (period === 'monthly') {
+                fileName = 'laporan-bulanan.xlsx';
+            } else if (period === 'yearly') {
+                fileName = 'laporan-tahunan.xlsx';
+            } else if (period === 'all') {
+                fileName = 'laporan-seluruhnya.xlsx';
+            } else if (period === 'specific-month') {
+                const [year, month] = specificMonth.split('-');
+                fileName = `laporan-keuangan-${year}-${month}.xlsx`;
+            }
+
+            writeFile(workbook, fileName);
+            toast.success(`File ${fileName} berhasil di-download (${dataToExport.length} data)`);
+        } catch (error) {
+            console.error('Gagal membuat Excel:', error);
+            toast.error('Gagal membuat Excel');
+        }
+    };
+
+    const dropdownOptions = [
+        { value: 'excel-monthly', label: 'Unduh Bulan Ini' },
+        { value: 'excel-yearly', label: 'Unduh Tahun Ini' },
+        { value: 'excel-all', label: 'Unduh Semua Data' },
+        { value: 'excel-specific', label: 'Pilih Bulan & Tahun' },
+    ];
+
+    const handleDropdownSelect = (option) => {
+        if (option.value.startsWith('excel-')) {
+            const period = option.value.replace('excel-', '');
+            if (period === 'specific') {
+                setIsMonthYearPickerOpen(true);
+            } else {
+                handleDownloadExcel(period);
+            }
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                <span className="ml-4 text-gray-700 dark:text-gray-300">Memuat data...</span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <ToastContainer position="bottom-right" autoClose={3000} />
+
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h3 className="text-lg font-semibold dark:text-gray-100">Laporan Keuangan</h3>
+                <FiturSearchKeuangan onSearch={handleSearch} />
+                <CustomDropdown options={dropdownOptions} onSelect={handleDropdownSelect} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h4 className="text-sm text-gray-500 dark:text-gray-300">Pendapatan Bulan Ini</h4>
+                    <p className="text-2xl font-bold mt-2 dark:text-gray-100">
+                        {formatCurrency(pendapatanBulanIni)}
+                    </p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h4 className="text-sm text-gray-500 dark:text-gray-300">Pengeluaran Bulan Ini</h4>
+                    <p className="text-2xl font-bold mt-2 dark:text-gray-100">
+                        {formatCurrency(pengeluaranBulanIni)}
+                    </p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h4 className="text-sm text-gray-500 dark:text-gray-300">Saldo Akhir</h4>
+                    <p className="text-2xl font-bold mt-2 dark:text-gray-100">
+                        {formatCurrency(saldoAkhir)}
+                    </p>
+                </div>
+            </div>
+
+            <div className="mt-8">
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Deskripsi</th>
+                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Status</th>
+                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Tanggal</th>
+                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {currentTransactions.length > 0 ? (
+                                currentTransactions.map((t) => (
+                                    <tr key={t.id} className="border-t dark:border-gray-700">
+                                        <td className="py-3 px-4 dark:text-gray-300">{t.deskripsi}</td>
+                                        <td className="py-3 px-4">
+                                            <span className={`px-2 py-1 rounded-full text-xs ${t.status === 'MASUK'
+                                                ? 'bg-green-100 text-green-600 dark:bg-green-800 dark:text-green-200'
+                                                : 'bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-200'
+                                                }`}>
+                                                {t.status}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 px-4 dark:text-gray-300">
+                                            {new Date(t.tanggal_waktu).toLocaleDateString('id-ID')}
+                                        </td>
+                                        <td className="py-3 px-4 dark:text-gray-300">
+                                            {formatCurrency(t.jumlah)}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="4" className="py-4 text-center text-gray-500 dark:text-gray-400">
+                                        Tidak ada data yang ditemukan
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="mt-6">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        goToPage={(page) => {
+                            setCurrentPage(page);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        prevPage={() => {
+                            if (currentPage > 1) {
+                                setCurrentPage(p => p - 1);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
+                        }}
+                        nextPage={() => {
+                            if (currentPage < totalPages) {
+                                setCurrentPage(p => p + 1);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
+                        }}
+                    />
+                </div>
+            </div>
+
+            <MonthYearPickerModal
+                isOpen={isMonthYearPickerOpen}
+                onClose={() => setIsMonthYearPickerOpen(false)}
+                onDownload={(monthYear) => handleDownloadExcel('specific-month', monthYear)}
+                availableMonths={availableMonths}
+            />
+        </div>
+    );
+}

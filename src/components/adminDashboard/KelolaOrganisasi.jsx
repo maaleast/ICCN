@@ -193,6 +193,14 @@ const DEFAULT_DIRECTORATE_STRUCTURE = [
                 affiliation: "",
                 photo_url: "",
             },
+            {
+                id: 602,
+                position: "Wakil Direktur",
+                role: "Direktorat Sertifikasi dan Akreditasi Pusat Karir",
+                name: "",
+                affiliation: "",
+                photo_url: "",
+            },
         ],
     },
     {
