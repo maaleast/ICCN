@@ -13,6 +13,8 @@ import PageEvents from './pages/PageEvents';
 import PageTeam from './pages/PageTeam';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import DetailWordServices from './pages/DetailWordServices';
+
 
 function ProtectedRoute({ children, allowedRoles }) {
   const token = localStorage.getItem("token");
@@ -57,7 +59,7 @@ function RouteGuard({ children }) {
 function App() {
   return (
     <Router>
-      <ToastContainer 
+      <ToastContainer
         position="bottom-right"
         autoClose={5000}
         hideProgressBar={false}
@@ -82,6 +84,7 @@ function App() {
         <Route path="/gallery" element={<PageGallery />} />
         <Route path="/berita" element={<PageBerita />} />
         <Route path="/services" element={<PageServices />} />
+        <Route path="/services/detail/:id" element={<DetailWordServices />} />
         <Route path="/events" element={<PageEvents />} />
         <Route path="/team" element={<PageTeam />} />
 
