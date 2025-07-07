@@ -96,62 +96,95 @@ export default function Gallery() {
     };
 
     const handleAddPhoto = async (files, keterangan) => {
-        if (!files || files.length === 0) {
-            Swal.fire("Error", "Tidak ada file yang dipilih", "error");
-            return;
-        }
+    if (!files || files.length === 0) {
+        Swal.fire("Error", "Tidak ada file yang dipilih", "error");
+        return;
+    }
 
-        const formData = new FormData();
-        files.forEach((file) => {
-            formData.append("images", file);
+    // Cek ukuran file sebelum upload
+    const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+        Swal.fire({
+            title: "File Terlalu Besar",
+            html: `File <b>${oversizedFiles[0].name}</b> melebihi batas 5MB<br>Ukuran: ${(oversizedFiles[0].size / (1024 * 1024)).toFixed(2)}MB`,
+            icon: "error",
+            confirmButtonText: "OK"
         });
-        formData.append("keterangan", keterangan);
+        return;
+    }
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/admin/gallery/upload`, {
-                method: "POST",
-                body: formData,
-            });
+    const formData = new FormData();
+    files.forEach((file) => {
+        formData.append("images", file);
+    });
+    formData.append("keterangan", keterangan);
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/gallery/upload`, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            if (errorData.message === 'Ukuran file melebihi batas maksimal 5MB') {
+                Swal.fire({
+                    title: "File Terlalu Besar",
+                    text: "Salah satu file melebihi batas maksimal 5MB",
+                    icon: "error"
+                });
+                return;
             }
-
-            const data = await response.json();
-            if (data.data && Array.isArray(data.data)) {
-                // Tambahkan URL lengkap ke foto yang baru diupload
-                const newPhotos = data.data.map(photo => ({
-                    ...photo,
-                    image_url: getImageUrl(photo.image_url)
-                }));
-                
-                setPhotos(prevPhotos => [...prevPhotos, ...newPhotos]);
-                Swal.fire("Berhasil!", "Foto baru telah ditambahkan.", "success");
-                setUploadModalOpen(false);
-                setSelectedFiles([]);
-                setKeterangan('');
-            } else {
-                throw new Error("Data yang diterima tidak valid");
-            }
-        } catch (error) {
-            console.error("Gagal mengunggah foto:", error);
-            Swal.fire("Error", "Gagal mengunggah foto", "error");
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
-    };
+
+        const data = await response.json();
+        if (data.data && Array.isArray(data.data)) {
+            const newPhotos = data.data.map(photo => ({
+                ...photo,
+                image_url: getImageUrl(photo.image_url)
+            }));
+            
+            setPhotos(prevPhotos => [...prevPhotos, ...newPhotos]);
+            Swal.fire("Berhasil!", "Foto baru telah ditambahkan.", "success");
+            setUploadModalOpen(false);
+            setSelectedFiles([]);
+            setKeterangan('');
+        } else {
+            throw new Error("Data yang diterima tidak valid");
+        }
+    } catch (error) {
+        console.error("Gagal mengunggah foto:", error);
+        Swal.fire("Error", "Gagal mengunggah foto", "error");
+    }
+};
+
 
     const handleFileChange = (e, index) => {
-        const files = Array.from(e.target.files);
-        const maxAllowed = 5 - index;
-        const filesToAdd = files.slice(0, maxAllowed);
+    const files = Array.from(e.target.files);
+    const maxAllowed = 5 - index;
+    const filesToAdd = files.slice(0, maxAllowed);
 
-        if (filesToAdd.length > 0) {
-            const newFiles = [...selectedFiles];
-            for (let i = 0; i < filesToAdd.length; i++) {
-                newFiles[index + i] = filesToAdd[i];
-            }
-            setSelectedFiles(newFiles);
+    // Cek ukuran file
+    const oversizedFiles = filesToAdd.filter(file => file.size > 5 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+        Swal.fire({
+            title: "File Terlalu Besar",
+            html: `File <b>${oversizedFiles[0].name}</b> melebihi batas 5MB<br>Ukuran: ${(oversizedFiles[0].size / (1024 * 1024)).toFixed(2)}MB`,
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+        return;
+    }
+
+    if (filesToAdd.length > 0) {
+        const newFiles = [...selectedFiles];
+        for (let i = 0; i < filesToAdd.length; i++) {
+            newFiles[index + i] = filesToAdd[i];
         }
-    };
+        setSelectedFiles(newFiles);
+    }
+};
 
     const getVisibleBoxes = () => {
         const totalFilled = selectedFiles.filter(file => file).length;
@@ -317,6 +350,8 @@ export default function Gallery() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     Pilih Foto (Maksimal 5)
+                                    <br></br>
+                                    <p className="text-xs text-red-500 italic">File maksimum 5mb saja</p>
                                 </label>
                                 <div className="grid grid-cols-3 gap-3">
                                     {[...Array(5)].map((_, index) => (
