@@ -8,7 +8,7 @@ import about1 from "../assets/about.jpg";
 import about2 from "../assets/about2.png";
 import LandingBg from "../assets/LandingBg.jpg";
 import Logo from "../assets/iccn.png";
-import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes } from "react-icons/fa";
+import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes, FaCalendarAlt, FaFileWord } from "react-icons/fa";
 import uk from "../assets/uk.png";
 import ina from "../assets/ina.png";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -192,6 +192,7 @@ const LandingPage = () => {
     const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
     const navigate = useNavigate();
     const [selectedPartnerType, setSelectedPartnerType] = useState("All");
+    const [selectedService, setSelectedService] = useState(null);
     const [services, setServices] = useState([]);
     const [events, setEvents] = useState([]);
     const [team, setTeam] = useState([]);
@@ -305,33 +306,22 @@ const LandingPage = () => {
         };
 
         const fetchServices = async () => {
-            try {
-                const response = await fetch(`${API_BASE_URL}/services/all`);
-                const data = await response.json();
-                if (data.success) {
-                    const processedServices = data.data.map(service => ({
-                        ...service,
-                        image: service.image
-                            ? `${API_BASE_URL}/uploads/services/${service.image}`
-                            : "https://via.placeholder.com/300x200",
-                        // Normalisasi tanggal
-                        date: service.date || service.created_at || new Date().toISOString()
-                    }));
-                    setServices(processedServices);
-                } else {
-                    setServices(dummyServices.map(s => ({
-                        ...s,
-                        date: s.date || new Date().toISOString()
-                    })));
-                }
-            } catch (error) {
-                console.error("Error fetching services:", error);
-                setServices(dummyServices.map(s => ({
-                    ...s,
-                    date: s.date || new Date().toISOString()
-                })));
-            }
-        };
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/services/all`);
+                        const data = await response.json();
+        
+                        if (data.success && Array.isArray(data.data)) {
+                            // Data dari DB langsung ditampilkan
+                            setServices(data.data);
+                        } else {
+                            console.error("Data service tidak valid:", data.message);
+                            setServices([]); // Kosongin daripada error
+                        }
+                    } catch (error) {
+                        console.error("Gagal ambil data service:", error);
+                        setServices([]); // Kosongin juga saat gagal fetch
+                    }
+                };
 
         const fetchEvents = async () => {
             try {
@@ -935,49 +925,123 @@ const LandingPage = () => {
                 </section>
 
                 {/* Services Section */}
-                <section id="services" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Layanan Kami</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {services.slice(0, 2).map((service, index) => (
-                                <motion.div
-                                    key={service.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => navigate("/services")}
-                                >
-                                    <img
-                                        src={service.image}
-                                        alt={service.title}
-                                        className="w-full h-48 object-cover"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = "https://via.placeholder.com/300x200";
-                                        }}
-                                    />
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-semibold text-blue-900 mb-2">{service.title}</h3>
-                                        <p className="text-gray-700 line-clamp-3">{service.description}</p>
-                                        <p className="text-sm text-gray-500 mt-2">
-                                            {formatDate.long(service.date)}
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            ))}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.5 }}
-                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
-                                onClick={() => navigate("/services")}
-                            >
-                                <div className="p-6 text-4xl font-bold text-white">+{services.length > 2 ? services.length - 2 : 0}</div>
-                            </motion.div>
+                {/* Services Section */}
+<section id="services" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
+    <div className="container mx-auto px-4">
+        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Layanan Kami</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {services.slice(0, 2).map((service, index) => (
+                <motion.div
+                    key={service._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                    onClick={() => setSelectedService(service)}
+                >
+                    <img
+                        src={
+                            service.image
+                                ? service.image.startsWith("http")
+                                    ? service.image
+                                    : `${API_BASE_URL}/uploads/${service.image}`
+                                : "https://via.placeholder.com/400x250?text=No+Image"
+                        }
+                        alt={service.title}
+                        className="w-full h-48 object-cover"
+                    />
+                    <div className="p-6">
+                        <h3 className="text-xl font-semibold text-blue-900 mb-2">{service.title}</h3>
+                        <p className="text-gray-700 line-clamp-3">{service.description}</p>
+                        <p className="text-sm text-gray-500 mt-2">
+                            <FaCalendarAlt className="inline mr-1" />
+                            {formatDate.long(service.date)}
+                        </p>
+                    </div>
+                </motion.div>
+            ))}
+
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="bg-blue-600 rounded-2xl shadow-md hover:shadow-xl transition duration-300 flex flex-col justify-center items-center text-white cursor-pointer"
+                onClick={() => navigate("/services")}
+            >
+                <div className="text-5xl font-bold mb-2">+{Math.max(services.length - 2, 0)}</div>
+                <div className="text-lg font-medium">Lihat Semua</div>
+            </motion.div>
+        </div>
+    </div>
+
+    {/* Modal Detail */}
+    {selectedService && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-xl max-w-3xl w-full relative p-8 max-h-[90vh] overflow-y-auto"
+            >
+                <button
+                    className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-colors"
+                    onClick={() => setSelectedService(null)}
+                >
+                    <FaTimes className="w-6 h-6" />
+                </button>
+
+                <div className="space-y-6">
+                    {selectedService.image && (
+                        <div className="rounded-lg overflow-hidden">
+                            <img
+                                src={
+                                    selectedService.image.startsWith("http")
+                                        ? selectedService.image
+                                        : `${API_BASE_URL}/uploads/${selectedService.image}`
+                                }
+                                alt={selectedService.title}
+                                className="w-full h-64 object-cover"
+                            />
+                        </div>
+                    )}
+
+                    <div>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                            {selectedService.title}
+                        </h2>
+                        <div className="flex items-center text-gray-500 mb-6">
+                            <FaCalendarAlt className="mr-2" />
+                            <span>{formatDate.long(selectedService.date)}</span>
                         </div>
                     </div>
-                </section>
+
+                    <div className="text-gray-800 whitespace-pre-line">
+                        <p>{selectedService.description}</p>
+                    </div>
+
+                    {selectedService.document && (
+                        <div className="mt-6">
+                            <button
+                                onClick={() => window.open(`/services/detail/${selectedService._id}`, "_blank")}
+                                className="inline-flex items-center text-blue-600 hover:underline"
+                            >
+                                <FaFileWord className="mr-2" />
+                                Lihat Dokumen
+                            </button>
+                        </div>
+                    )}
+
+                    <button
+                        onClick={() => setSelectedService(null)}
+                        className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Tutup
+                    </button>
+                </div>
+            </motion.div>
+        </div>
+    )}
+</section>
 
                 {/* Events Section */}
                 <section id="event" className="py-12 bg-white scroll-mt-[110px] pt-32">
