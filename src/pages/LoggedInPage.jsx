@@ -15,30 +15,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock } from '@fortawesome/free-solid-svg-icons';
 
 // Dummy data untuk semua section
-const dummyEvents = [
-    {
-        _id: 1,
-        title: "PAMERAN KARIER VIRTUAL INDONESIA",
-        date: "2024-03-15",
-        description: "Salam kenal, dari kami Indonesia Career Center Network (ICCN). ICCN merupakan sebuah asosiasi profesi pengelola pusat karier perguruan tinggi Indonesia. ICCN memiliki tujuan untuk meningkatkan daya saing sumber daya manusia Indonesia melalui standarisasi pelayanan pusat karier perguruan tinggi.",
-        image: "https://indonesiacareercenter.id/wp-content/uploads/2023/06/05.png"
-    },
-    {
-        _id: 1,
-        title: "Pelatihan CCOP JAWA TIMUR",
-        date: "2024-03-15",
-        description: "Pelatihan CCOP Yang diselenggarakan di Jawa Timur ",
-        image: "https://indonesiacareercenter.id/wp-content/uploads/2023/05/IMG_1470-1-scaled.jpg"
-    },
-    {
-        _id: 1,
-        title: "Job Fair Nasional 2024",
-        date: "2024-03-15",
-        description: "Pameran pekerjaan terbesar tahun ini",
-        image: "src/assets/events-1.jpg"
-    }
-];
-
 const partners = [
     {
         _id: 1,
@@ -176,7 +152,7 @@ const LoggedInPage = () => {
     const [selectedPartnerType, setSelectedPartnerType] = useState("All");
     const [selectedService, setSelectedService] = useState(null);
     const [services, setServices] = useState([]);
-    const [events, setEvents] = useState(dummyEvents);
+    const [events, setEvents] = useState([]);
     const [team, setTeam] = useState(teamMembers);
     const [berita, setBerita] = useState(dummyBerita);
     const [gallery, setGallery] = useState(dummyGallery);
@@ -322,13 +298,17 @@ const LoggedInPage = () => {
 
         const fetchEvents = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/events`);
-                const data = await response.json();
-                setEvents(data);
+              const response = await fetch(`${API_BASE_URL}/events/all`);
+              const data = await response.json();
+              if (data.success) {
+                setEvents(data.data);
+              } else {
+                console.error("Failed to fetch events:", data.message);
+              }
             } catch (error) {
-                console.error("Error fetching events:", error);
+              console.error("Error fetching events:", error);
             }
-        };
+          };
 
         const fetchTeam = async () => {
             try {
@@ -1030,46 +1010,106 @@ const LoggedInPage = () => {
 
 
                 {/* Events Section */}
-                <section id="events" className="py-12 bg-white scroll-mt-[110px] pt-32">
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Acara</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {events.slice(0, 2).map((event, index) => (
-                                <motion.div
-                                    key={event._id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => setSelectedEvent(event)}
-                                >
-                                    <img
-                                        src={event.image} // Pastikan ini adalah URL yang valid
-                                        alt={event.title}
-                                        className="w-full h-48 object-cover"
-                                    />
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-semibold text-blue-900 mb-2">{event.title}</h3>
-                                        <p className="text-gray-700 line-clamp-3">{event.description}</p>
-                                        <p className="text-sm text-gray-500 mt-4">
-                                            {new Date(event.date).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            ))}
-                            {/* Tombol + untuk menuju PageEvents */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.5 }}
-                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
-                                onClick={() => navigate("/events")}
-                            >
-                                <div className="p-6 text-4xl font-bold text-white">+{events.length - 2}</div>
-                            </motion.div>
-                        </div>
-                    </div>
-                </section>
+<section id="events" className="py-12 bg-white scroll-mt-[110px] pt-32">
+  <div className="container mx-auto px-4">
+    <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Acara</h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {events.slice(0, 2).map((event, index) => (
+        <motion.div
+          key={event.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+          className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+          onClick={() => setSelectedEvent(event)}
+        >
+          <img
+            src={
+              event.gambar 
+                ? `${API_BASE_URL}/uploads/${event.gambar}`
+                : "https://via.placeholder.com/400x250?text=No+Image"
+            }
+            alt={event.judul}
+            className="w-full h-48 object-cover"
+          />
+          <div className="p-6">
+            <h3 className="text-xl font-semibold text-blue-900 mb-2">{event.judul}</h3>
+            <p className="text-gray-700 line-clamp-3">{event.deskripsi_singkat || event.deskripsi}</p>
+            <p className="text-sm text-gray-500 mt-4">
+              <FaCalendarAlt className="inline mr-1" />
+              {formatDate(event.tanggal || event.start_date)}
+            </p>
+          </div>
+        </motion.div>
+      ))}
+      {/* Tombol + untuk menuju PageEvents */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+        className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+        onClick={() => navigate("/events")}
+      >
+        <div className="p-6 text-4xl font-bold text-white">+{Math.max(events.length - 2, 0)}</div>
+      </motion.div>
+    </div>
+  </div>
+</section>
+
+{/* Event Detail Modal */}
+{selectedEvent && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <button
+        className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+        onClick={() => setSelectedEvent(null)}
+      >
+        <FaTimes className="w-6 h-6" />
+      </button>
+      
+      {selectedEvent.gambar && (
+        <img
+          src={`${API_BASE_URL}/uploads/${selectedEvent.gambar}`}
+          alt={selectedEvent.judul}
+          className="w-full rounded-lg mb-4"
+        />
+      )}
+      
+      <h3 className="text-2xl font-bold mb-2">{selectedEvent.judul}</h3>
+      
+      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <FaCalendarAlt className="mr-2" />
+        <span>{formatDate(selectedEvent.tanggal || selectedEvent.start_date)}</span>
+      </div>
+      
+      <div className="mb-4">
+        <h4 className="font-medium mb-2">Deskripsi:</h4>
+        <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+          {selectedEvent.deskripsi}
+        </p>
+      </div>
+      
+      {selectedEvent.document && (
+        <div className="mb-4">
+          <button
+            onClick={() => window.open(`${API_BASE_URL}/uploads/${selectedEvent.document}`, '_blank')}
+            className="flex items-center text-blue-600 dark:text-blue-400"
+          >
+            <FaFileWord className="mr-2" />
+            Lihat Dokumen
+          </button>
+        </div>
+      )}
+      
+      <button
+        onClick={() => setSelectedEvent(null)}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+      >
+        Tutup
+      </button>
+    </div>
+  </div>
+)}
 
                 {/* Partnership Section */}
                 <section id="partnership" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">

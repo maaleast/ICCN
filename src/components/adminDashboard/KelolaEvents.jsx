@@ -339,7 +339,7 @@ const handleOpenEditModal = (event) => {
                             <div key={item.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow hover:shadow-lg transition-shadow">
                                 {item.gambar && (
                                     <img
-                                        src={`${API_BASE_URL}/events/uploads/events/${item.gambar}`}
+                                        src={`${API_BASE_URL}/uploads/${item.gambar}`}
                                         alt={item.judul}
                                         className="w-full h-48 object-cover rounded-lg mb-3"
                                     />
@@ -574,7 +574,7 @@ const handleOpenEditModal = (event) => {
                                 <div className="mb-2">
                                     <p className="text-sm text-gray-500 dark:text-gray-400">Gambar saat ini:</p>
                                     <img
-                                        src={`${API_BASE_URL}/events/uploads/events/${editEvent.oldImage}`}
+                                        src={`${API_BASE_URL}/uploads/${editEvent.oldImage}`}
                                         alt="Current"
                                         className="w-32 h-32 object-cover rounded-lg"
                                     />
@@ -639,7 +639,7 @@ const handleOpenEditModal = (event) => {
 
                         {selectedEvent.gambar && (
                             <img
-                                src={`${API_BASE_URL}/uploads/events/${selectedEvent.gambar}`}
+                                src={`${API_BASE_URL}/uploads/${selectedEvent.gambar}`}
                                 alt={selectedEvent.judul}
                                 className="w-full rounded-lg mb-4"
                             />
