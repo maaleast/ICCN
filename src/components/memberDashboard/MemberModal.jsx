@@ -594,6 +594,7 @@ export const TrainingDetailModal = ({ selectedTraining, onClose, statusModal, me
                                 </label>
                                 <a
                                     href={selectedTraining.link}
+                                    target='_blank'
                                     rel="noopener noreferrer"
                                     className={`w-full px-4 py-2 text-white rounded-lg transition-colors text-center block ${
                                         buttonText === "Daftar"
