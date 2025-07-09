@@ -1,18 +1,18 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import AdminPanel from "./pages/AdminPanel";
-import MemberDashboard from "./pages/MemberDashboard";
-import LoggedInPage from "./pages/LoggedInPage";
-import PageGallery from "./pages/PageGallery";
-import PerpanjangMember from "./pages/PerpanjangMember";
-import PageBerita from "./pages/PageBerita";
-import PageServices from './pages/PageServices';
-import PageEvents from './pages/PageEvents';
-import PageTeam from './pages/PageTeam';
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import AdminPanel from "./pages/AdminPanel";
+import LandingPage from "./pages/LandingPage";
+import LoggedInPage from "./pages/LoggedInPage";
+import Login from "./pages/Login";
+import MemberDashboard from "./pages/MemberDashboard";
+import PageBerita from "./pages/PageBerita";
+import PageEvents from './pages/PageEvents';
+import PageGallery from "./pages/PageGallery";
+import PageServices from './pages/PageServices';
+import PageTeam from './pages/PageTeam';
+import PerpanjangMember from "./pages/PerpanjangMember";
+import Register from "./pages/Register";
 
 function ProtectedRoute({ children, allowedRoles }) {
   const token = localStorage.getItem("token");
@@ -70,12 +70,8 @@ function App() {
         theme="light"
       />
       <Routes>
-        {/* Route untuk landing page dengan proteksi */}
-        <Route path="/" element={
-          <RouteGuard>
-            <LandingPage />
-          </RouteGuard>
-        } />
+        {/* Route untuk landing page tanpa proteksi */}
+        <Route path="/" element={<LandingPage />} />
 
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />

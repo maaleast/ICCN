@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../config";
-import { FaUser, FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaEnvelope } from "react-icons/fa";
 import { motion } from "framer-motion";
-import Logo from "../assets/iccn.png";
 import { jwtDecode } from "jwt-decode";
+import { useState } from "react";
+import { FaArrowLeft, FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import Logo from "../assets/iccn.png";
+import { API_BASE_URL } from "../config";
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -123,7 +123,7 @@ export default function Login() {
 
                     <nav className="w-full px-10 flex justify-between items-center p-4 relative">
                         <div className="z-20 flex items-center">
-                            <button onClick={() => navigate("/home")}>
+                            <button onClick={() => navigate("/")}>
                                 <img src={Logo} alt="ICCN Logo" className="h-20 w-auto max-w-none" />
                             </button>
                         </div>

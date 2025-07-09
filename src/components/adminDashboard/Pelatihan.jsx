@@ -161,6 +161,14 @@ export default function Pelatihan() {
             return;
         }
 
+        // validasi tipe file gambar banner
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!allowedTypes.includes(newPelatihan.upload_banner.type)) {
+            showErrorNotification("Hanya gambar JPEG atau PNG atau JPG yang diperbolehkan!");
+            return;
+        }
+
+
         const formData = new FormData();
         formData.append('judul_pelatihan', newPelatihan.judul);
         formData.append('tanggal_pelatihan', formatDateForBackend(newPelatihan.tanggal_mulai));
@@ -522,7 +530,7 @@ export default function Pelatihan() {
                                     setNewPelatihan({ ...newPelatihan, upload_banner: null });
                                 }
                             }}
-                            accept="image/*"  // Hanya menerima file gambar
+                            accept="image/jpeg,image/jpg,image/png" // Hanya menerima file gambar
                             required
                         />
 

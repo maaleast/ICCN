@@ -1,18 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+import { faClock } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { FaArrowRight, FaEnvelope, FaMapMarkerAlt, FaPhone, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { API_BASE_URL } from "../config";
-import Swal from "sweetalert2";
 import { Link as ScrollLink } from "react-scroll";
 import about1 from "../assets/about.jpg";
 import about2 from "../assets/about2.png";
-import LandingBg from "../assets/LandingBg.jpg";
 import Logo from "../assets/iccn.png";
-import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes } from "react-icons/fa";
-import uk from "../assets/uk.png";
 import ina from "../assets/ina.png";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock } from '@fortawesome/free-solid-svg-icons';
+import LandingBg from "../assets/LandingBg.jpg";
+import uk from "../assets/uk.png";
+import { API_BASE_URL } from "../config";
 
 // Dummy data untuk semua section
 const dummyServices = [
@@ -480,7 +479,7 @@ const LandingPage = () => {
                     <nav className="w-full px-4 lg:px-10 flex justify-between items-center p-4 relative">
                         {/* Logo */}
                         <div className="z-20 flex items-center">
-                            <button onClick={() => navigate("/home")}>
+                            <button onClick={() => navigate("/")}>
                                 <img src={Logo} alt="ICCN Logo" className="h-16 lg:h-20 w-auto max-w-none" />
                             </button>
                         </div>
