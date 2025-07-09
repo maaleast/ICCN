@@ -8,58 +8,13 @@ import about1 from "../assets/about.jpg";
 import about2 from "../assets/about2.png";
 import LandingBg from "../assets/LandingBg.jpg";
 import Logo from "../assets/iccn.png";
-import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes } from "react-icons/fa";
+import { FaArrowRight, FaMapMarkerAlt, FaPhone, FaEnvelope, FaTimes, FaCalendarAlt, FaFileWord } from "react-icons/fa";
 import uk from "../assets/uk.png";
 import ina from "../assets/ina.png";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock } from '@fortawesome/free-solid-svg-icons';
 
 // Dummy data untuk semua section
-const dummyServices = [
-    {
-        _id: 1,
-        title: "Career Counseling",
-        shortDescription: "Layanan konsultasi karir profesional untuk membantu pengambilan keputusan",
-        image: "https://maukuliah.ap-south-1.linodeobjects.com/job/1701409908-ii2tk3e4w9.jpeg"
-    },
-    {
-        _id: 2,
-        title: "Workshop Development",
-        shortDescription: "Pelatihan pengembangan keterampilan profesional",
-        image: "https://executivevc.unl.edu/sites/unl.edu.executive-vice-chancellor/files/media/image/development-workshops-header.jpg"
-    },
-    {
-        _id: 3,
-        title: "Workshop Development",
-        shortDescription: "Pelatihan pengembangan keterampilan profesional",
-        image: "https://executivevc.unl.edu/sites/unl.edu.executive-vice-chancellor/files/media/image/development-workshops-header.jpg"
-    }
-];
-
-const dummyEvents = [
-    {
-        _id: 1,
-        title: "PAMERAN KARIER VIRTUAL INDONESIA",
-        date: "2024-03-15",
-        description: "Salam kenal, dari kami Indonesia Career Center Network (ICCN). ICCN merupakan sebuah asosiasi profesi pengelola pusat karier perguruan tinggi Indonesia. ICCN memiliki tujuan untuk meningkatkan daya saing sumber daya manusia Indonesia melalui standarisasi pelayanan pusat karier perguruan tinggi.",
-        image: "https://indonesiacareercenter.id/wp-content/uploads/2023/06/05.png"
-    },
-    {
-        _id: 1,
-        title: "Pelatihan CCOP JAWA TIMUR",
-        date: "2024-03-15",
-        description: "Pelatihan CCOP Yang diselenggarakan di Jawa Timur ",
-        image: "https://indonesiacareercenter.id/wp-content/uploads/2023/05/IMG_1470-1-scaled.jpg"
-    },
-    {
-        _id: 1,
-        title: "Job Fair Nasional 2024",
-        date: "2024-03-15",
-        description: "Pameran pekerjaan terbesar tahun ini",
-        image: "src/assets/events-1.jpg"
-    }
-];
-
 const partners = [
     {
         _id: 1,
@@ -195,9 +150,9 @@ const LoggedInPage = () => {
     const navigate = useNavigate();
     const user_id = localStorage.getItem("user_id");
     const [selectedPartnerType, setSelectedPartnerType] = useState("All");
-    const [selectedService, setSelectedService] = useState(null); // Tambahkan state ini
-    const [services, setServices] = useState(dummyServices);
-    const [events, setEvents] = useState(dummyEvents);
+    const [selectedService, setSelectedService] = useState(null);
+    const [services, setServices] = useState([]);
+    const [events, setEvents] = useState([]);
     const [team, setTeam] = useState(teamMembers);
     const [berita, setBerita] = useState(dummyBerita);
     const [gallery, setGallery] = useState(dummyGallery);
@@ -327,27 +282,33 @@ const LoggedInPage = () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/services/all`);
                 const data = await response.json();
-                if (data.success) {
+
+                if (data.success && Array.isArray(data.data)) {
+                    // Data dari DB langsung ditampilkan
                     setServices(data.data);
                 } else {
-                    console.error("Error fetching services:", data.message);
-                    setServices(dummyServices); // Fallback ke dummy data jika error
+                    console.error("Data service tidak valid:", data.message);
+                    setServices([]); // Kosongin daripada error
                 }
             } catch (error) {
-                console.error("Error fetching services:", error);
-                setServices(dummyServices); // Fallback ke dummy data jika error
+                console.error("Gagal ambil data service:", error);
+                setServices([]); // Kosongin juga saat gagal fetch
             }
         };
 
         const fetchEvents = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/events`);
-                const data = await response.json();
-                setEvents(data);
+              const response = await fetch(`${API_BASE_URL}/events/all`);
+              const data = await response.json();
+              if (data.success) {
+                setEvents(data.data);
+              } else {
+                console.error("Failed to fetch events:", data.message);
+              }
             } catch (error) {
-                console.error("Error fetching events:", error);
+              console.error("Error fetching events:", error);
             }
-        };
+          };
 
         const fetchTeam = async () => {
             try {
@@ -387,6 +348,14 @@ const LoggedInPage = () => {
         localStorage.removeItem('token');
         localStorage.removeItem("role");
         navigate('/login');
+    };
+
+    const handleServiceClick = (service) => {
+        setSelectedService(service);
+    };
+
+    const closeServiceModal = () => {
+        setSelectedService(null);
     };
 
     // Fungsi untuk navigasi berdasarkan role
@@ -925,6 +894,7 @@ const LoggedInPage = () => {
                 <section id="services" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Layanan Kami</h2>
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {services.slice(0, 2).map((service, index) => (
                                 <motion.div
@@ -932,11 +902,17 @@ const LoggedInPage = () => {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => navigate("/services")}
+                                    className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                                    onClick={() => setSelectedService(service)}
                                 >
                                     <img
-                                        src={service.image ? `${API_BASE_URL}/uploads/services/${service.image}` : "https://via.placeholder.com/300x200"}
+                                        src={
+                                            service.image
+                                                ? service.image.startsWith("http")
+                                                    ? service.image
+                                                    : `${API_BASE_URL}/uploads/${service.image}`
+                                                : "https://via.placeholder.com/400x250?text=No+Image"
+                                        }
                                         alt={service.title}
                                         className="w-full h-48 object-cover"
                                     />
@@ -944,65 +920,196 @@ const LoggedInPage = () => {
                                         <h3 className="text-xl font-semibold text-blue-900 mb-2">{service.title}</h3>
                                         <p className="text-gray-700 line-clamp-3">{service.description}</p>
                                         <p className="text-sm text-gray-500 mt-2">
-                                            {new Date(service.date).toLocaleDateString()}
+                                            <FaCalendarAlt className="inline mr-1" />
+                                            {formatDate(service.date)}
                                         </p>
                                     </div>
                                 </motion.div>
                             ))}
+
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.5 }}
-                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+                                transition={{ duration: 0.5, delay: 0.3 }}
+                                className="bg-blue-600 rounded-2xl shadow-md hover:shadow-xl transition duration-300 flex flex-col justify-center items-center text-white cursor-pointer"
                                 onClick={() => navigate("/services")}
                             >
-                                <div className="p-6 text-4xl font-bold text-white">+{services.length > 2 ? services.length - 2 : 0}</div>
+                                <div className="text-5xl font-bold mb-2">+{Math.max(services.length - 2, 0)}</div>
+                                <div className="text-lg font-medium">Lihat Semua</div>
                             </motion.div>
                         </div>
                     </div>
+
+                    {/* Modal Detail */}
+                    {selectedService && (
+                        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-white rounded-xl max-w-3xl w-full relative p-8 max-h-[90vh] overflow-y-auto"
+                            >
+                                <button
+                                    className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-colors"
+                                    onClick={() => setSelectedService(null)}
+                                >
+                                    <FaTimes className="w-6 h-6" />
+                                </button>
+
+                                <div className="space-y-6">
+                                    {selectedService.image && (
+                                        <div className="rounded-lg overflow-hidden">
+                                            <img
+                                                src={
+                                                    selectedService.image.startsWith("http")
+                                                        ? selectedService.image
+                                                        : `${API_BASE_URL}/uploads/${selectedService.image}`
+                                                }
+                                                alt={selectedService.title}
+                                                className="w-full h-64 object-cover"
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                                            {selectedService.title}
+                                        </h2>
+                                        <div className="flex items-center text-gray-500 mb-6">
+                                            <FaCalendarAlt className="mr-2" />
+                                            <span>{formatDate(selectedService.date)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="text-gray-800 whitespace-pre-line">
+                                        <p>{selectedService.description}</p>
+                                    </div>
+
+                                    {selectedService.document && (
+                                        <div className="mt-6">
+                                            <button
+                                                onClick={() => window.open(`/services/detail/${selectedService.id}`, "_blank")}
+                                                className="inline-flex items-center text-blue-600 hover:underline"
+                                            >
+                                                <FaFileWord className="mr-2" />
+                                                Lihat Dokumen
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    <button
+                                        onClick={() => setSelectedService(null)}
+                                        className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        Tutup
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
                 </section>
 
+
                 {/* Events Section */}
-                <section id="events" className="py-12 bg-white scroll-mt-[110px] pt-32">
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Acara</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {events.slice(0, 2).map((event, index) => (
-                                <motion.div
-                                    key={event._id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => setSelectedEvent(event)}
-                                >
-                                    <img
-                                        src={event.image} // Pastikan ini adalah URL yang valid
-                                        alt={event.title}
-                                        className="w-full h-48 object-cover"
-                                    />
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-semibold text-blue-900 mb-2">{event.title}</h3>
-                                        <p className="text-gray-700 line-clamp-3">{event.description}</p>
-                                        <p className="text-sm text-gray-500 mt-4">
-                                            {new Date(event.date).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            ))}
-                            {/* Tombol + untuk menuju PageEvents */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.5 }}
-                                className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
-                                onClick={() => navigate("/events")}
-                            >
-                                <div className="p-6 text-4xl font-bold text-white">+{events.length - 2}</div>
-                            </motion.div>
-                        </div>
-                    </div>
-                </section>
+<section id="events" className="py-12 bg-white scroll-mt-[110px] pt-32">
+  <div className="container mx-auto px-4">
+    <h2 className="text-3xl font-bold text-center text-blue-900 mb-8">Acara</h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {events.slice(0, 2).map((event, index) => (
+        <motion.div
+          key={event.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+          className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+          onClick={() => setSelectedEvent(event)}
+        >
+          <img
+            src={
+              event.gambar 
+                ? `${API_BASE_URL}/uploads/${event.gambar}`
+                : "https://via.placeholder.com/400x250?text=No+Image"
+            }
+            alt={event.judul}
+            className="w-full h-48 object-cover"
+          />
+          <div className="p-6">
+            <h3 className="text-xl font-semibold text-blue-900 mb-2">{event.judul}</h3>
+            <p className="text-gray-700 line-clamp-3">{event.deskripsi_singkat || event.deskripsi}</p>
+            <p className="text-sm text-gray-500 mt-4">
+              <FaCalendarAlt className="inline mr-1" />
+              {formatDate(event.tanggal || event.start_date)}
+            </p>
+          </div>
+        </motion.div>
+      ))}
+      {/* Tombol + untuk menuju PageEvents */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+        className="bg-gray-400 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex items-center justify-center cursor-pointer"
+        onClick={() => navigate("/events")}
+      >
+        <div className="p-6 text-4xl font-bold text-white">+{Math.max(events.length - 2, 0)}</div>
+      </motion.div>
+    </div>
+  </div>
+</section>
+
+{/* Event Detail Modal */}
+{selectedEvent && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <button
+        className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+        onClick={() => setSelectedEvent(null)}
+      >
+        <FaTimes className="w-6 h-6" />
+      </button>
+      
+      {selectedEvent.gambar && (
+        <img
+          src={`${API_BASE_URL}/uploads/${selectedEvent.gambar}`}
+          alt={selectedEvent.judul}
+          className="w-full rounded-lg mb-4"
+        />
+      )}
+      
+      <h3 className="text-2xl font-bold mb-2">{selectedEvent.judul}</h3>
+      
+      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <FaCalendarAlt className="mr-2" />
+        <span>{formatDate(selectedEvent.tanggal || selectedEvent.start_date)}</span>
+      </div>
+      
+      <div className="mb-4">
+        <h4 className="font-medium mb-2">Deskripsi:</h4>
+        <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+          {selectedEvent.deskripsi}
+        </p>
+      </div>
+      
+      {selectedEvent.document && (
+        <div className="mb-4">
+          <button
+            onClick={() => window.open(`${API_BASE_URL}/uploads/${selectedEvent.document}`, '_blank')}
+            className="flex items-center text-blue-600 dark:text-blue-400"
+          >
+            <FaFileWord className="mr-2" />
+            Lihat Dokumen
+          </button>
+        </div>
+      )}
+      
+      <button
+        onClick={() => setSelectedEvent(null)}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+      >
+        Tutup
+      </button>
+    </div>
+  </div>
+)}
 
                 {/* Partnership Section */}
                 <section id="partnership" className="py-12 bg-gray-100 scroll-mt-[110px] pt-32">
@@ -1501,7 +1608,7 @@ const LoggedInPage = () => {
                 opacity: 0,
                 zIndex: -1
             }}></div>
-        </div>
+        </div >
     );
 };
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaTimes, FaCalendarAlt, FaSync } from "react-icons/fa";
+import { FaTimes, FaCalendarAlt, FaSync, FaFileWord } from "react-icons/fa";
 import { API_BASE_URL } from "../config";
 import Navbar from "../components/Navbar";
 
@@ -23,7 +23,6 @@ const PageServices = () => {
             }
 
             const data = await response.json();
-            console.log("Data from API:", data); // Untuk debugging
 
             if (data.success && data.data && data.data.length > 0) {
                 const processedServices = data.data.map(service => ({
@@ -32,7 +31,7 @@ const PageServices = () => {
                     image: service.image
                         ? service.image.startsWith('http')
                             ? service.image
-                            : `${API_BASE_URL}/uploads/services/${service.image}`
+                            : `${API_BASE_URL}/uploads/${service.image}`
                         : 'https://via.placeholder.com/400x300?text=No+Image'
                 }));
                 setServices(processedServices);
@@ -137,7 +136,6 @@ const PageServices = () => {
     );
 };
 
-// Komponen ServiceCard yang dipisah
 const ServiceCard = ({ service, index, formatDate, onClick }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -167,13 +165,12 @@ const ServiceCard = ({ service, index, formatDate, onClick }) => (
     </motion.div>
 );
 
-// Komponen ServiceModal yang dipisah
 const ServiceModal = ({ service, formatDate, onClose }) => (
     <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
         <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-xl max-w-2xl w-full relative p-8 max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-xl max-w-3xl w-full relative p-8 max-h-[90vh] overflow-y-auto"
         >
             <button
                 className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-colors"
@@ -203,11 +200,22 @@ const ServiceModal = ({ service, formatDate, onClose }) => (
                     </div>
                 </div>
 
-                <div className="prose max-w-none">
-                    <p className="text-gray-700 whitespace-pre-line">
-                        {service.description}
-                    </p>
+                <div className="text-gray-800 whitespace-pre-line">
+                    <p>{service.description}</p>
                 </div>
+
+                {service.document && (
+                    <div className="mt-6">
+                        <button
+                            onClick={() => window.open(`/services/detail/${service.id}`, "_blank")}
+                            className="inline-flex items-center text-blue-600 hover:underline"
+                        >
+                            <FaFileWord className="mr-2" />
+                            Lihat Dokumen
+                        </button>
+                    </div>
+                )}
+
 
                 <button
                     onClick={onClose}
